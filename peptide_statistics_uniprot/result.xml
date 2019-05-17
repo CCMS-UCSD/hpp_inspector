@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<interface id="peptide_statistics_uniprot" version="1.2.3">
+    <download>
+        <source type="folder" name="protein_coverage/"/>
+        <source type="folder" name="library_coverage_summary_statistics/"/>
+    </download>
+
+    <view id="view_peptides" label="View Peptides">
+        <blockRef id="main" type="view_peptides"/>
+    </view>
+
+    <block id="view_peptides" type="table_ss">
+        <data>
+            <source type="file" name="peptide_coverage_merged/"/>
+            <parsers>
+                <parser type="sortedTabular" sortBy="il_peptide" operator="ascending"/>
+                <parser type="SQLite"/>
+            </parsers>
+        </data>
+        <row>
+            <column type="text" field="il_peptide" label="il_peptide" width="12"/>
+            <column type="text" field="peptide" label="peptide" width="12"/>
+            <column type="expandable" field="proteins" label="proteins" width="12"/>
+            <column type="expandable" field="proteins_w_coords" label="proteins_w_coords" width="12"/>
+            <column type="integer" field="num_proteins" label="num_proteins" precision="2"/>
+            <column type="integer" field="num_proteins_w_mismatch" label="num_proteins_w_mismatch" precision="2"/>
+            <column type="integer" field="num_proteins_all" label="#All Proteins Covered" precision="2"/>
+            <column type="integer" field="num_proteins_no_tr" label="#All Swiss Prot" precision="2"/>
+            <column type="integer" field="num_proteins_no_iso_no_tr" label="#All Swiss Prot No Isoforms" precision="2"/>
+            <column type="integer" field="num_proteinsg_covered" label="#Genes Covered" precision="2"/>
+            <column type="text" field="gene_unique" label="Gene Unique" precision="2"/>
+            <column type="expandable" field="proteins_all" label="All Proteins Covered" precision="2"/>
+            <column type="expandable" field="proteins_no_tr" label="All Swiss Prot" precision="2"/>
+            <column type="expandable" field="proteins_no_iso_no_tr" label="All Swiss Prot No Isoforms" precision="2"/>
+            <column type="expandable" field="proteinsg_covered" label="Genes Covered" precision="2"/>
+            <column type="expandable" field="proteinsg_covered_mismatch" label="Genes Covered (w/ Mismatch)" precision="2"/>
+            <column type="integer" field="num_proteins_w_mismatch" label="num_proteins_w_mismatch" precision="2"/>
+            <column type="text" field="gene" label="gene" precision="2"/>
+            <column type="text" field="protein_name" label="protein_name" width="12"/>
+            <column type="integer" field="glycosylation_covered" label="glycosylation_covered" precision="2"/>
+            <column type="integer" field="disulfide_covered" label="disulfide_covered" precision="2"/>
+            <column type="integer" field="glycosylation_covered" label="glycosylation_covered" precision="2"/>
+            <column type="integer" field="activesites_covered" label="activesites_covered" precision="2"/>
+            <column type="integer" field="metalbinding_covered" label="metalbinding_covered" precision="2"/>
+            <column type="integer" field="mod_covered" label="mod_covered" precision="2"/>
+            <column type="integer" field="pe1" label="PE1" precision="2"/>
+            <column type="integer" field="pe2" label="PE2" precision="2"/>
+            <column type="integer" field="pe3" label="PE3" precision="2"/>
+            <column type="integer" field="pe4" label="PE4" precision="2"/>
+            <column type="integer" field="pe5" label="PE5" precision="2"/>
+        </row>
+    </block>
+
+
+    <!-- View definitions -->
+    <view id="view_proteins" label="View Proteins">
+        <blockRef id="main" type="view_proteins"/>
+    </view>
+
+    <block id="view_proteins" type="table_ss">
+        <data>
+            <source type="file" name="protein_coverage/"/>
+            <parsers>
+                <parser type="sortedTabular" sortBy="protein" operator="ascending"/>
+                <parser type="SQLite"/>
+            </parsers>
+        </data>
+        <row>
+            <column type="text" field="protein" label="Protein" width="12"/>
+            <column type="text" field="protein_name" label="ProteinName" width="20"/>
+            <column type="text" field="gene" label="Gene" width="20"/>
+            <column type="integer" field="pe_number" label="neXtProt PE" width="4"/>
+            <column type="float" field="aminoacid_coverage" label="Coverage" precision="2"/>
+            <column type="integer" field="unique_peptide_count_no_mismatch" label="Uniquely Mapped Peptides"/>
+            <column type="integer" field="unique_peptide_count" label="HUPO Non-Overlapping Peptides"/>
+            <column type="integer" field="gene_unique_peptide_count_no_mismatch" label="(Gene Unqiue) Uniquely Mapped Peptides"/>
+            <column type="integer" field="gene_unique_peptide_count" label="(Gene Unique) HUPO Non-Overlapping Peptides"/>
+            <column type="integer" field="peptides_on_protein" label="total peptides"/>
+            <column type="integer" field="protein_length" label="protein_length"/>
+            <column type="float" field="mod_percentage" label="ModPercent" precision="2"/>
+            <column type="integer" field="mod_total" label="ModTotal" precision="2"/>
+            <column type="float" field="sites_percentage" label="SitePercent" precision="2"/>
+            <column type="integer" field="sites_total" label="SiteTotal" precision="2"/>
+            <column type="float" field="activesites_percentage" label="ActiveSitePercent" precision="2"/>
+            <column type="integer" field="activesites_total" label="ActiveSiteTotal" precision="2"/>
+            <column type="float" field="bindingsites_percentage" label="BindingSitePercent" precision="2"/>
+            <column type="integer" field="bindingsites_total" label="BindingSiteTotal" precision="2"/>
+            <column type="float" field="disulfide_percentage" label="DisulfideSitePercent" precision="2"/>
+            <column type="integer" field="disulfide_total" label="DisulfideSiteTotal" precision="2"/>
+            <column type="float" field="glycosylation_percentage" label="GlycosylationPercent" precision="2"/>
+            <column type="integer" field="glycosylation_total" label="GlycosylationTotal" precision="2"/>
+            <column type="float" field="metalbinding_percentage" label="MetalBindingPercent" precision="2"/>
+            <column type="integer" field="metalbinding_total" label="MetalBindingTotal" precision="2"/>
+            <column type="float" field="snp_percentage" label="SNPPercent" precision="2"/>
+            <column type="integer" field="snp_total" label="SNPTotal" precision="2"/>
+            <column type="float" field="coverable_percentage" label="coverable_percentage" precision="2"/>
+            <column type="float" field="coverage_of_coverable" label="coverage_of_coverable" precision="2"/>
+            <column type="float" field="coverage_of_uncoverable" label="coverage_of_uncoverable" precision="2"/>
+        </row>
+    </block>
+<!--
+    <view id="view_all_peptide_mappings" label="View All Peptide Mappings">
+        <blockRef id="main" type="view_all_peptide_mappings"/>
+    </view>
+    <block id="view_all_peptide_mappings" type="table_ss">
+        <data>
+            <source type="file" name="unique_peptides_list/"/>
+            <parsers>
+                <parser type="sortedTabular" sortBy="peptide" operator="ascending"/>
+                <parser type="SQLite"/>
+            </parsers>
+        </data>
+        <row>
+            <column type="text" field="peptide" label="peptide" width="20"/>
+            <column type="integer" field="protein_count" label="protein_count" width="20"/>
+            <column type="text" field="proteins" label="Proteins" width="12"/>
+        </row>
+    </block> -->
+
+    <view id="view_stats" label="View Stats">
+        <blockRef id="main" type="view_stats"/>
+    </view>
+    <block id="view_stats" type="table_ss">
+        <data>
+            <source type="file" name="library_coverage_summary_statistics/"/>
+            <parsers>
+                <parser type="sortedTabular" sortBy="category" operator="ascending"/>
+            </parsers>
+        </data>
+        <row>
+            <column type="text" field="category" label="category" width="20"/>
+            <column type="text" field="value" label="value" width="20"/>
+        </row>
+    </block>
+</interface>

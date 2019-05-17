@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<flow name="peptide_statistics_uniprot">
+	<object name="workflowParameters"/>
+
+    <object name="peptidelist"/>
+    <object name="fastadb"/>
+
+	<collection name="parallel_params"/>
+	<collection name="intermediate_protein_coverage"/>
+
+    <collection name="intermediate_unique_peptide_coverage"/>
+
+    <collection name="debug_protein_coverage"/>
+
+    <object name="protein_coverage"/>
+    <object name="unique_peptides_list"/>
+	<object name="library_coverage_summary_statistics"/>
+
+
+
+    <action name="begin">
+        <output port="peptidelist"       object="peptidelist"/>
+        <output port="fastadb" 		  object="fastadb"/>
+        <output port="params" object="workflowParameters"/>
+    </action>
+
+	<action name="protein_coverage_calculation_paramgeneration">
+        <input  port="peptidelist"             object="peptidelist"/>
+        <input  port="fastadb"             object="fastadb"/>
+        <input  port="params"             object="workflowParameters"/>
+        <output port="parallel_params"       collection="parallel_params"/>
+    </action>
+
+    <action name="protein_coverage_calculation_map" multiplicity="multiple" type="parallel">
+		<input port="parallel_params"       collection="parallel_params"  transformation="unfolding"/>
+        <input  port="peptidelist"             object="peptidelist"/>
+        <input  port="fastadb"             object="fastadb"/>
+        <input  port="params"             object="workflowParameters"/>
+        <output port="intermediate_protein_coverage"       collection="intermediate_protein_coverage"/>
+        <output port="debug_protein_coverage"       collection="debug_protein_coverage"/>
+    </action>
+
+    <action name="unique_peptide_calculation_map" multiplicity="multiple" type="parallel">
+		<input port="parallel_params"       collection="parallel_params"  transformation="unfolding"/>
+        <input  port="peptidelist"             object="peptidelist"/>
+        <input  port="fastadb"             object="fastadb"/>
+        <input  port="params"             object="workflowParameters"/>
+        <output port="intermediate_unique_peptide_coverage"       collection="intermediate_unique_peptide_coverage"/>
+    </action>
+
+	<action name="protein_coverage_calculation_reduce">
+		<input  port="peptidelist"             object="peptidelist"/>
+        <input  port="fastadb"             object="fastadb"/>
+        <input  port="params"             object="workflowParameters"/>
+		<input port="intermediate_protein_coverage"       collection="intermediate_protein_coverage"/>
+        <input port="intermediate_unique_peptide_coverage" collection="intermediate_unique_peptide_coverage"/>
+        <output port="protein_coverage"       object="protein_coverage"/>
+        <output port="unique_peptides_list"       object="unique_peptides_list"/>
+        <output port="library_coverage_summary_statistics"       object="library_coverage_summary_statistics"/>
+    </action>
+
+
+	<collection name="intermediate_peptide_coverage"/>
+	<action name="peptide_stats_coverage_map" multiplicity="multiple" type="parallel">
+		<input port="parallel_params"       collection="parallel_params"  transformation="unfolding"/>
+        <input  port="peptidelist"             object="peptidelist"/>
+        <input  port="fastadb"             object="fastadb"/>
+        <input  port="params"             object="workflowParameters"/>
+        <output port="intermediate_peptide_coverage"       collection="intermediate_peptide_coverage"/>
+    </action>
+
+	<object name="peptide_coverage_merged"/>
+	<action name="peptide_stats_coverage_reduce">
+		<input port="input_folder"       collection="intermediate_peptide_coverage"/>
+        <output port="output_file"       object="peptide_coverage_merged"/>
+    </action>
+
+
+    <action name="end">
+        <input port="unique_peptides_list"       object="unique_peptides_list"/>
+        <input port="protein_coverage" object="protein_coverage"/>
+		<input port="library_coverage_summary_statistics" object="library_coverage_summary_statistics"/>
+        <input port="debug_protein_coverage" collection="debug_protein_coverage"/>
+		<input port="peptide_coverage_merged" object="peptide_coverage_merged"/>
+    </action>
+</flow>

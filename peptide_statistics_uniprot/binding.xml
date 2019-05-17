@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<binding>
+    <bind action="begin" type="download">
+         <url value="{livesearch.download}"/>
+         <query name="task" valueRef="@task" />
+        <query name="user" valueRef="@user"/>
+         <compression type="zip" />
+        <download port="params" type="file">
+            <query name="resource" value="params"/>
+        </download>
+		<download port="peptidelist" type="folder">
+            <query name="resource" value="peptidelist"/>
+        </download>
+        <download port="fastadb" type="folder">
+            <query name="resource" value="fastadb"/>
+        </download>
+        <downloadParams>
+            <query name="resource" value="params"/>
+        </downloadParams>
+
+    </bind>
+
+    <bind action="protein_coverage_calculation_paramgeneration" tool="protein_coverage_calculation_paramgeneration">
+        <inputAsRequirement port="peptidelist"             requirement="peptidelist"/>
+        <inputAsRequirement port="fastadb"             requirement="fastadb"/>
+        <inputAsRequirement port="params"             requirement="params"/>
+        <productionToOutput port="parallel_params"    production="parallel_params"/>
+    </bind>
+
+	<bind action="protein_coverage_calculation_map" tool="protein_coverage_calculation_map">
+        <inputAsRequirement port="peptidelist"             requirement="peptidelist"/>
+        <inputAsRequirement port="fastadb"             requirement="fastadb"/>
+        <inputAsRequirement port="params"             requirement="params"/>
+        <inputAsRequirement port="parallel_params"    requirement="parallel_params"/>
+		<productionToOutput port="intermediate_protein_coverage"    production="intermediate_protein_coverage"/>
+        <productionToOutput port="debug_protein_coverage"    production="debug_protein_coverage"/>
+    </bind>
+
+    <bind action="unique_peptide_calculation_map" tool="unique_peptide_calculation_map">
+        <inputAsRequirement port="peptidelist"             requirement="peptidelist"/>
+        <inputAsRequirement port="fastadb"             requirement="fastadb"/>
+        <inputAsRequirement port="params"             requirement="params"/>
+        <inputAsRequirement port="parallel_params"    requirement="parallel_params"/>
+		<productionToOutput port="intermediate_unique_peptide_coverage"    production="intermediate_unique_peptide_coverage"/>
+    </bind>
+
+	<bind action="protein_coverage_calculation_reduce" tool="protein_coverage_calculation_reduce">
+        <inputAsRequirement port="peptidelist"             requirement="peptidelist"/>
+        <inputAsRequirement port="fastadb"             requirement="fastadb"/>
+        <inputAsRequirement port="params"             requirement="params"/>
+        <inputAsRequirement port="intermediate_protein_coverage"    requirement="intermediate_protein_coverage"/>
+        <inputAsRequirement port="intermediate_unique_peptide_coverage"    requirement="intermediate_unique_peptide_coverage"/>
+		<productionToOutput port="protein_coverage"    production="protein_coverage"/>
+        <productionToOutput port="unique_peptides_list"    production="unique_peptides_list"/>
+        <productionToOutput port="library_coverage_summary_statistics"    production="library_coverage_summary_statistics"/>
+    </bind>
+
+    <bind action="peptide_stats_coverage_map" tool="peptide_stats_coverage_map">
+        <inputAsRequirement port="peptidelist"             requirement="peptidelist"/>
+        <inputAsRequirement port="fastadb"             requirement="fastadb"/>
+        <inputAsRequirement port="params"             requirement="params"/>
+        <inputAsRequirement port="parallel_params"    requirement="parallel_params"/>
+		<productionToOutput port="intermediate_peptide_coverage"    production="intermediate_peptide_coverage"/>
+    </bind>
+
+    <bind action="peptide_stats_coverage_reduce" tool="merge_tsv_efficient">
+        <inputAsRequirement port="input_folder"       requirement="input_folder"/>
+        <productionToOutput port="output_file"           production="output_file"/>
+    </bind>
+
+
+
+
+    <bind action="end" type="upload">
+        <url value="{livesearch.upload}"/>
+        <query name="task" valueRef="@task"/>
+        <contentQuery name="content"/>
+        <compression type="zip"/>
+        <upload port="unique_peptides_list" type="file">
+            <query name="resource" value="unique_peptides_list"/>
+        </upload>
+        <upload port="protein_coverage" type="file">
+            <query name="resource" value="protein_coverage"/>
+        </upload>
+        <upload port="library_coverage_summary_statistics" type="file">
+            <query name="resource" value="library_coverage_summary_statistics"/>
+        </upload>
+        <upload port="peptide_coverage_merged" type="file">
+            <query name="resource" value="peptide_coverage_merged"/>
+        </upload>
+    </bind>
+</binding>

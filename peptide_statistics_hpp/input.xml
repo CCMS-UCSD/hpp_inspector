@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<interface id="peptide_statistics_uniprot" version="1.2.5">
-	<workflow-id>PEPTIDE_STATISTICS_UNIPROT</workflow-id>
+<interface id="peptide_statistics_hpp" version="0.1.0">
+	<workflow-id>PEPTIDE_STATISTICS_HPP</workflow-id>
 	<workflow-label>Peptide Statistics (UniProt)</workflow-label>
 	<parameters>
         <parameter name="desc" label="Description">
@@ -14,12 +14,15 @@
 			<fileGenerator type="upload" purpose="fasta" target="fastadb"/>
 		</parameter>
 
-		<parameter name="peptidelist" label="Peptide List">
-			<fileGenerator type="upload" purpose="fasta" target="peptidelist"/>
+		<parameter name="mztab" label="Search mzTab Files">
+			<fileGenerator type="upload" purpose="mztab" target="mztab"/>
 		</parameter>
 
+		<parameter name="spec_on_server" label="Spectrum Files">
+			<fileGenerator type="upload" purpose="spec_on_server" target="spec_on_server"/>
+		</parameter>
 
-      </parameters>
+</parameters>
 
 	<!-- Input form layout -->
     <block label="Search Options">
@@ -39,16 +42,27 @@
 		<row>
             <cell>
                 <label>
-                    <content parameter="peptidelist"/>
+                    <content parameter="mztab"/>
                 </label>
             </cell>
             <cell colspan="3">
-                <module id="peptidelist" type="fileSelector">
-                    <property name="label">Peptide List</property>
+                <module id="mztab" type="fileSelector">
+                    <property name="label">Search mzTab Files</property>
                 </module>
             </cell>
         </row>
-
+		<row>
+            <cell>
+                <label>
+                    <content parameter="spec_on_server"/>
+                </label>
+            </cell>
+            <cell colspan="3">
+                <module id="spec_on_server" type="fileSelector">
+                    <property name="label">Spectrum Files</property>
+                </module>
+            </cell>
+        </row>
 	</block>
 
 </interface>

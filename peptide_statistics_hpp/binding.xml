@@ -8,8 +8,11 @@
         <download port="params" type="file">
             <query name="resource" value="params"/>
         </download>
-		<download port="peptidelist" type="folder">
-            <query name="resource" value="peptidelist"/>
+		<download port="mztab" type="folder">
+            <query name="resource" value="mztab"/>
+        </download>
+        <download port="spec_on_server" type="folder">
+                <query name="resource" value="spec_on_server"/>
         </download>
         <download port="fastadb" type="folder">
             <query name="resource" value="fastadb"/>
@@ -18,6 +21,16 @@
             <query name="resource" value="params"/>
         </downloadParams>
 
+    </bind>
+
+    <bind action="extract_peptides" tool="extract_peptides">
+        <inputAsRequirement port="mztab"             requirement="mztab"/>
+        <productionToOutput port="peptidelist"    production="peptidelist"/>
+    </bind>
+
+    <bind action="download_latest_kb" tool="download_latest_kb">
+        <inputAsRequirement port="params"    requirement="params"/>
+        <productionToOutput port="kb_pep"    production="kb_pep"/>
     </bind>
 
     <bind action="protein_coverage_calculation_paramgeneration" tool="protein_coverage_calculation_paramgeneration">
@@ -68,7 +81,18 @@
         <productionToOutput port="output_file"           production="output_file"/>
     </bind>
 
+    <bind action="merge_kb_coverage" tool="merge_kb_coverage">
+        <inputAsRequirement port="kb_pep"       requirement="kb_pep"/>
+        <inputAsRequirement port="protein_coverage"       requirement="protein_coverage"/>
+        <productionToOutput port="novel_coverage"           production="novel_coverage"/>
+    </bind>
 
+    <bind action="find_novel_psms" tool="find_novel_psms">
+        <inputAsRequirement port="novel_coverage"       requirement="novel_coverage"/>
+        <inputAsRequirement port="spec_on_server"       requirement="spec_on_server"/>
+        <inputAsRequirement port="mztab"                requirement="mztab"/>
+        <productionToOutput port="novel_psms"           production="novel_psms"/>
+    </bind>
 
 
     <bind action="end" type="upload">
@@ -87,6 +111,12 @@
         </upload>
         <upload port="peptide_coverage_merged" type="file">
             <query name="resource" value="peptide_coverage_merged"/>
+        </upload>
+        <upload port="novel_coverage" type="file">
+            <query name="resource" value="novel_coverage"/>
+        </upload>
+        <upload port="novel_psms" type="file">
+            <query name="resource" value="novel_psms"/>
         </upload>
     </bind>
 </binding>

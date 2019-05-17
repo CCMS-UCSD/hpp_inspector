@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-<flow name="peptide_statistics_uniprot">
+<flow name="peptide_statistics_hpp">
 	<object name="workflowParameters"/>
 
     <object name="peptidelist"/>
     <object name="fastadb"/>
+		<collection name="mztab"/>
+		<collection name="spec_on_server"/>
+
+		<object name="kb_pep"/>
 
 	<collection name="parallel_params"/>
 	<collection name="intermediate_protein_coverage"/>
@@ -13,16 +17,27 @@
     <collection name="debug_protein_coverage"/>
 
     <object name="protein_coverage"/>
+		<object name="novel_coverage"/>
+		<object name="novel_psms"/>
     <object name="unique_peptides_list"/>
 	<object name="library_coverage_summary_statistics"/>
 
-
-
     <action name="begin">
-        <output port="peptidelist"       object="peptidelist"/>
+        <output port="mztab"       			 collection="mztab"/>
+				<output port="spec_on_server"       collection="spec_on_server"/>
         <output port="fastadb" 		  object="fastadb"/>
         <output port="params" object="workflowParameters"/>
     </action>
+
+		<action name="extract_peptides">
+			<input   port="mztab"       			      collection="mztab"/>
+			<output  port="peptidelist"             object="peptidelist"/>
+		</action>
+
+		<action name="download_latest_kb">
+			<input   port="params"       			    object="workflowParameters"/>
+			<output  port="kb_pep"             		object="kb_pep"/>
+		</action>
 
 	<action name="protein_coverage_calculation_paramgeneration">
         <input  port="peptidelist"             object="peptidelist"/>
@@ -70,17 +85,31 @@
     </action>
 
 	<object name="peptide_coverage_merged"/>
-	<action name="peptide_stats_coverage_reduce">
+		<action name="peptide_stats_coverage_reduce">
 		<input port="input_folder"       collection="intermediate_peptide_coverage"/>
         <output port="output_file"       object="peptide_coverage_merged"/>
     </action>
 
+		<action name="merge_kb_coverage">
+			<input   port="kb_pep"       			    object="kb_pep"/>
+			<input   port="protein_coverage"         object="protein_coverage"/>
+			<output   port="novel_coverage"         object="novel_coverage"/>
+		</action>
+
+		<action name="find_novel_psms">
+			<input   port="novel_coverage"      object="novel_coverage"/>
+			<input   port="spec_on_server"      collection="spec_on_server"/>
+			<input   port="mztab"      					collection="mztab"/>
+			<output  port="novel_psms"          object="novel_psms"/>
+		</action>
 
     <action name="end">
         <input port="unique_peptides_list"       object="unique_peptides_list"/>
         <input port="protein_coverage" object="protein_coverage"/>
-		<input port="library_coverage_summary_statistics" object="library_coverage_summary_statistics"/>
+				<input port="library_coverage_summary_statistics" object="library_coverage_summary_statistics"/>
         <input port="debug_protein_coverage" collection="debug_protein_coverage"/>
-		<input port="peptide_coverage_merged" object="peptide_coverage_merged"/>
-    </action>
+				<input port="peptide_coverage_merged" object="peptide_coverage_merged"/>
+				<input port="novel_coverage" object="novel_coverage"/>
+				<input port="novel_psms" object="novel_psms"/>
+		</action>
 </flow>

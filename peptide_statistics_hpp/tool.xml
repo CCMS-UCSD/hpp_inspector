@@ -1,0 +1,195 @@
+<toolset>
+
+<pathSet base="peptide_statistics_hpp">
+    <toolPath tool="protein_coverage_calculation_paramgeneration" path="parallel_protein_coverage_paramgen.py" />
+    <pathVar name="protein_coverage_calculation_map.script" path="protein_coverage_calculate.py" />
+    <pathVar name="unique_peptide_calculation_map.script" path="unique_peptide_calculation_parallel.py" />
+    <pathVar name="protein_coverage_calculation_reduce.script" path="parallel_reduce_protein_coverage.py" />
+    <pathVar name="peptide_stats_coverage_map.script" path="peptide_stats_coverage_map.py" />
+
+    <pathVar name="merge_tsv_efficient.script" path="merge_tsv_files_efficient.py" />
+
+    <pathVar name="uniprot_gff_pkl" path="uniprot_annotations.pkl" />
+    <pathVar name="next_prot_pe" path="NextProt_PEs.txt" />
+
+    <pathVar name="extract_peptides.script" path="extract_peptides.py" />
+    <pathVar name="download_latest_kb.script" path="download_latest_kb.py" />
+    <pathVar name="merge_kb_coverage.script" path="merge_kb_coverage.py" />
+    <pathVar name="find_novel_psms.script" path="find_novel_psms.py" />
+
+</pathSet>
+
+
+    <pathSet base="anaconda2">
+        <toolPath tool="unique_peptide_calculation_map" path="bin/python2.7" />
+        <toolPath tool="protein_coverage_calculation_reduce" path="bin/python2.7" />
+    </pathSet>
+
+    <pathSet base="anaconda3">
+        <toolPath tool="protein_coverage_calculation_map" path="bin/python3.5" />
+        <toolPath tool="peptide_stats_coverage_map" path="bin/python3.5" />
+        <toolPath tool="merge_tsv_efficient" path="bin/python3.5" />
+        <toolPath tool="extract_peptides" path="bin/python3.5" />
+        <toolPath tool="download_latest_kb" path="bin/python3.5" />
+        <toolPath tool="merge_kb_coverage" path="bin/python3.5" />
+        <toolPath tool="find_novel_psms" path="bin/python3.5" />
+    </pathSet>
+
+    <tool name="extract_peptides">
+        <require name="mztab"    type="folder"/>
+        <produce name="peptidelist" type="file" naming="explicit"  extension="out"/>
+
+        <execution env="binary" argConvention="adhoc">
+            <arg pathRef="extract_peptides.script"/>
+            <arg option="-mztab"        valueRef="mztab"/>
+            <arg option="-peptidelist"  valueRef="peptidelist"/>
+        </execution>
+    </tool>
+
+    <tool name="download_latest_kb">
+      <require name="params"    type="file"/>
+      <produce name="peptidelist" type="file" naming="explicit"  extension="out"/>
+
+        <execution env="binary" argConvention="adhoc">
+            <arg pathRef="download_latest_kb.script"/>
+            <arg option="-params"  valueRef="params"/>
+            <arg option="-kb_pep"  valueRef="kb_pep"/>
+        </execution>
+    </tool>
+
+
+
+  <tool name="protein_coverage_calculation_paramgeneration">
+      <require name="fastadb" type="file"/>
+      <require name="peptidelist"       type="file"/>
+      <require name="params"    type="file"/>
+      <produce name="parallel_params"        type="folder"/>
+
+      <execution env="binary" argConvention="adhoc">
+              <arg valueRef="fastadb"/>
+              <arg valueRef="peptidelist"/>
+              <arg valueRef="parallel_params"/>
+              <arg value="20"/>
+      </execution>
+  </tool>
+
+
+  <tool name="protein_coverage_calculation_map">
+      <require name="peptidelist"       type="file"/>
+      <require name="fastadb" type="file"/>
+      <require name="params"    type="file"/>
+      <require name="parallel_params"    type="file"/>
+      <produce name="intermediate_protein_coverage"        type="folder"/>
+      <produce name="debug_protein_coverage"        type="folder"/>
+
+      <execution env="binary" argConvention="adhoc">
+              <arg pathRef="protein_coverage_calculation_map.script"/>
+              <arg valueRef="fastadb"/>
+              <arg valueRef="peptidelist"/>
+              <arg valueRef="parallel_params"/>
+              <arg pathRef="uniprot_gff_pkl"/>
+              <arg pathRef="next_prot_pe"/>
+              <arg valueRef="intermediate_protein_coverage"/>
+              <arg valueRef="debug_protein_coverage"/>
+      </execution>
+  </tool>
+
+  <tool name="unique_peptide_calculation_map">
+      <require name="peptidelist"       type="file"/>
+      <require name="fastadb" type="file"/>
+      <require name="params"    type="file"/>
+      <require name="parallel_params"    type="file"/>
+      <produce name="intermediate_unique_peptide_coverage"        type="folder"/>
+
+      <execution env="binary" argConvention="adhoc">
+          <arg pathRef="unique_peptide_calculation_map.script"/>
+          <arg valueRef="fastadb"/>
+          <arg valueRef="peptidelist"/>
+          <arg valueRef="parallel_params"/>
+          <arg pathRef="next_prot_pe"/>
+          <arg valueRef="intermediate_unique_peptide_coverage"/>
+      </execution>
+  </tool>
+
+
+  <tool name="protein_coverage_calculation_reduce">
+      <require name="peptidelist"       type="file"/>
+      <require name="fastadb" type="file"/>
+      <require name="params"    type="file"/>
+      <require name="intermediate_protein_coverage"    type="folder"/>
+      <require name="intermediate_unique_peptide_coverage"    type="folder"/>
+      <produce name="protein_coverage"        type="file" naming="explicit"  extension="out"/>
+      <produce name="unique_peptides_list"        type="file" naming="explicit"  extension="out"/>
+      <produce name="library_coverage_summary_statistics"        type="file" naming="explicit"  extension="tsv"/>
+
+      <execution env="binary" argConvention="adhoc">
+          <arg pathRef="protein_coverage_calculation_reduce.script"/>
+          <arg valueRef="fastadb"/>
+          <arg valueRef="intermediate_protein_coverage"/>
+          <arg valueRef="intermediate_unique_peptide_coverage"/>
+          <arg valueRef="protein_coverage"/>
+          <arg valueRef="unique_peptides_list"/>
+          <arg pathRef="next_prot_pe"/>
+          <arg valueRef="library_coverage_summary_statistics"/>
+      </execution>
+  </tool>
+
+
+  <tool name="peptide_stats_coverage_map">
+      <require name="peptidelist"       type="file"/>
+      <require name="fastadb" type="file"/>
+      <require name="params"    type="file"/>
+      <require name="parallel_params"    type="file"/>
+      <produce name="intermediate_peptide_coverage"        type="folder"/>
+
+      <execution env="binary" argConvention="adhoc">
+          <arg pathRef="peptide_stats_coverage_map.script"/>
+          <arg valueRef="fastadb"/>
+          <arg valueRef="peptidelist"/>
+          <arg valueRef="parallel_params"/>
+          <arg pathRef="uniprot_gff_pkl"/>
+          <arg pathRef="next_prot_pe"/>
+          <arg valueRef="intermediate_peptide_coverage"/>
+      </execution>
+  </tool>
+
+  <tool name="merge_tsv_efficient">
+      <require name="input_folder" type="folder"/>
+      <produce name="output_file" type="file" naming="explicit"  extension="tsv"/>
+
+      <execution env="binary" argConvention="adhoc">
+          <arg pathRef="merge_tsv_efficient.script"/>
+          <arg valueRef="input_folder"/>
+          <arg valueRef="output_file"/>
+      </execution>
+  </tool>
+
+  <tool name="merge_kb_coverage">
+      <require name="kb_pep"    type="file"/>
+      <require name="protein_coverage"    type="file"/>
+      <produce name="novel_coverage" type="file" naming="explicit"  extension="tsv"/>
+
+      <execution env="binary" argConvention="adhoc">
+          <arg pathRef="merge_kb_coverage.script"/>
+          <arg option="-kb_pep"        valueRef="kb_pep"/>
+          <arg option="-protein_coverage"  valueRef="protein_coverage"/>
+          <arg option="-novel_coverage"  valueRef="novel_coverage"/>
+      </execution>
+  </tool>
+
+  <tool name="find_novel_psms">
+    <require name="novel_coverage"    type="file"/>
+    <require name="spec_on_server"    type="folder"/>
+    <require name="mztab"     type="folder"/>
+    <produce name="novel_psms" type="file" naming="explicit"  extension="out"/>
+
+      <execution env="binary" argConvention="adhoc">
+          <arg pathRef="find_novel_psms.script"/>
+          <arg option="-novel_coverage"   valueRef="novel_coverage"/>
+          <arg option="-spec_on_server"   valueRef="spec_on_server"/>
+          <arg option="-mztab"            valueRef="mztab"/>
+          <arg option="-novel_psms"       valueRef="novel_psms"/>
+      </execution>
+  </tool>
+
+</toolset>

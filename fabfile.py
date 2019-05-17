@@ -16,10 +16,10 @@ def updateWorkflow(workflow):
         updateWorkflowComponent(workflow,component)
 
 def updatePeptideStatisticsWorkflow():
-    updateWorkflow('peptide_statistics_uniprot')
+    updateWorkflow('peptide_statistics_hpp')
 
 def updatePeptideStatisticsScripts():
-    put('peptide_statistics_tools/*', '/data/cluster/tools/peptide_statistics3')
+    put('peptide_statistics_hpp_tools/*', '/data/cluster/tools/peptide_statistics_hpp')
 
 def updateAll():
     updatePeptideStatisticsWorkflow()

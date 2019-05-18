@@ -4,6 +4,18 @@ import csv
 import glob
 import mztab
 
+def arguments():
+    parser = argparse.ArgumentParser(description='mzTab to list of peptides')
+    parser.add_argument('-p','--kb_pep', type = str, help='Peptides from KB')
+    parser.add_argument('-c','--protein_coverage', type = str, help='Added Protein Coverage')
+    parser.add_argument('-n','--novel_coverage', type = str, help='Novel Coverage')
+    parser.add_argument('-x','--nextprot_pe', type = str, help='NextProt PEs')
+
+    if len(sys.argv) < 4:
+        parser.print_help()
+        sys.exit(1)
+    return parser.parse_args()
+
 
 def hupo_nonoverlapping(segments, just_noncontained = True):
     if len(segments) == 0:
@@ -61,18 +73,6 @@ def hupo_nonoverlapping(segments, just_noncontained = True):
 
     return max_score_at_pep[-1]
 
-def arguments():
-    parser = argparse.ArgumentParser(description='mzTab to list of peptides')
-    parser.add_argument('-p','--kb_pep', type = str, help='Peptides from KB')
-    parser.add_argument('-c','--protein_coverage', type = str, help='Added Protein Coverage')
-    parser.add_argument('-n','--novel_coverage', type = str, help='Novel Coverage')
-    parser.add_argument('-x','--nextprot_pe', type = str, help='NextProt PEs')
-
-    if len(sys.argv) < 3:
-        parser.print_help()
-        sys.exit(1)
-    return parser.parse_args()
-
 def main():
     args = arguments()
     nextprot_pe = defaultdict(lambda: 0)
@@ -105,16 +105,39 @@ def main():
                     if nextprot_pe[accession] > 1:
                         added_proteins[accession][peptide].append((aa_start,aa_end))
 
-    for protein, added_peptides in added_proteins.item():
-        kb_peptides = kb_proteins[protein]
-        hupo_nonoverlapping
-        unique_kb_peptides = len(set(kb_peptides.keys()).difference(set(added_peptides.keys())))
-        unique_added_peptides = len(set(added_peptides.keys()).difference(set(kb_peptides.keys())))
-        unique_intersection = len(set(added_peptides.keys()).difference(set(kb_peptides.keys())))
+    with open(novel_coverage, 'w') as w:
+        fieldnames = ['protein','supporting_peptides','novel_peptides','kb_hpp','new_hpp','combined_hpp','promoted']
+        r = csv.DictWriter(w, delimiter = '\t', fieldnames = fieldnames)
+        r.writeheader()
 
-        nonoverlapping_kb_peptides = len(set(kb_peptides.keys()).difference(set(added_peptides.keys())))
-        nonoverlapping_added_peptides = len(set(added_peptides.keys()).difference(set(kb_peptides.keys())))
-        nonoverlapping_intersection = len(set(added_peptides.keys()).difference(set(kb_peptides.keys())))
+        for protein, added_peptides in added_proteins.items():
+            kb_peptides = set(kb_proteins[protein].keys())
+            added_peptides = set(added_peptides.keys())
+
+            kb_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in kb_proteins[protein].values()])
+            added_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in added_peptides.values()])
+
+            novel_peptides = added_peptides.difference(kb_peptides)
+            supporting_peptides = added_peptides.intersection(kb_peptides)
+
+            unique_kb_peptides = len(kb_peptides.difference(added_peptides))
+            unique_added_peptides = len(added_peptides.difference(kb_peptides))
+            unique_intersection = len(kb_peptides.union(added_peptides))
+
+            nonoverlapping_kb_peptides = hupo_nonoverlapping(kb_pos.difference(added_pos))
+            nonoverlapping_added_peptides = hupo_nonoverlapping(added_pos.difference(kb_pos))
+            nonoverlapping_intersection = hupo_nonoverlapping(kb_pos.union(added_pos))
+
+            r.writerow({
+                'protein': protein,
+                'supporting_peptides':','.join(supporting_peptides),
+                'novel_peptides':','.join(novel_peptides),
+                'kb_hpp':nonoverlapping_kb_peptides,
+                'new_hpp':nonoverlapping_added_peptides,
+                'combined_hpp':nonoverlapping_intersection,
+                'promoted':'Yes' if (nonoverlapping_kb_peptides < 2 and nonoverlapping_intersection >= 2) else 'No'
+            })
+
 
 if __name__ == '__main__':
     main()

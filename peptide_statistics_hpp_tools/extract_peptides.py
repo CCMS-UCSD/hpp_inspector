@@ -20,7 +20,7 @@ def main():
         for mztab_file in glob.glob(args.mztab + '/*'):
             ids = mztab.read(mztab_file, ids)
     peptides = set([
-        ''.join([aa for aa in id.sequence if aa.isalpha()]
+        ''.join([aa for aa in id.sequence if aa.isalpha()])
         for id in
         ids.items()
     ])

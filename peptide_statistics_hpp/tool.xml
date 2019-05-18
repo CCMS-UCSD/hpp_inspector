@@ -174,6 +174,7 @@
           <arg option="-kb_pep"        valueRef="kb_pep"/>
           <arg option="-protein_coverage"  valueRef="protein_coverage"/>
           <arg option="-novel_coverage"  valueRef="novel_coverage"/>
+          <arg option="-nextprot_pe" pathRef="next_prot_pe"/>
       </execution>
   </tool>
 

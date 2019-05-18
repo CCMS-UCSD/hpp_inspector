@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <interface id="peptide_statistics_hpp" version="0.1.0">
 	<workflow-id>PEPTIDE_STATISTICS_HPP</workflow-id>
-	<workflow-label>Peptide Statistics (UniProt)</workflow-label>
+	<workflow-label>Peptide Statistics (HPP Augment)</workflow-label>
 	<parameters>
         <parameter name="desc" label="Description">
             <validator type="length" maximum="1000"/>

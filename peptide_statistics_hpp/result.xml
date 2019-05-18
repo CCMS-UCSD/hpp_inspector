@@ -125,6 +125,7 @@
             <source type="file" name="library_coverage_summary_statistics/"/>
             <parsers>
                 <parser type="sortedTabular" sortBy="category" operator="ascending"/>
+                <parser type="SQLite"/>
             </parsers>
         </data>
         <row>
@@ -132,4 +133,50 @@
             <column type="text" field="value" label="value" width="20"/>
         </row>
     </block>
+
+    ['protein','supporting_peptides','novel_peptides','kb_hpp','new_hpp','combined_hpp','promoted']
+
+    <view id="view_added" label="View New Protein Evidence">
+        <blockRef id="main" type="view_added"/>
+    </view>
+    <block id="view_added" type="table_ss">
+        <data>
+            <source type="file" name="novel_coverage/"/>
+            <parsers>
+                <parser type="sortedTabular" sortBy="category" operator="ascending"/>
+                <parser type="SQLite"/>
+            </parsers>
+        </data>
+        <row>
+            <column type="text" field="protein" label="Protein" width="5"/>
+            <column type="text" field="supporting_peptides" label="Supporting Peptides" width="20"/>
+            <column type="text" field="novel_peptides" label="Novel Peptides" width="20"/>
+            <column type="integer" field="combined_hpp" label="#HPP Peptides (Combined)" width="20"/>
+            <column type="integer" field="kb_hpp" label="#HPP Peptides (KB Only)" width="20"/>
+            <column type="integer" field="new_hpp" label="#HPP Peptides (Added Only)" width="20"/>
+            <column type="text" field="promoted" label="Evidence to Promote" width="20"/>
+        </row>
+    </block>
+
+    <view id="view_added_psm" label="View New PSM Evidence">
+        <blockRef id="main" type="view_added_psm"/>
+    </view>
+    <block id="view_added_psm" type="table_ss">
+        <data>
+            <source type="file" name="novel_psms/"/>
+            <parsers>
+                <parser type="sortedTabular" sortBy="category" operator="ascending"/>
+                <parser type="SQLite"/>
+            </parsers>
+        </data>
+        <row>
+            <column type="text" field="protein" label="Protein" width="5"/>
+            <column type="text" field="filename" label="Filename" width="20"/>
+            <column type="integer" field="scan" label="Scan" width="20"/>
+            <column type="text" field="sequence" label="Sequence" width="20"/>
+            <column type="integer" field="charge" label="Charge" width="20"/>
+            <column type="text" field="type" label="Evidence Type" width="20"/>
+        </row>
+    </block>
+
 </interface>

@@ -57,7 +57,7 @@ def read(mztab_file, ids):
             if 'ms_run' in nextline:
                 header_line = nextline.rstrip().split("\t")
                 ms_filename = header_line[1].replace("-location","")
-                ms_filepath = header_line[2]
+                ms_filepath = header_line[2].replace("file://","f.")
                 filenames[ms_filename] = ms_filepath
             nextline = f.readline()
         while(nextline[0:3] == 'PRH' or nextline[0:3] == 'PRT' or nextline == '\n'):

@@ -25,7 +25,7 @@ def main():
             ids = mztab.read(mztab_file, ids)
     peptide_to_psm = defaultdict(list)
     for filescan,psm in ids.items():
-        peptide_to_psm[''.join([p for p in psm[0].sequence if p.isalpha()])].append((filescan,psm))
+        peptide_to_psm[''.join([p.replace('I','L') for p in psm[0].sequence if p.isalpha()])].append((filescan,psm))
 
     with open(args.novel_coverage) as f, open(args.novel_psms, 'w') as fw:
         header = ['protein','filename','scan','sequence','charge','type']

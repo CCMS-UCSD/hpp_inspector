@@ -175,6 +175,14 @@
             <column type="integer" field="charge" label="Charge" width="4"/>
             <column type="text" field="type" label="Evidence Type" width="6"/>
         </row>
+        <row expander="image">
+            <column type="jscolumnspectrumviewer" colspan="6">
+                <parameter name="file"          file="[filename]"/>
+                <parameter name="scan"          value="[scan]"/>
+                <parameter name="peptide"       value="[sequence]"/>
+                <parameter name="modformat"     value="inspect"/>
+            </column>
+        </row>
     </block>
 
 </interface>

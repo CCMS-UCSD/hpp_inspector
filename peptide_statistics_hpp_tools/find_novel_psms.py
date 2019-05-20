@@ -2,7 +2,9 @@ import argparse
 import sys
 import csv
 import glob
-import mztab
+from quantlib import mztab
+from collections import defaultdict
+
 
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
@@ -23,24 +25,29 @@ def main():
             ids = mztab.read(mztab_file, ids)
     peptide_to_psm = defaultdict(list)
     for filescan,psm in ids.items():
-        peptide_to_psm[''.join([p for p in psm.sequence if p.isalpha()])].append((filescan,psm))
-        
-    with open(args.novel_coverage) as f, open(args.novel_psms) as fw:
+        peptide_to_psm[''.join([p for p in psm[0].sequence if p.isalpha()])].append((filescan,psm))
+
+    with open(args.novel_coverage) as f, open(args.novel_psms, 'w') as fw:
         header = ['protein','filename','scan','sequence','charge','type']
         r = csv.DictReader(f, delimiter = '\t')
-        w = csv.DictWriter(fw, delimiter = '\t', fieldnames = [''])
+        w = csv.DictWriter(fw, delimiter = '\t', fieldnames = header)
+        w.writeheader()
         for l in r:
-            supporting_peptides = l['supporting_peptides'].split(',')
-            novel_peptides = l['novel_peptides'].split(',')
+            supporting_peptides = []
+            novel_peptides = []
+            if l['supporting_peptides'] != ' ':
+                supporting_peptides = [p.split(' ')[0] for p in l['supporting_peptides'].split(',')]
+            if l['novel_peptides'] != ' ':
+                novel_peptides = [p.split(' ')[0] for p in l['novel_peptides'].split(',')]
             protein = l['protein']
             for peptide in supporting_peptides + novel_peptides:
                 for (filescan,psm) in peptide_to_psm[peptide]:
-                    w.write({
+                    w.writerow({
                         'protein':protein,
                         'filename':filescan[0],
                         'scan':filescan[1],
-                        'sequence':psm.sequence,
-                        'charge':psm.charge,
+                        'sequence':psm[0].sequence,
+                        'charge':psm[0].charge,
                         'type':'Supporting' if peptide in supporting_peptides else 'Novel'
                     })
 

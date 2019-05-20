@@ -147,9 +147,10 @@ def main():
             output_dict["num_proteins"].append(len(proteins_covered))
             output_dict["num_proteins_w_mismatch"].append(num_proteins_covered)
             output_dict["num_proteinsg_covered"].append(len(set([protein_to_gene[p] for p in proteins_covered])))
+
             shared_gene = True
             min_genes_covered = None
-            for protein_pos in peptide_to_protein_map[peptide]:
+            for protein_pos in peptide_to_protein_map[strip_sequence(peptide).replace("I", "L")]:
                 p,both_pos = protein_pos.split(" ")
                 genes_covered = protein_to_gene[p]
                 if min_genes_covered is None:
@@ -168,7 +169,7 @@ def main():
                             shared_with_protein = True
                     shared_gene = shared_gene and shared_with_protein
             output_dict["gene_unique_no_mismatch"].append(shared_gene)
-            for p in peptide_to_protein_map_w_mismatch[peptide]:
+            for p in peptide_to_protein_map_w_mismatch[strip_sequence(peptide).replace("I", "L")]:
                 genes_covered = protein_to_gene[p]
                 if min_genes_covered is None:
                     min_genes_covered = genes_covered

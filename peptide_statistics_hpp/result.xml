@@ -134,16 +134,14 @@
         </row>
     </block>
 
-    ['protein','supporting_peptides','novel_peptides','kb_hpp','new_hpp','combined_hpp','promoted']
-
     <view id="view_added" label="View New Protein Evidence">
         <blockRef id="main" type="view_added"/>
     </view>
+
     <block id="view_added" type="table_ss">
         <data>
             <source type="file" name="novel_coverage/"/>
             <parsers>
-                <parser type="sortedTabular" sortBy="category" operator="ascending"/>
                 <parser type="SQLite"/>
             </parsers>
         </data>
@@ -161,21 +159,21 @@
     <view id="view_added_psm" label="View New PSM Evidence">
         <blockRef id="main" type="view_added_psm"/>
     </view>
+
     <block id="view_added_psm" type="table_ss">
         <data>
             <source type="file" name="novel_psms/"/>
             <parsers>
-                <parser type="sortedTabular" sortBy="category" operator="ascending"/>
                 <parser type="SQLite"/>
             </parsers>
         </data>
         <row>
-            <column type="text" field="protein" label="Protein" width="5"/>
+            <column type="text" field="protein" label="Protein" width="4"/>
             <column type="text" field="filename" label="Filename" width="20"/>
-            <column type="integer" field="scan" label="Scan" width="20"/>
+            <column type="integer" field="scan" label="Scan" width="4"/>
             <column type="text" field="sequence" label="Sequence" width="20"/>
-            <column type="integer" field="charge" label="Charge" width="20"/>
-            <column type="text" field="type" label="Evidence Type" width="20"/>
+            <column type="integer" field="charge" label="Charge" width="4"/>
+            <column type="text" field="type" label="Evidence Type" width="6"/>
         </row>
     </block>
 

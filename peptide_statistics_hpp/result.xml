@@ -174,7 +174,6 @@
             <column type="text" field="sequence" label="Sequence" width="20"/>
             <column type="integer" field="charge" label="Charge" width="4"/>
             <column type="text" field="type" label="Evidence Type" width="6"/>
-            <column type="text" field="type" label="Evidence Type" width="6"/>
             <column label="Add to Library" type="genericurlgenerator" width="12"> \
                 <parameter name="URLBASE" value="/ProteoSAFe/addToLibrary.jsp"/>\
                 <parameter name="REQUESTPARAMETER=file" value="[filename]"/>\

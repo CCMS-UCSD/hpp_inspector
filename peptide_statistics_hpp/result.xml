@@ -174,6 +174,20 @@
             <column type="text" field="sequence" label="Sequence" width="20"/>
             <column type="integer" field="charge" label="Charge" width="4"/>
             <column type="text" field="type" label="Evidence Type" width="6"/>
+            <column type="text" field="type" label="Evidence Type" width="6"/>
+            <column label="Add to Library" type="genericurlgenerator" width="12"> \
+                <parameter name="URLBASE" value="/ProteoSAFe/addToLibrary.jsp"/>\
+                <parameter name="REQUESTPARAMETER=file" value="[filename]"/>\
+                <parameter name="REQUESTPARAMETER=scan" value="[scan]"/>\
+                <!--<parameter name="REQUESTPARAMETER=index" value=""/>\-->
+                <parameter name="REQUESTPARAMETER=charge" value="[charge]"/>\
+                <!--<parameter name="REQUESTPARAMETER=mass" value=""/>\-->
+                <parameter name="REQUESTPARAMETER=proteins" value="[protein]"/>\
+                <parameter name="REQUESTPARAMETER=peptide" value="[sequence]"/>\
+                <parameter name="LABEL" value="Link"/>\
+                <parameter name="USETASK" value="True"/>\
+                <parameter name="PASS_URL" value="True"/>\
+            </column>
         </row>
         <row expander="image">
             <column type="jscolumnspectrumviewer" colspan="6">

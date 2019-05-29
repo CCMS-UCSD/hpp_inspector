@@ -65,11 +65,12 @@ def read(mztab_file, ids):
         headers = nextline.rstrip().split('\t')
         mztab_dict = csv.DictReader(f, fieldnames = headers, delimiter = '\t')
         for row in list(mztab_dict):
+            parent_mass = row.get('opt_global_precursor_neutral_mass',0)
             protein = row['accession']
             peptide = peptide_string(row['sequence'],row['modifications'])
             source_file, index = parse_spectrum_ref(row['spectra_ref'],filenames)
             rt = row.get('opt_global_RTMean')
             if rt:
                 rt = float(rt)
-            ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), 'MZTAB', row['modifications'], rt, protein)]
+            ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), 'MZTAB', row['modifications'], rt, protein, parent_mass)]
     return ids

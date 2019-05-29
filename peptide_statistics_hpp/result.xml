@@ -149,10 +149,10 @@
             <column type="text" field="protein" label="Protein" width="5"/>
             <column type="text" field="supporting_peptides" label="Supporting Peptides" width="20"/>
             <column type="text" field="novel_peptides" label="Novel Peptides" width="20"/>
-            <column type="integer" field="combined_hpp" label="#HPP Peptides (Combined)" width="20"/>
-            <column type="integer" field="kb_hpp" label="#HPP Peptides (KB Only)" width="20"/>
-            <column type="integer" field="new_hpp" label="#HPP Peptides (Added Only)" width="20"/>
-            <column type="text" field="promoted" label="Evidence to Promote" width="20"/>
+            <column type="integer" field="combined_hpp" label="#HPP Peptides (Combined)" width="5"/>
+            <column type="integer" field="kb_hpp" label="#HPP Peptides (KB Only)" width="5"/>
+            <column type="integer" field="new_hpp" label="#HPP Peptides (Added Only)" width="5"/>
+            <column type="text" field="promoted" label="Evidence to Promote" width="5"/>
         </row>
     </block>
 
@@ -172,17 +172,21 @@
             <column type="text" field="filename" label="Filename" width="20"/>
             <column type="integer" field="scan" label="Scan" width="4"/>
             <column type="text" field="sequence" label="Sequence" width="20"/>
+            <column type="text" field="parent_mass" label="Parent Mass" width="20"/>
             <column type="integer" field="charge" label="Charge" width="4"/>
             <column type="text" field="type" label="Evidence Type" width="6"/>
-            <column label="Add to Library" type="genericurlgenerator" width="12"> \
-                <parameter name="URLBASE" value="/ProteoSAFe/addToLibrary.jsp"/>\
-                <parameter name="REQUESTPARAMETER=file" value="[filename]"/>\
-                <parameter name="REQUESTPARAMETER=scan" value="[scan]"/>\
+            <column type="text" field="synthetic_filename" label="Synthetic Filename" width="20"/>
+            <column type="integer" field="synthetic_scan" label="Synthetic Scan" width="4"/>
+            <column type="float" field="best_cosine_to_synthetic" label="Best Cosine to Synthetic" width="6"/>
+            <column label="Add to Library" type="genericurlgenerator" width="12">
+                <parameter name="URLBASE" value="/ProteoSAFe/addToLibrary.jsp"/>
+                <parameter name="REQUESTPARAMETER=file" value="[filename]"/>
+                <parameter name="REQUESTPARAMETER=scan" value="[scan]"/>
                 <!--<parameter name="REQUESTPARAMETER=index" value=""/>\-->
-                <parameter name="REQUESTPARAMETER=charge" value="[charge]"/>\
-                <!--<parameter name="REQUESTPARAMETER=mass" value=""/>\-->
-                <parameter name="REQUESTPARAMETER=proteins" value="[protein]"/>\
-                <parameter name="REQUESTPARAMETER=peptide" value="[sequence]"/>\
+                <parameter name="REQUESTPARAMETER=charge" value="[charge]"/>
+                <parameter name="REQUESTPARAMETER=mass" value="[parent_mass]"/>
+                <parameter name="REQUESTPARAMETER=proteins" value="[protein]"/>
+                <parameter name="REQUESTPARAMETER=peptide" value="[sequence]"/>
                 <parameter name="LABEL" value="Link"/>\
                 <parameter name="USETASK" value="True"/>\
                 <parameter name="PASS_URL" value="True"/>\
@@ -192,6 +196,12 @@
             <column type="jscolumnspectrumviewer" colspan="6">
                 <parameter name="file"          file="[filename]"/>
                 <parameter name="scan"          value="[scan]"/>
+                <parameter name="peptide"       value="[sequence]"/>
+                <parameter name="modformat"     value="inspect"/>
+            </column>
+            <column type="jscolumnspectrumviewer" colspan="6">
+                <parameter name="file"          file="[synthetic_filename]"/>
+                <parameter name="scan"          value="[synthetic_scan]"/>
                 <parameter name="peptide"       value="[sequence]"/>
                 <parameter name="modformat"     value="inspect"/>
             </column>

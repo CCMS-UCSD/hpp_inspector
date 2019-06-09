@@ -48,7 +48,7 @@
 
     <tool name="download_latest_kb">
       <require name="params"    type="file"/>
-      <produce name="peptidelist" type="file" naming="explicit"  extension="out"/>
+      <produce name="kb_pep" type="file" naming="explicit"  extension="out"/>
 
         <execution env="binary" argConvention="adhoc">
             <arg pathRef="download_latest_kb.script"/>
@@ -166,13 +166,13 @@
 
   <tool name="merge_kb_coverage">
       <require name="kb_pep"    type="file"/>
-      <require name="protein_coverage"    type="file"/>
+      <require name="peptide_coverage_merged"    type="file"/>
       <produce name="novel_coverage" type="file" naming="explicit"  extension="tsv"/>
 
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="merge_kb_coverage.script"/>
           <arg option="-kb_pep"        valueRef="kb_pep"/>
-          <arg option="-protein_coverage"  valueRef="protein_coverage"/>
+          <arg option="-protein_coverage"  valueRef="peptide_coverage_merged"/>
           <arg option="-novel_coverage"  valueRef="novel_coverage"/>
           <arg option="-nextprot_pe" pathRef="next_prot_pe"/>
       </execution>

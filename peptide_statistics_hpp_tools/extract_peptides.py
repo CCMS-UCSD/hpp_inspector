@@ -2,7 +2,7 @@ import argparse
 import sys
 import csv
 import glob
-import mztab
+from quantlib import mztab
 
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
@@ -20,12 +20,12 @@ def main():
         for mztab_file in glob.glob(args.mztab + '/*'):
             ids = mztab.read(mztab_file, ids)
     peptides = set([
-        ''.join([aa for aa in id.sequence if aa.isalpha()])
+        ''.join([aa for aa in id[0].sequence if aa.isalpha()])
         for id in
-        ids.items()
+        ids.values()
     ])
     with open(args.peptidelist,'w') as w:
-        w.write('Peptide')
+        w.write('Peptide\n')
         for peptide in peptides:
             w.write('{}\n'.format(peptide))
 

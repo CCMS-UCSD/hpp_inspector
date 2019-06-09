@@ -92,7 +92,7 @@
 
 		<action name="merge_kb_coverage">
 			<input   port="kb_pep"       			    object="kb_pep"/>
-			<input   port="protein_coverage"         object="protein_coverage"/>
+			<input   port="peptide_coverage_merged"         object="peptide_coverage_merged"/>
 			<output   port="novel_coverage"         object="novel_coverage"/>
 		</action>
 

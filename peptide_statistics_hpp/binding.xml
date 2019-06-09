@@ -83,7 +83,7 @@
 
     <bind action="merge_kb_coverage" tool="merge_kb_coverage">
         <inputAsRequirement port="kb_pep"       requirement="kb_pep"/>
-        <inputAsRequirement port="protein_coverage"       requirement="protein_coverage"/>
+        <inputAsRequirement port="peptide_coverage_merged"       requirement="peptide_coverage_merged"/>
         <productionToOutput port="novel_coverage"           production="novel_coverage"/>
     </bind>
 

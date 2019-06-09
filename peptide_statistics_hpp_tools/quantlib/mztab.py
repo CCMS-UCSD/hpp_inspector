@@ -57,7 +57,7 @@ def read(mztab_file, ids):
             if 'ms_run' in nextline:
                 header_line = nextline.rstrip().split("\t")
                 ms_filename = header_line[1].replace("-location","")
-                ms_filepath = header_line[2].split("/")[-1]
+                ms_filepath = header_line[2].replace("file://","f.")
                 filenames[ms_filename] = ms_filepath
             nextline = f.readline()
         while(nextline[0:3] == 'PRH' or nextline[0:3] == 'PRT' or nextline == '\n'):
@@ -65,11 +65,12 @@ def read(mztab_file, ids):
         headers = nextline.rstrip().split('\t')
         mztab_dict = csv.DictReader(f, fieldnames = headers, delimiter = '\t')
         for row in list(mztab_dict):
+            parent_mass = row.get('opt_global_precursor_neutral_mass',0)
             protein = row['accession']
             peptide = peptide_string(row['sequence'],row['modifications'])
             source_file, index = parse_spectrum_ref(row['spectra_ref'],filenames)
             rt = row.get('opt_global_RTMean')
             if rt:
                 rt = float(rt)
-            ids[(source_file.split('.')[0], index)] = [psm.PSM(peptide, int(row['charge']), 'MZTAB', row['modifications'], rt, protein)]
+            ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), 'MZTAB', row['modifications'], rt, protein, parent_mass)]
     return ids

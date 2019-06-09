@@ -2,7 +2,8 @@ import argparse
 import sys
 import csv
 import glob
-import mztab
+from collections import defaultdict
+from quantlib import mztab
 
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
@@ -79,13 +80,13 @@ def main():
     with open(args.nextprot_pe) as f:
         r = csv.DictReader(f, delimiter='\t')
         for l in r:
-            nextprot_pe[l['Protein'].replace('NX_','')] = int(l['PE'])
+            nextprot_pe[l['protein'].replace('NX_','')] = int(l['pe'])
     kb_proteins = defaultdict(lambda: defaultdict(list))
     added_proteins = defaultdict(lambda: defaultdict(list))
     with open(args.kb_pep) as f:
         r = csv.DictReader(f, delimiter='\t')
         for l in r:
-            kb_proteins[l['protein']][l['peptide']].append((int(l['aa_start']),int(l['aa_end'])))
+            kb_proteins[l['protein']][l['demodified']].append((int(l['aa_start']),int(l['aa_end'])))
     with open(args.protein_coverage) as f:
         r = csv.DictReader(f, delimiter='\t')
         for l in r:
@@ -99,30 +100,30 @@ def main():
                     proteins_w_coords.split(';')
                 ]
                 for protein in proteins:
-                    accession = protein[0].split('|')[1]
-                    aa_start = int(protein[1])
-                    aa_end = int(protein[2])
-                    if nextprot_pe[accession] > 1:
-                        added_proteins[accession][peptide].append((aa_start,aa_end))
+                    if len(protein) == 3:
+                        accession = protein[0].split('|')[1]
+                        aa_start = int(protein[1]) + 1
+                        aa_end = int(protein[2])
+                        if nextprot_pe[accession] > 1 and (aa_end - aa_start >= 9):
+                            added_proteins[accession][peptide].append((aa_start,aa_end))
 
-    with open(novel_coverage, 'w') as w:
+    with open(args.novel_coverage, 'w') as w:
         fieldnames = ['protein','supporting_peptides','novel_peptides','kb_hpp','new_hpp','combined_hpp','promoted']
         r = csv.DictWriter(w, delimiter = '\t', fieldnames = fieldnames)
         r.writeheader()
 
-        for protein, added_peptides in added_proteins.items():
-            kb_peptides = set(kb_proteins[protein].keys())
-            added_peptides = set(added_peptides.keys())
-
+        for protein in added_proteins.keys():
             kb_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in kb_proteins[protein].values()])
-            added_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in added_peptides.values()])
+            added_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in added_proteins[protein].values()])
+
+            kb_peptides = set(["{} ({}-{})".format(peptide,sorted(positions, key = lambda x: x[0])[0][0],sorted(positions, key = lambda x: x[0])[0][1]) for peptide, positions in kb_proteins[protein].items()])
+            added_peptides = set(["{} ({}-{})".format(peptide,sorted(positions, key = lambda x: x[0])[0][0],sorted(positions, key = lambda x: x[0])[0][1]) for peptide, positions in added_proteins[protein].items()])
+
+            print(kb_peptides)
+            print(added_peptides)
 
             novel_peptides = added_peptides.difference(kb_peptides)
             supporting_peptides = added_peptides.intersection(kb_peptides)
-
-            unique_kb_peptides = len(kb_peptides.difference(added_peptides))
-            unique_added_peptides = len(added_peptides.difference(kb_peptides))
-            unique_intersection = len(kb_peptides.union(added_peptides))
 
             nonoverlapping_kb_peptides = hupo_nonoverlapping(kb_pos.difference(added_pos))
             nonoverlapping_added_peptides = hupo_nonoverlapping(added_pos.difference(kb_pos))
@@ -130,14 +131,13 @@ def main():
 
             r.writerow({
                 'protein': protein,
-                'supporting_peptides':','.join(supporting_peptides),
-                'novel_peptides':','.join(novel_peptides),
+                'supporting_peptides':','.join(supporting_peptides) if len(supporting_peptides) >= 1 else ' ',
+                'novel_peptides':','.join(novel_peptides) if len(novel_peptides) >= 1 else ' ',
                 'kb_hpp':nonoverlapping_kb_peptides,
                 'new_hpp':nonoverlapping_added_peptides,
                 'combined_hpp':nonoverlapping_intersection,
                 'promoted':'Yes' if (nonoverlapping_kb_peptides < 2 and nonoverlapping_intersection >= 2) else 'No'
             })
-
 
 if __name__ == '__main__':
     main()

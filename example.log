@@ -1,8 +1,0 @@
-DEBUG      workflow_validator:104 ======================Error List==============================
-DEBUG      workflow_validator:107 Missing path for tool: extract_peptides
-DEBUG      workflow_validator:107 Missing path for tool: download_latest_kb
-DEBUG      workflow_validator:107 Missing path for tool: merge_kb_coverage
-DEBUG      workflow_validator:107 Missing path for tool: find_novel_psms
-DEBUG      workflow_validator:107 Flow [find_novel_psms] contains undeclared items: ['novel_coverage']
-DEBUG      workflow_validator:107 Flow [end] contains undeclared items: ['novel_coverage', 'novel_psms']
-DEBUG      workflow_validator:104 ======================Error List==============================

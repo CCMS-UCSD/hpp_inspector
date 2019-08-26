@@ -171,6 +171,7 @@ def main():
             all_protein_stats[protein]["unique_peptide_count_no_mismatch"] = len(set([p[0] for p in all_proteins_to_protein_unique_peptides_map_no_mismatch[protein]]))
         else:
             all_protein_stats[protein]["unique_peptide_count_no_mismatch"] = 0
+
     #Format this appropriately
     output_dict = defaultdict(list)
     for protein in all_protein_stats:

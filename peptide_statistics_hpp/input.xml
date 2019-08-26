@@ -18,8 +18,13 @@
 			<fileGenerator type="upload" purpose="mztab" target="mztab"/>
 		</parameter>
 
-		<parameter name="spec_on_server" label="Spectrum Files">
+		<parameter name="spec_on_server" label="Spectrum Files (if not public)">
 			<fileGenerator type="upload" purpose="spec_on_server" target="spec_on_server"/>
+		</parameter>
+
+		<parameter name="peak_tolerance" label="Peak Tolerance (Da) for Cosine to Synthetics">
+			<default value="0.05"/>
+			<validator type="float" minimum="0"/>
 		</parameter>
 
 </parameters>
@@ -63,6 +68,16 @@
                 </module>
             </cell>
         </row>
+				<row>
+		            <cell>
+		                <label>
+		                    <content parameter="peak_tolerance"/>
+		                </label>
+		            </cell>
+		            <cell colspan="3">
+		                <input type="text" parameter="peak_tolerance"/>
+		            </cell>
+		        </row>
 	</block>
 
 </interface>

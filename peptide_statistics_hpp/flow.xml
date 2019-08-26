@@ -17,8 +17,9 @@
     <collection name="debug_protein_coverage"/>
 
     <object name="protein_coverage"/>
-		<object name="novel_coverage"/>
+		<object name="novel_proteins"/>
 		<object name="novel_psms"/>
+		<object name="novel_peptides"/>
     <object name="unique_peptides_list"/>
 	<object name="library_coverage_summary_statistics"/>
 
@@ -93,14 +94,11 @@
 		<action name="merge_kb_coverage">
 			<input   port="kb_pep"       			    object="kb_pep"/>
 			<input   port="peptide_coverage_merged"         object="peptide_coverage_merged"/>
-			<output   port="novel_coverage"         object="novel_coverage"/>
-		</action>
-
-		<action name="find_novel_psms">
-			<input   port="novel_coverage"      object="novel_coverage"/>
 			<input   port="spec_on_server"      collection="spec_on_server"/>
 			<input   port="mztab"      					collection="mztab"/>
+			<output   port="novel_proteins"         object="novel_proteins"/>
 			<output  port="novel_psms"          object="novel_psms"/>
+			<output  port="novel_peptides"          object="novel_peptides"/>
 		</action>
 
     <action name="end">
@@ -109,7 +107,8 @@
 				<input port="library_coverage_summary_statistics" object="library_coverage_summary_statistics"/>
         <input port="debug_protein_coverage" collection="debug_protein_coverage"/>
 				<input port="peptide_coverage_merged" object="peptide_coverage_merged"/>
-				<input port="novel_coverage" object="novel_coverage"/>
+				<input port="novel_proteins" object="novel_proteins"/>
 				<input port="novel_psms" object="novel_psms"/>
+				<input port="novel_peptides" object="novel_peptides"/>
 		</action>
 </flow>

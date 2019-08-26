@@ -18,7 +18,10 @@ def main():
     ids = {}
     if args.mztab != "" and args.mztab != None:
         for mztab_file in glob.glob(args.mztab + '/*'):
-            ids = mztab.read(mztab_file, ids)
+            try:
+                ids = mztab.read(mztab_file, ids)
+            except:
+                ids = mztab.read_lib(mztab_file, ids)
     peptides = set([
         ''.join([aa for aa in id[0].sequence if aa.isalpha()])
         for id in

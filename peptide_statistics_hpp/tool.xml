@@ -11,7 +11,7 @@
 
     <pathVar name="uniprot_gff_pkl" path="uniprot_annotations.pkl" />
     <pathVar name="next_prot_pe" path="NextProt_PEs.txt" />
-
+    <pathVar name="synthetics_pkl" path="proteometools.pkl"/>
     <pathVar name="extract_peptides.script" path="extract_peptides.py" />
     <pathVar name="download_latest_kb.script" path="download_latest_kb.py" />
     <pathVar name="merge_kb_coverage.script" path="merge_kb_coverage.py" />
@@ -167,30 +167,26 @@
   <tool name="merge_kb_coverage">
       <require name="kb_pep"    type="file"/>
       <require name="peptide_coverage_merged"    type="file"/>
-      <produce name="novel_coverage" type="file" naming="explicit"  extension="tsv"/>
+      <require name="mztab"             type="folder"/>
+      <require name="spec_on_server"    type="folder"/>
+      <produce name="novel_proteins" type="file" naming="explicit"  extension="tsv"/>
+      <produce name="novel_psms" type="file" naming="explicit"  extension="tsv"/>
+      <produce name="novel_peptides" type="file" naming="explicit"  extension="tsv"/>
 
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="merge_kb_coverage.script"/>
           <arg option="-kb_pep"        valueRef="kb_pep"/>
           <arg option="-protein_coverage"  valueRef="peptide_coverage_merged"/>
-          <arg option="-novel_coverage"  valueRef="novel_coverage"/>
+          <arg option="-spec_on_server"   valueRef="spec_on_server"/>
+          <arg option="-synthetics"       pathRef="synthetics_pkl"/>
+          <arg option="-mztab"            valueRef="mztab"/>
+          <arg option="-novel_proteins"  valueRef="novel_proteins"/>
+          <arg option="-novel_psms"       valueRef="novel_psms"/>
+          <arg option="-novel_peptides"   valueRef="novel_peptides"/>
+          <arg option="-peak_tolerance"  valueRef="@peak_tolerance"/>
           <arg option="-nextprot_pe" pathRef="next_prot_pe"/>
       </execution>
   </tool>
 
-  <tool name="find_novel_psms">
-    <require name="novel_coverage"    type="file"/>
-    <require name="spec_on_server"    type="folder"/>
-    <require name="mztab"     type="folder"/>
-    <produce name="novel_psms" type="file" naming="explicit"  extension="out"/>
-
-      <execution env="binary" argConvention="adhoc">
-          <arg pathRef="find_novel_psms.script"/>
-          <arg option="-novel_coverage"   valueRef="novel_coverage"/>
-          <arg option="-spec_on_server"   valueRef="spec_on_server"/>
-          <arg option="-mztab"            valueRef="mztab"/>
-          <arg option="-novel_psms"       valueRef="novel_psms"/>
-      </execution>
-  </tool>
 
 </toolset>

@@ -17,7 +17,7 @@ def arguments():
 def main():
     args = arguments()
     peptides = requests.get('http://ccms-internal.ucsd.edu/ProteoSAFe/PeptideStatisticsServlet').json()
-    header = ['protein','nextprot_pe','aa_start','aa_end','demodified']
+    header = ['library','protein','aa_start','aa_end','demodified','charge', 'sequence']
     with open(args.kb_pep, 'w') as w:
         r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
         r.writeheader()

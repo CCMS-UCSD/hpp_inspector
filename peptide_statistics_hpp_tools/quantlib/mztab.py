@@ -1,5 +1,6 @@
 import csv
 from quantlib import psm
+import math
 
 def filter_unknown_modification_rows(input_psms):
     output_psms = {}
@@ -20,6 +21,7 @@ def peptide_string(sequence,modifications):
                 if find_mod(mod.split("-")[1]) != None
             ])
         new_sequence = []
+        new_sequence.append(mods.get(0,""))
         for (i,s) in enumerate(sequence):
             new_sequence.append(s)
             new_sequence.append(mods.get(i+1,""))
@@ -65,12 +67,30 @@ def read(mztab_file, ids):
         headers = nextline.rstrip().split('\t')
         mztab_dict = csv.DictReader(f, fieldnames = headers, delimiter = '\t')
         for row in list(mztab_dict):
-            parent_mass = row.get('opt_global_precursor_neutral_mass',0)
+            parent_mass = row.get('opt_global_Precursor',0)
             protein = row['accession']
             peptide = peptide_string(row['sequence'],row['modifications'])
             source_file, index = parse_spectrum_ref(row['spectra_ref'],filenames)
             rt = row.get('opt_global_RTMean')
+            score = row.get('opt_global_EValue')
             if rt:
                 rt = float(rt)
-            ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), 'MZTAB', row['modifications'], rt, protein, parent_mass)]
+            if score:
+                score = -math.log10(float(score))
+            if (float(row.get('opt_global_ProtQValue',0)) < 0.01 and float(row.get('opt_global_PepQValue',0)) < 0.01 and float(row.get('opt_global_QValue',0)) < 0.01):
+                ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), 'MZTAB', row['modifications'], rt, protein, parent_mass, score)]
+    return ids
+
+def read_lib(mztab_file, ids):
+    filenames = {}
+    with open(mztab_file) as f:
+        r = csv.DictReader(f, delimiter = '\t')
+        for l in r:
+            filename = l['filename']
+            scan = int(l['scan'])
+            peptide = l['annotation']
+            charge = int(l['charge'])
+            parent_mass = float(l['mz'])
+            score = float(l['score'])
+            ids[(filename, scan)] = [psm.PSM(peptide, charge, 'MSGF_AMB', ' ', None, None, parent_mass, score)]
     return ids

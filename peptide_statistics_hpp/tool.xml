@@ -1,6 +1,6 @@
 <toolset>
 
-<pathSet base="peptide_statistics_hpp">
+<pathSet base="$base">
     <toolPath tool="protein_coverage_calculation_paramgeneration" path="parallel_protein_coverage_paramgen.py" />
     <pathVar name="protein_coverage_calculation_map.script" path="protein_coverage_calculate.py" />
     <pathVar name="unique_peptide_calculation_map.script" path="unique_peptide_calculation_parallel.py" />

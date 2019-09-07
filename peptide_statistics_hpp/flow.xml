@@ -6,6 +6,7 @@
     <object name="fastadb"/>
 		<collection name="mztab"/>
 		<collection name="spec_on_server"/>
+		<collection name="library_output"/>
 
 		<object name="kb_pep"/>
 
@@ -32,7 +33,9 @@
 
 		<action name="extract_peptides">
 			<input   port="mztab"       			      collection="mztab"/>
+			<input  port="params"             			object="workflowParameters"/>
 			<output  port="peptidelist"             object="peptidelist"/>
+			<output  port="library_output"          collection="library_output"/>
 		</action>
 
 		<action name="download_latest_kb">
@@ -106,6 +109,7 @@
         <input port="protein_coverage" object="protein_coverage"/>
 				<input port="library_coverage_summary_statistics" object="library_coverage_summary_statistics"/>
         <input port="debug_protein_coverage" collection="debug_protein_coverage"/>
+				<input port="library_output" collection="library_output"/>
 				<input port="peptide_coverage_merged" object="peptide_coverage_merged"/>
 				<input port="novel_proteins" object="novel_proteins"/>
 				<input port="novel_psms" object="novel_psms"/>

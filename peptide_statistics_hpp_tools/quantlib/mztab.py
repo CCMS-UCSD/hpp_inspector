@@ -1,6 +1,7 @@
 import csv
 from quantlib import psm
 import math
+import re
 
 def filter_unknown_modification_rows(input_psms):
     output_psms = {}
@@ -15,10 +16,15 @@ def peptide_string(sequence,modifications):
         return sequence
     else:
         new_sequence = sequence.split()
+        # mods = dict([
+        #         (int(mod.split("-")[0]),find_mod(mod.split("-")[1]))
+        #         for mod in modifications.split(",")
+        #         if find_mod(mod.split("-")[1]) != None
+        #     ])
         mods = dict([
-                (int(mod.split("-")[0]),find_mod(mod.split("-")[1]))
-                for mod in modifications.split(",")
-                if find_mod(mod.split("-")[1]) != None
+                (int(mod.split("-")[0]),find_mod(''.join(mod.split("-")[1:])))
+                for mod in re.split("/\,(?![^\[]*\])/g", modifications)
+                if find_mod(''.join(mod.split("-")[1:])) != None
             ])
         new_sequence = []
         new_sequence.append(mods.get(0,""))
@@ -48,10 +54,18 @@ def find_mod(modification):
     }
     if 'UNIMOD' in modification:
         return convert.get(modification)
+    elif 'PSI-MS' in modification:
+        psi_mod_split = modificatiom[1:-1].split(',')
+        if psi_mod_split[1] == 'MS:1001524':
+            return '-{}'.format(psi_mod_split[3])
+        else:
+            print(modification)
+            raise Exception
     else:
+        print(modification)
         return modification.split(":")[1]
 
-def read(mztab_file, ids):
+def read(mztab_file, ids, mangled_name = None):
     filenames = {}
     with open(mztab_file) as f:
         nextline = f.readline()
@@ -62,23 +76,28 @@ def read(mztab_file, ids):
                 ms_filepath = header_line[2].replace("file://","f.")
                 filenames[ms_filename] = ms_filepath
             nextline = f.readline()
-        while(nextline[0:3] == 'PRH' or nextline[0:3] == 'PRT' or nextline == '\n'):
+        while(nextline[0:3] == 'PRH' or nextline[0:3] == 'PRT' or nextline[0:3] == 'COM' or nextline == '\n'):
             nextline = f.readline()
         headers = nextline.rstrip().split('\t')
         mztab_dict = csv.DictReader(f, fieldnames = headers, delimiter = '\t')
         for row in list(mztab_dict):
             parent_mass = row.get('opt_global_Precursor',0)
-            protein = row['accession']
-            peptide = peptide_string(row['sequence'],row['modifications'])
+            protein = row.get('accession')
+            try:
+                peptide = peptide_string(row['sequence'],row['modifications'])
+            except:
+                print(row['sequence'],row['modifications'])
+                raise Exception
             source_file, index = parse_spectrum_ref(row['spectra_ref'],filenames)
             rt = row.get('opt_global_RTMean')
-            score = row.get('opt_global_EValue')
+            score = row.get('opt_global_EValue',0)
             if rt:
                 rt = float(rt)
             if score:
                 score = -math.log10(float(score))
+            search_engine = row.get('search_engine','[,,MZTAB,]')[1:-1].split(',')[2]
             if (float(row.get('opt_global_ProtQValue',0)) < 0.01 and float(row.get('opt_global_PepQValue',0)) < 0.01 and float(row.get('opt_global_QValue',0)) < 0.01):
-                ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), 'MZTAB', row['modifications'], rt, protein, parent_mass, score)]
+                ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), search_engine, row['modifications'], rt, protein, parent_mass, score, mangled_name)]
     return ids
 
 def read_lib(mztab_file, ids):

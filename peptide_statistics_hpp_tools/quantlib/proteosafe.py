@@ -2,16 +2,20 @@ import xmltodict
 from csv import DictReader
 from collections import defaultdict
 
-def read_params(input_file):
-    return get_mangled_file_mapping(parse_xml_file(input_file))
+def read_params(input_file, full_paths = False):
+    return get_mangled_file_mapping(parse_xml_file(input_file),full_paths)
 
-def get_mangled_file_mapping(params):
+def get_mangled_file_mapping(params, full_paths = False):
     all_mappings = params["upload_file_mapping"]
     mangled_mapping = {}
     for mapping in all_mappings:
         splits = mapping.split("|")
-        mangled_name = splits[0].split(".")[0].split('/')[-1]
-        original_name = splits[1].split(".")[0].split('/')[-1]
+        if full_paths:
+            mangled_name = splits[0]
+            original_name = splits[1]
+        else:
+            mangled_name = splits[0].split(".")[0].split('/')[-1]
+            original_name = splits[1].split(".")[0].split('/')[-1]
         mangled_mapping[mangled_name] = original_name
 
     return mangled_mapping

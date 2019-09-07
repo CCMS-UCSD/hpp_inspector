@@ -37,12 +37,16 @@
 
     <tool name="extract_peptides">
         <require name="mztab"    type="folder"/>
+        <require name="params"    type="file"/>
+        <produce name="library_output" type="folder"/>
         <produce name="peptidelist" type="file" naming="explicit"  extension="out"/>
 
         <execution env="binary" argConvention="adhoc">
             <arg pathRef="extract_peptides.script"/>
             <arg option="-mztab"        valueRef="mztab"/>
+            <arg option="-params"       valueRef="params"/>
             <arg option="-peptidelist"  valueRef="peptidelist"/>
+            <arg option="-output_library_folder"  valueRef="library_output"/>
         </execution>
     </tool>
 

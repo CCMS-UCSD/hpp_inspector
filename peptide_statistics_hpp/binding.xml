@@ -25,7 +25,9 @@
 
     <bind action="extract_peptides" tool="extract_peptides">
         <inputAsRequirement port="mztab"             requirement="mztab"/>
+        <inputAsRequirement port="params"             requirement="params"/>
         <productionToOutput port="peptidelist"    production="peptidelist"/>
+        <productionToOutput port="library_output"    production="library_output"/>
     </bind>
 
     <bind action="download_latest_kb" tool="download_latest_kb">
@@ -117,6 +119,9 @@
         </upload>
         <upload port="novel_peptides" type="file">
             <query name="resource" value="novel_peptides"/>
+        </upload>
+        <upload port="library_output" type="folder">
+            <query name="resource" value="library_output"/>
         </upload>
     </bind>
 </binding>

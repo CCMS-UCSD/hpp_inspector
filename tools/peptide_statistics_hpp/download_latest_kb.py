@@ -2,7 +2,7 @@ import argparse
 import sys
 import csv
 import glob
-import mztab
+from quantlib import mztab
 import requests
 
 def arguments():

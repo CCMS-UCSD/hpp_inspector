@@ -106,10 +106,10 @@ def read_lib(mztab_file, ids):
         r = csv.DictReader(f, delimiter = '\t')
         for l in r:
             filename = l['filename']
-            scan = int(l['scan'])
+            scan = int(l['scan'].replace('scan=',''))
             peptide = l['annotation']
             charge = int(l['charge'])
             parent_mass = float(l['mz'])
             score = float(l['score'])
-            ids[(filename, scan)] = [psm.PSM(peptide, charge, 'MSGF_AMB', ' ', None, None, parent_mass, score)]
+            ids[(filename, scan)] = [psm.PSM(peptide, charge, 'MSGF_AMB', ' ', None, None, parent_mass, score, filename)]
     return ids

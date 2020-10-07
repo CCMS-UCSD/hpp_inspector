@@ -96,8 +96,7 @@ def read(mztab_file, ids, mangled_name = None):
             if score:
                 score = -math.log10(float(score))
             search_engine = row.get('search_engine','[,,MZTAB,]')[1:-1].split(',')[2]
-            if (float(row.get('opt_global_ProtQValue',0)) < 0.01 and float(row.get('opt_global_PepQValue',0)) < 0.01 and float(row.get('opt_global_QValue',0)) < 0.01):
-                ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), search_engine, row['modifications'], rt, protein, parent_mass, score, mangled_name)]
+            ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), search_engine, row['modifications'], rt, protein, parent_mass, score, mangled_name)]
     return ids
 
 def read_lib(mztab_file, ids):
@@ -109,7 +108,7 @@ def read_lib(mztab_file, ids):
             scan = int(l['scan'].replace('scan=',''))
             peptide = l['annotation']
             charge = int(l['charge'])
-            parent_mass = float(l['mz'])
+            parent_mass = float(l.get('mz',1))
             score = float(l['score'])
             ids[(filename, scan)] = [psm.PSM(peptide, charge, 'MSGF_AMB', ' ', None, None, parent_mass, score, filename)]
     return ids

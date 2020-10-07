@@ -66,9 +66,6 @@ def find_coverage(pos, length):
         for (start,end) in p:
             for i in range(start,end+1):
                 if i <= len(coverage):
-                    # print(protein)
-                    # print(i)
-                    # print(len(coverage))
                     coverage[i-1] = True
     return len([c for c in coverage if c])
 
@@ -132,8 +129,6 @@ def main():
     args = arguments()
     nextprot_pe = defaultdict(lambda: 0)
     protein_length = defaultdict(lambda: 0)
-    with open(args.synthetics,'rb') as f:
-        synthetic_scans = pickle.load(f)
 
     tol = float(args.peak_tolerance)
 
@@ -148,9 +143,9 @@ def main():
 
     peptide_to_psm = defaultdict(list)
     for filescan,psm in ids.items():
-        peptide_to_psm[''.join([p.replace('I','L') for p in psm[0].sequence if p.isalpha()])].append((filescan,psm))
-
-    # print(peptide_to_psm)
+        #Don't include improper bioplex files
+        if not ('j10022_RNF14' in filescan[0] or 'j12271_TMPRSS3' in filescan[0] or 'j13961_ADAM32' in filescan[0] or 'j9837_ADCYAP1' in filescan[0] or 'q8920_ACCN4' in filescan[0]):
+            peptide_to_psm[''.join([p.replace('I','L') for p in psm[0].sequence if p.isalpha()])].append((filescan,psm))
 
     supporting_peptides = set()
 
@@ -160,15 +155,13 @@ def main():
 
     ms_existence = {}
 
-    cosine_to_synthetic = defaultdict(lambda: (0,('N/A','N/A')))
-
     with open(args.nextprot_pe) as f:
         r = csv.DictReader(f, delimiter='\t')
         for l in r:
             ms_existence[l['protein'].replace('NX_','')] = l['ms_evidence']
 
     # note that this has a limit of 100000000 so with multi-species in ProteinExplorer this will likely need to change
-    url = "http://ccms-internal.ucsd.edu/ProteoSAFe/ProteinLibraryServlet?task=protein_explorer_proteins&file=&pageSize=100000000&offset=0&query=%2523%257B%2522unroll%2522%253A%2522no%2522%252C%2522include_synthetics%2522%253A%2522yes%2522%252C%2522datasets%2522%253A%2522%2522%252C%2522accession_input%2522%253A%2522%2522%257D&query_type=representative&_=1560375217897"
+    url = "http://massive.ucsd.edu/ProteoSAFe/ProteinLibraryServlet?task=protein_explorer_proteins&file=&pageSize=100000000&offset=0&query=%2523%257B%2522unroll%2522%253A%2522no%2522%252C%2522include_synthetics%2522%253A%2522yes%2522%252C%2522datasets%2522%253A%2522%2522%252C%2522accession_input%2522%253A%2522%2522%257D&query_type=representative&_=1560375217897"
     proteins = requests.get(url).json()['row_data']
     for protein in proteins:
         nextprot_pe[protein['accession']] = int(protein['proteinexistance'])
@@ -183,14 +176,14 @@ def main():
         r = csv.DictReader(f, delimiter='\t')
         for l in r:
             if int(l['library']) == 2:
-                kb_proteins[l['protein']][l['demodified']].append((int(l['aa_start']),int(l['aa_end'])))
+                kb_proteins[l['protein']][l['demodified'].replace('I','L')].append((int(l['aa_start']),int(l['aa_end'])))
             if int(l['library']) == 3 or int(l['library']) == 4:
-                has_synthetic.add(l['demodified'])
-        for protein in kb_proteins:
-            for seq in kb_proteins[protein].keys():
-                if seq in has_synthetic:
-                    kb_proteins_w_synthetic[protein][seq] = kb_proteins[protein][seq]
+                has_synthetic.add(l['demodified'].replace('I','L'))
 
+    for protein in kb_proteins:
+        for seq in kb_proteins[protein].keys():
+            if seq in has_synthetic:
+                kb_proteins_w_synthetic[protein][seq] = kb_proteins[protein][seq]
 
     with open(args.protein_coverage) as f:
         r = csv.DictReader(f, delimiter='\t')
@@ -216,34 +209,9 @@ def main():
     for protein in added_proteins:
         for peptide in added_proteins[protein].keys():
             peptide_to_protein[peptide.replace('I','L')] = protein
-            for (filescan,psm) in peptide_to_psm[peptide.replace('I','L')]:
-                if synthetic_scans.get((psm[0].sequence,psm[0].charge)):
-                    psms_to_consider[filescan[0]].add(filescan[1])
+            if peptide.replace('I','L') in has_synthetic:
+                for (filescan,psm) in peptide_to_psm[peptide.replace('I','L')]:
                     added_proteins_w_synthetic[protein][peptide] = added_proteins[protein][peptide]
-
-    for filename in psms_to_consider:
-        try:
-            exts = pathlib.Path(filename).suffixes
-            if 'MSV' in filename:
-                filepath = filename.replace('f.','/data/massive/')
-                if filepath[0] == 'M':
-                    filepath = '/data/massive/' + filepath
-            if exts[0] == '.mzML':
-                with mzml.read(filepath) as reader:
-                    for spectrum in reader:
-                        peaks = zip(spectrum['m/z array'],spectrum['intensity array'])
-                        spec_id = {idx.split('=')[0]:idx.split('=')[1] for idx in spectrum['id'].split(' ')}
-                        scan = int(spec_id['scan'])
-                        if scan in psms_to_consider[filename]:
-                            synthetic_peaks,synthetic_filescan = synthetic_scans.get((ids[(filename,scan)][0].sequence,ids[(filename,scan)][0].charge))
-                            cosine,_ = sa.score_alignment(list(peaks),list(synthetic_peaks),0,0,tol)
-                            cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
-        except:
-            pass
-        if exts[0] == '.mgf':
-            pass
-        if exts[0] == '.mzXML':
-            pass
 
 
     with open(args.novel_proteins, 'w') as w:
@@ -268,24 +236,12 @@ def main():
 
                 r.writerow(protein_dict)
 
-
-    with open(args.novel_psms, 'w') as fw_psm, open(args.novel_peptides, 'w') as fw_pep:
-        header = ['protein','pe','ms_evidence','filename','scan','sequence','charge','score','pass','type','parent_mass','synthetic_filename','synthetic_scan','best_cosine_to_synthetic']
+    with open(args.novel_psms, 'w') as fw_psm:
+        header = ['protein','pe','ms_evidence','filename','scan','sequence','charge','score','pass','type','parent_mass','synthetic_match']
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
-        w_pep = csv.DictWriter(fw_pep, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
-        w_pep.writeheader()
         for peptide, protein in peptide_to_protein.items():
-            # print(peptide,protein)
-            best_psm = None
-            best_psm_score = -1e9
-            # print(peptide_to_psm[peptide.replace('I','L')])
             for (filescan,psm) in peptide_to_psm[peptide.replace('I','L')]:
-                cosine, best_synthetic = cosine_to_synthetic[filescan]
-                if best_synthetic[0] != 'N/A':
-                    synthetic_filename = 'f.' + best_synthetic[0]
-                else:
-                    synthetic_filename = best_synthetic[0]
                 psm_row = {
                     'protein':protein,
                     'ms_evidence':ms_existence.get(protein,'no'),
@@ -297,16 +253,9 @@ def main():
                     'score':psm[0].score,
                     'pass':'Above' if psm[0].score > CUTOFF[str(len(peptide))] else 'Below',
                     'parent_mass':psm[0].parent_mass,
-                    'type':'Supporting' if peptide in supporting_peptides else 'Novel',
-                    'synthetic_filename': synthetic_filename,
-                    'synthetic_scan': best_synthetic[1],
-                    'best_cosine_to_synthetic': cosine
+                    'type':'Supporting' if peptide in supporting_peptides else 'Novel'
                 }
                 w_psm.writerow(psm_row)
-                if psm[0].score >= best_psm_score:
-                    best_psm = psm_row
-            if best_psm:
-                w_pep.writerow(best_psm)
 
 if __name__ == '__main__':
     main()

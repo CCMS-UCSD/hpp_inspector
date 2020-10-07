@@ -106,11 +106,14 @@ def main():
                 ids = mztab.read(mztab_file, ids, file_mapping[mztab_file.split('/')[-1]])
             except:
                 ids = mztab.read_lib(mztab_file, ids)
+
     peptides = set([
         ''.join([aa for aa in id[0].sequence if aa.isalpha()])
-        for id in
-        ids.values()
+        for filescan,id in
+        ids.items()
+        if not ('j10022_RNF14' in filescan[0] or 'j12271_TMPRSS3' in filescan[0] or 'j13961_ADAM32' in filescan[0] or 'j9837_ADCYAP1' in filescan[0] or 'q8920_ACCN4' in filescan[0])
     ])
+
     with open(args.peptidelist,'w') as w:
         w.write('Peptide\n')
         for peptide in peptides:

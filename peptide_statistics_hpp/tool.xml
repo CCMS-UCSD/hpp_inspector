@@ -16,7 +16,12 @@
     <pathVar name="download_latest_kb.script" path="download_latest_kb.py" />
     <pathVar name="merge_kb_coverage.script" path="merge_kb_coverage.py" />
     <pathVar name="find_novel_psms.script" path="find_novel_psms.py" />
+    <pathVar name="cosine_to_synthetic.script" path="cosine_to_synthetics.py" />
+    <pathVar name="peptide_protein_cosine.script" path="peptide_protein_cosine.py" />
+</pathSet>
 
+<pathSet base="extract_peaks_pypkl/0.1">
+      <pathVar name="split_identifications_script" path="split_identifications.py"/>
 </pathSet>
 
 
@@ -28,11 +33,14 @@
     <pathSet base="anaconda3">
         <toolPath tool="protein_coverage_calculation_map" path="bin/python3.5" />
         <toolPath tool="peptide_stats_coverage_map" path="bin/python3.5" />
-        <toolPath tool="merge_tsv_efficient" path="bin/python3.5" />
+        <toolPath tool="merge_tsv_efficient" path="bin/python3.7" />
         <toolPath tool="extract_peptides" path="bin/python3.5" />
         <toolPath tool="download_latest_kb" path="bin/python3.5" />
         <toolPath tool="merge_kb_coverage" path="bin/python3.5" />
         <toolPath tool="find_novel_psms" path="bin/python3.5" />
+        <toolPath tool="peptide_protein_cosine" path="bin/python3.5" />
+        <toolPath tool="calculate_cosine" path="bin/python3.5" />
+        <toolPath tool="split_identifications" path="bin/python3.5" />
     </pathSet>
 
     <tool name="extract_peptides">
@@ -163,8 +171,8 @@
 
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="merge_tsv_efficient.script"/>
-          <arg valueRef="input_folder"/>
-          <arg valueRef="output_file"/>
+          <arg option="-input_folder"  valueRef="input_folder"/>
+          <arg option="-output_file"  valueRef="output_file"/>
       </execution>
   </tool>
 
@@ -175,7 +183,6 @@
       <require name="spec_on_server"    type="folder"/>
       <produce name="novel_proteins" type="file" naming="explicit"  extension="tsv"/>
       <produce name="novel_psms" type="file" naming="explicit"  extension="tsv"/>
-      <produce name="novel_peptides" type="file" naming="explicit"  extension="tsv"/>
 
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="merge_kb_coverage.script"/>
@@ -186,11 +193,59 @@
           <arg option="-mztab"            valueRef="mztab"/>
           <arg option="-novel_proteins"  valueRef="novel_proteins"/>
           <arg option="-novel_psms"       valueRef="novel_psms"/>
-          <arg option="-novel_peptides"   valueRef="novel_peptides"/>
           <arg option="-peak_tolerance"  valueRef="@peak_tolerance"/>
           <arg option="-nextprot_pe" pathRef="next_prot_pe"/>
       </execution>
   </tool>
 
+  <tool name="split_identifications">
+       <require name="novel_psms" type="file"/>
+       <produce name="novel_psms_p" type="folder" />
+       <produce name="jobs" type="folder" />
+      <execution env="binary" argConvention="adhoc">
+          <arg pathRef="split_identifications_script"/>
+          <arg valueRef="novel_psms"/>
+          <arg value="NONE"/>
+          <arg valueRef="novel_psms_p"/>
+          <arg value="spec"/>
+          <arg valueRef="jobs"/>
+          <arg value="filename"/>
+          <arg valueRef="@parallel_cosine.parallel_cosine"/>
+      </execution>
+</tool>
+
+  <tool name="calculate_cosine">
+      <require name="novel_psms_p"          type="folder"/>
+      <require name="jobs"                  type="file"/>
+      <require name="synthetics"            type="file"/>
+      <produce name="novel_psms_w_cosine"   type="folder"/>
+      <execution env="binary" argConvention="adhoc">
+          <arg pathRef="cosine_to_synthetic.script"/>
+          <arg option="-synthetics"       valueRef="synthetics"/>
+          <arg option="-jobs"             valueRef="jobs"/>
+          <arg option="-input_psms"       valueRef="novel_psms_p"/>
+          <arg option="-output_psms"      valueRef="novel_psms_w_cosine"/>
+          <arg option="-peak_tolerance"   value="0.05"/>
+      </execution>
+  </tool>
+
+  <tool name="peptide_protein_cosine">
+      <require name="novel_psms_w_cosine"             type="folder"/>
+      <require name="novel_proteins"                  type="file"/>
+      <require name="peptide_coverage_merged"    type="file"/>
+      <produce name="merged_novel_psms_w_cosine" type="file" naming="explicit"  extension="tsv"/>
+      <produce name="novel_peptides_w_cosine" type="file" naming="explicit"  extension="tsv"/>
+      <produce name="novel_proteins_w_cosine" type="file" naming="explicit"  extension="tsv"/>
+      <execution env="binary" argConvention="adhoc">
+          <arg pathRef="peptide_protein_cosine.script"/>
+          <arg option="-input_proteins"       valueRef="novel_proteins"/>
+          <arg option="-input_psms"           valueRef="novel_psms_w_cosine"/>
+          <arg option="-protein_coverage"  valueRef="peptide_coverage_merged"/>
+          <arg option="-output_psms"          valueRef="merged_novel_psms_w_cosine"/>
+          <arg option="-output_peptides"      valueRef="novel_peptides_w_cosine"/>
+          <arg option="-output_proteins"      valueRef="novel_proteins_w_cosine"/>
+          <arg option="-cosine_cutoff"        value="0.5"/>
+      </execution>
+  </tool>
 
 </toolset>

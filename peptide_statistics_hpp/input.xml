@@ -18,6 +18,10 @@
 			<fileGenerator type="upload" purpose="mztab" target="mztab"/>
 		</parameter>
 
+		<parameter name="synthetics" label="Synthetics">
+			<fileGenerator type="upload" purpose="synthetics" target="synthetics"/>
+		</parameter>
+
 		<parameter name="spec_on_server" label="Spectrum Files (if not public)">
 			<fileGenerator type="upload" purpose="spec_on_server" target="spec_on_server"/>
 		</parameter>
@@ -25,6 +29,11 @@
 		<parameter name="peak_tolerance" label="Peak Tolerance (Da) for Cosine to Synthetics">
 			<default value="0.05"/>
 			<validator type="float" minimum="0"/>
+		</parameter>
+
+		<parameter name="parallel_cosine.parallel_cosine" label="Parallelism (For Cosine Calculations)">
+			<default value="10"/>
+			<validator type="integer"/>
 		</parameter>
 
 </parameters>
@@ -69,6 +78,18 @@
             </cell>
         </row>
 				<row>
+								<cell>
+										<label>
+												<content parameter="synthetics"/>
+										</label>
+								</cell>
+								<cell colspan="3">
+										<module id="synthetics" type="fileSelector">
+												<property name="label">Synthetics (MUST be from Extract Peaks PyPKL Workflow)</property>
+										</module>
+								</cell>
+						</row>
+				<row>
 		            <cell>
 		                <label>
 		                    <content parameter="peak_tolerance"/>
@@ -79,5 +100,16 @@
 		            </cell>
 		        </row>
 	</block>
-
+	<block label="Advanced Parallelization Options">
+    <row>
+      <cell>
+        <label>
+          <content parameter="parallel_cosine.parallel_cosine"/>
+        </label>
+      </cell>
+      <cell colspan="2">
+        <input type="text" parameter="parallel_cosine.parallel_cosine"/>
+      </cell>
+    </row>
+  </block>
 </interface>

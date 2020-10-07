@@ -14,6 +14,9 @@
         <download port="spec_on_server" type="folder">
                 <query name="resource" value="spec_on_server"/>
         </download>
+        <download port="synthetics" type="file">
+                <query name="resource" value="synthetics"/>
+        </download>
         <download port="fastadb" type="folder">
             <query name="resource" value="fastadb"/>
         </download>
@@ -84,15 +87,36 @@
     </bind>
 
     <bind action="merge_kb_coverage" tool="merge_kb_coverage">
-        <inputAsRequirement port="kb_pep"       requirement="kb_pep"/>
-        <inputAsRequirement port="peptide_coverage_merged"       requirement="peptide_coverage_merged"/>
-        <inputAsRequirement port="spec_on_server"       requirement="spec_on_server"/>
-        <inputAsRequirement port="mztab"                requirement="mztab"/>
-        <productionToOutput port="novel_proteins"           production="novel_proteins"/>
-        <productionToOutput port="novel_psms"           production="novel_psms"/>
-        <productionToOutput port="novel_peptides"       production="novel_peptides"/>
+        <inputAsRequirement port="kb_pep"                         requirement="kb_pep"/>
+        <inputAsRequirement port="peptide_coverage_merged"        requirement="peptide_coverage_merged"/>
+        <inputAsRequirement port="spec_on_server"                 requirement="spec_on_server"/>
+        <inputAsRequirement port="mztab"                          requirement="mztab"/>
+        <productionToOutput port="novel_proteins"                 production="novel_proteins"/>
+        <productionToOutput port="novel_psms"                     production="novel_psms"/>
     </bind>
 
+    <bind action="calculate_cosine_p" tool="split_identifications">
+        <inputAsRequirement port="novel_psms"       requirement="novel_psms"/>
+        <productionToOutput port="novel_psms_p"     production="novel_psms_p"/>
+        <productionToOutput port="jobs"     production="jobs"/>
+
+    </bind>
+
+    <bind action="calculate_cosine" tool="calculate_cosine">
+        <inputAsRequirement port="jobs"       requirement="jobs"/>
+        <inputAsRequirement port="novel_psms_p"       requirement="novel_psms_p"/>
+        <inputAsRequirement port="synthetics"       requirement="synthetics"/>
+        <productionToOutput port="novel_psms_w_cosine"     production="novel_psms_w_cosine"/>
+    </bind>
+
+    <bind action="peptide_protein_cosine" tool="peptide_protein_cosine">
+        <inputAsRequirement port="novel_psms_w_cosine"       requirement="novel_psms_w_cosine"/>
+        <inputAsRequirement port="novel_proteins"       requirement="novel_proteins"/>
+        <inputAsRequirement port="peptide_coverage_merged"        requirement="peptide_coverage_merged"/>
+        <productionToOutput port="novel_proteins_w_cosine"     production="novel_proteins_w_cosine"/>
+        <productionToOutput port="novel_peptides_w_cosine"     production="novel_peptides_w_cosine"/>
+        <productionToOutput port="merged_novel_psms_w_cosine"     production="merged_novel_psms_w_cosine"/>
+    </bind>
 
     <bind action="end" type="upload">
         <url value="{livesearch.upload}"/>
@@ -111,14 +135,14 @@
         <upload port="peptide_coverage_merged" type="file">
             <query name="resource" value="peptide_coverage_merged"/>
         </upload>
-        <upload port="novel_proteins" type="file">
-            <query name="resource" value="novel_proteins"/>
+        <upload port="novel_proteins_w_cosine" type="file">
+            <query name="resource" value="novel_proteins_w_cosine"/>
         </upload>
-        <upload port="novel_psms" type="file">
-            <query name="resource" value="novel_psms"/>
+        <upload port="novel_peptides_w_cosine" type="file">
+            <query name="resource" value="novel_peptides_w_cosine"/>
         </upload>
-        <upload port="novel_peptides" type="file">
-            <query name="resource" value="novel_peptides"/>
+        <upload port="merged_novel_psms_w_cosine" type="file">
+            <query name="resource" value="merged_novel_psms_w_cosine"/>
         </upload>
         <upload port="library_output" type="folder">
             <query name="resource" value="library_output"/>

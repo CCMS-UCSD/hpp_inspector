@@ -16,7 +16,17 @@ def arguments():
 
 def main():
     args = arguments()
-    peptides = requests.get('http://ccms-internal.ucsd.edu/ProteoSAFe/PeptideStatisticsServlet').json()
+
+    PAGE_SIZE = 500000;
+    OFFSET = 0;
+
+    peptides_to_add = requests.get('http://ccms-internal.ucsd.edu/ProteoSAFe/PeptideStatisticsServlet?pageSize={}&offset={}'.format(PAGE_SIZE,OFFSET)).json()
+    peptides = peptides_to_add
+    while (len(peptides_to_add) == PAGE_SIZE):
+        OFFSET += PAGE_SIZE;
+        peptides_to_add = requests.get('http://ccms-internal.ucsd.edu/ProteoSAFe/PeptideStatisticsServlet?pageSize={}&offset={}'.format(PAGE_SIZE,OFFSET)).json()
+        peptides.extend(peptides_to_add)
+
     header = ['library','protein','aa_start','aa_end','demodified','charge', 'sequence']
     with open(args.kb_pep, 'w') as w:
         r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)

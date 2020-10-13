@@ -16785,3 +16785,1227 @@ DEBUG      channel:1212 [chan 10] EOF sent (10)
 DEBUG      channel:1212 [chan 2] EOF sent (2)
 DEBUG      transport:1819 Dropping user packet because connection is dead.
 DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      workflow_validator:101 ======================Workflow XML Error List==============================
+DEBUG      transport:1819 starting thread (client mode): 0x521bc50
+DEBUG      transport:1819 Local version/idstring: SSH-2.0-paramiko_2.7.1
+DEBUG      transport:1819 Remote version/idstring: SSH-2.0-OpenSSH_5.3
+INFO       transport:1819 Connected (version 2.0, client OpenSSH_5.3)
+DEBUG      transport:1819 kex algos:['diffie-hellman-group-exchange-sha256', 'diffie-hellman-group-exchange-sha1', 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1'] server key:['ssh-rsa', 'ssh-dss'] client encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] server encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] client mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] server mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] client compress:['none', 'zlib@openssh.com'] server compress:['none', 'zlib@openssh.com'] client lang:[''] server lang:[''] kex follows?False
+DEBUG      transport:1819 Kex agreed: diffie-hellman-group-exchange-sha256
+DEBUG      transport:1819 HostKey agreed: ssh-rsa
+DEBUG      transport:1819 Cipher agreed: aes128-ctr
+DEBUG      transport:1819 MAC agreed: hmac-sha2-256
+DEBUG      transport:1819 Compression agreed: none
+DEBUG      transport:1819 Got server p (2048 bits)
+DEBUG      transport:1819 kex engine KexGexSHA256 specified hash_algo <built-in function openssl_sha256>
+DEBUG      transport:1819 Switch to new keys ...
+DEBUG      transport:1819 Adding ssh-rsa host key for proteomics2.ucsd.edu: b'5a83e79de463e495cdd79ab30c40c11d'
+DEBUG      transport:1819 Trying discovered key b'efb7b4a8fd36d4ed8e10e10149759b84' in /Users/ben/.ssh/id_rsa_github
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (publickey) failed.
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (password) successful!
+DEBUG      channel:1212 [chan 0] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 0] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 0 opened.
+DEBUG      channel:1212 [chan 0] Sesch channel 0 request ok
+DEBUG      channel:1212 [chan 0] EOF received (0)
+DEBUG      channel:1212 [chan 0] EOF sent (0)
+DEBUG      channel:1212 [chan 1] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 1] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 1 opened.
+DEBUG      channel:1212 [chan 1] Sesch channel 1 request ok
+DEBUG      channel:1212 [chan 1] EOF received (1)
+DEBUG      channel:1212 [chan 1] EOF sent (1)
+DEBUG      channel:1212 [chan 2] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 2] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 2 opened.
+DEBUG      channel:1212 [chan 2] Sesch channel 2 request ok
+INFO       sftp:158 [chan 2] Opened sftp connection (server version 3)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_cb0a0cc4-7bc2-4bfb-8f58-962d126f79f5/input.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_cb0a0cc4-7bc2-4bfb-8f58-962d126f79f5/binding.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_cb0a0cc4-7bc2-4bfb-8f58-962d126f79f5/flow.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_cb0a0cc4-7bc2-4bfb-8f58-962d126f79f5/result.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_cb0a0cc4-7bc2-4bfb-8f58-962d126f79f5/tool.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 420)
+DEBUG      channel:1212 [chan 3] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 3] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 3 opened.
+DEBUG      channel:1212 [chan 3] Sesch channel 3 request ok
+DEBUG      channel:1212 [chan 3] EOF received (3)
+DEBUG      channel:1212 [chan 3] EOF sent (3)
+DEBUG      channel:1212 [chan 4] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 4] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 4 opened.
+DEBUG      channel:1212 [chan 4] Sesch channel 4 request ok
+DEBUG      channel:1212 [chan 4] EOF received (4)
+DEBUG      channel:1212 [chan 4] EOF sent (4)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_f5ac9a51-6851-4a7a-b094-f71d92a903c6.tar')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/._tools_peptide_statistics_hpp_1b17eb1a-2dbb-47c5-8a06-32b4fd5f7244.tar' to '/tmp/._tools_peptide_statistics_hpp_f5ac9a51-6851-4a7a-b094-f71d92a903c6.tar'
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_f5ac9a51-6851-4a7a-b094-f71d92a903c6.tar', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_f5ac9a51-6851-4a7a-b094-f71d92a903c6.tar', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_f5ac9a51-6851-4a7a-b094-f71d92a903c6.tar')
+DEBUG      sftp:158 [chan 2] chmod(b'/tmp/._tools_peptide_statistics_hpp_f5ac9a51-6851-4a7a-b094-f71d92a903c6.tar', 420)
+DEBUG      channel:1212 [chan 5] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 5] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 5 opened.
+DEBUG      channel:1212 [chan 5] Sesch channel 5 request ok
+DEBUG      channel:1212 [chan 5] EOF received (5)
+DEBUG      channel:1212 [chan 5] EOF sent (5)
+DEBUG      channel:1212 [chan 6] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 6] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 6 opened.
+DEBUG      channel:1212 [chan 6] Sesch channel 6 request ok
+DEBUG      channel:1212 [chan 6] EOF received (6)
+DEBUG      channel:1212 [chan 6] EOF sent (6)
+DEBUG      channel:1212 [chan 7] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 7] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 7 opened.
+DEBUG      channel:1212 [chan 7] Sesch channel 7 request ok
+DEBUG      channel:1212 [chan 7] EOF received (7)
+DEBUG      channel:1212 [chan 7] EOF sent (7)
+DEBUG      channel:1212 [chan 8] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 8] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 8 opened.
+DEBUG      channel:1212 [chan 8] Sesch channel 8 request ok
+DEBUG      channel:1212 [chan 8] EOF received (8)
+DEBUG      channel:1212 [chan 8] EOF sent (8)
+DEBUG      channel:1212 [chan 9] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 9] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 9 opened.
+DEBUG      channel:1212 [chan 9] Sesch channel 9 request ok
+DEBUG      channel:1212 [chan 9] EOF received (9)
+DEBUG      channel:1212 [chan 9] EOF sent (9)
+DEBUG      channel:1212 [chan 10] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 10] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 10 opened.
+DEBUG      channel:1212 [chan 10] Sesch channel 10 request ok
+DEBUG      channel:1212 [chan 10] EOF received (10)
+DEBUG      channel:1212 [chan 10] EOF sent (10)
+DEBUG      channel:1212 [chan 2] EOF sent (2)
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      workflow_validator:101 ======================Workflow XML Error List==============================
+DEBUG      transport:1819 starting thread (client mode): 0x514cf90
+DEBUG      transport:1819 Local version/idstring: SSH-2.0-paramiko_2.7.1
+DEBUG      transport:1819 Remote version/idstring: SSH-2.0-OpenSSH_5.3
+INFO       transport:1819 Connected (version 2.0, client OpenSSH_5.3)
+DEBUG      transport:1819 kex algos:['diffie-hellman-group-exchange-sha256', 'diffie-hellman-group-exchange-sha1', 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1'] server key:['ssh-rsa', 'ssh-dss'] client encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] server encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] client mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] server mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] client compress:['none', 'zlib@openssh.com'] server compress:['none', 'zlib@openssh.com'] client lang:[''] server lang:[''] kex follows?False
+DEBUG      transport:1819 Kex agreed: diffie-hellman-group-exchange-sha256
+DEBUG      transport:1819 HostKey agreed: ssh-rsa
+DEBUG      transport:1819 Cipher agreed: aes128-ctr
+DEBUG      transport:1819 MAC agreed: hmac-sha2-256
+DEBUG      transport:1819 Compression agreed: none
+DEBUG      transport:1819 Got server p (2048 bits)
+DEBUG      transport:1819 kex engine KexGexSHA256 specified hash_algo <built-in function openssl_sha256>
+DEBUG      transport:1819 Switch to new keys ...
+DEBUG      transport:1819 Adding ssh-rsa host key for proteomics2.ucsd.edu: b'5a83e79de463e495cdd79ab30c40c11d'
+DEBUG      transport:1819 Trying discovered key b'efb7b4a8fd36d4ed8e10e10149759b84' in /Users/ben/.ssh/id_rsa_github
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (publickey) failed.
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (password) successful!
+DEBUG      channel:1212 [chan 0] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 0] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 0 opened.
+DEBUG      channel:1212 [chan 0] Sesch channel 0 request ok
+DEBUG      channel:1212 [chan 0] EOF received (0)
+DEBUG      channel:1212 [chan 0] EOF sent (0)
+DEBUG      channel:1212 [chan 1] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 1] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 1 opened.
+DEBUG      channel:1212 [chan 1] Sesch channel 1 request ok
+DEBUG      channel:1212 [chan 1] EOF received (1)
+DEBUG      channel:1212 [chan 1] EOF sent (1)
+DEBUG      channel:1212 [chan 2] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 2] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 2 opened.
+DEBUG      channel:1212 [chan 2] Sesch channel 2 request ok
+INFO       sftp:158 [chan 2] Opened sftp connection (server version 3)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_52864b5d-510b-4796-b965-94af47c92ddc/input.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_52864b5d-510b-4796-b965-94af47c92ddc/binding.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_52864b5d-510b-4796-b965-94af47c92ddc/flow.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_52864b5d-510b-4796-b965-94af47c92ddc/result.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_52864b5d-510b-4796-b965-94af47c92ddc/tool.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 420)
+DEBUG      channel:1212 [chan 3] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 3] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 3 opened.
+DEBUG      channel:1212 [chan 3] Sesch channel 3 request ok
+DEBUG      channel:1212 [chan 3] EOF received (3)
+DEBUG      channel:1212 [chan 3] EOF sent (3)
+DEBUG      channel:1212 [chan 4] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 4] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 4 opened.
+DEBUG      channel:1212 [chan 4] Sesch channel 4 request ok
+DEBUG      channel:1212 [chan 4] EOF received (4)
+DEBUG      channel:1212 [chan 4] EOF sent (4)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_21f3c1e8-5fd8-4a65-88e5-33aa0684f8c4.tar')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/._tools_peptide_statistics_hpp_607f8946-1bac-4e42-b960-7e7aa5eb7f70.tar' to '/tmp/._tools_peptide_statistics_hpp_21f3c1e8-5fd8-4a65-88e5-33aa0684f8c4.tar'
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_21f3c1e8-5fd8-4a65-88e5-33aa0684f8c4.tar', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_21f3c1e8-5fd8-4a65-88e5-33aa0684f8c4.tar', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_21f3c1e8-5fd8-4a65-88e5-33aa0684f8c4.tar')
+DEBUG      sftp:158 [chan 2] chmod(b'/tmp/._tools_peptide_statistics_hpp_21f3c1e8-5fd8-4a65-88e5-33aa0684f8c4.tar', 420)
+DEBUG      channel:1212 [chan 5] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 5] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 5 opened.
+DEBUG      channel:1212 [chan 5] Sesch channel 5 request ok
+DEBUG      channel:1212 [chan 5] EOF received (5)
+DEBUG      channel:1212 [chan 5] EOF sent (5)
+DEBUG      channel:1212 [chan 6] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 6] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 6 opened.
+DEBUG      channel:1212 [chan 6] Sesch channel 6 request ok
+DEBUG      channel:1212 [chan 6] EOF received (6)
+DEBUG      channel:1212 [chan 6] EOF sent (6)
+DEBUG      channel:1212 [chan 7] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 7] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 7 opened.
+DEBUG      channel:1212 [chan 7] Sesch channel 7 request ok
+DEBUG      channel:1212 [chan 7] EOF received (7)
+DEBUG      channel:1212 [chan 7] EOF sent (7)
+DEBUG      channel:1212 [chan 8] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 8] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 8 opened.
+DEBUG      channel:1212 [chan 8] Sesch channel 8 request ok
+DEBUG      channel:1212 [chan 8] EOF received (8)
+DEBUG      channel:1212 [chan 8] EOF sent (8)
+DEBUG      channel:1212 [chan 9] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 9] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 9 opened.
+DEBUG      channel:1212 [chan 9] Sesch channel 9 request ok
+DEBUG      channel:1212 [chan 9] EOF received (9)
+DEBUG      channel:1212 [chan 9] EOF sent (9)
+DEBUG      channel:1212 [chan 10] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 10] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 10 opened.
+DEBUG      channel:1212 [chan 10] Sesch channel 10 request ok
+DEBUG      channel:1212 [chan 10] EOF received (10)
+DEBUG      channel:1212 [chan 10] EOF sent (10)
+DEBUG      channel:1212 [chan 2] EOF sent (2)
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      workflow_validator:101 ======================Workflow XML Error List==============================
+DEBUG      transport:1819 starting thread (client mode): 0x114189d0
+DEBUG      transport:1819 Local version/idstring: SSH-2.0-paramiko_2.7.1
+DEBUG      transport:1819 Remote version/idstring: SSH-2.0-OpenSSH_5.3
+INFO       transport:1819 Connected (version 2.0, client OpenSSH_5.3)
+DEBUG      transport:1819 kex algos:['diffie-hellman-group-exchange-sha256', 'diffie-hellman-group-exchange-sha1', 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1'] server key:['ssh-rsa', 'ssh-dss'] client encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] server encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] client mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] server mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] client compress:['none', 'zlib@openssh.com'] server compress:['none', 'zlib@openssh.com'] client lang:[''] server lang:[''] kex follows?False
+DEBUG      transport:1819 Kex agreed: diffie-hellman-group-exchange-sha256
+DEBUG      transport:1819 HostKey agreed: ssh-rsa
+DEBUG      transport:1819 Cipher agreed: aes128-ctr
+DEBUG      transport:1819 MAC agreed: hmac-sha2-256
+DEBUG      transport:1819 Compression agreed: none
+DEBUG      transport:1819 Got server p (2048 bits)
+DEBUG      transport:1819 kex engine KexGexSHA256 specified hash_algo <built-in function openssl_sha256>
+DEBUG      transport:1819 Switch to new keys ...
+DEBUG      transport:1819 Adding ssh-rsa host key for proteomics2.ucsd.edu: b'5a83e79de463e495cdd79ab30c40c11d'
+DEBUG      transport:1819 Trying discovered key b'efb7b4a8fd36d4ed8e10e10149759b84' in /Users/ben/.ssh/id_rsa_github
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (publickey) failed.
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (password) successful!
+DEBUG      channel:1212 [chan 0] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 0] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 0 opened.
+DEBUG      channel:1212 [chan 0] Sesch channel 0 request ok
+DEBUG      channel:1212 [chan 0] EOF received (0)
+DEBUG      channel:1212 [chan 0] EOF sent (0)
+DEBUG      channel:1212 [chan 1] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 1] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 1 opened.
+DEBUG      channel:1212 [chan 1] Sesch channel 1 request ok
+DEBUG      channel:1212 [chan 1] EOF received (1)
+DEBUG      channel:1212 [chan 1] EOF sent (1)
+DEBUG      channel:1212 [chan 2] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 2] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 2 opened.
+DEBUG      channel:1212 [chan 2] Sesch channel 2 request ok
+INFO       sftp:158 [chan 2] Opened sftp connection (server version 3)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_1a59d357-7fa2-4664-9975-cc70302f3a12/input.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_1a59d357-7fa2-4664-9975-cc70302f3a12/binding.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_1a59d357-7fa2-4664-9975-cc70302f3a12/flow.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_1a59d357-7fa2-4664-9975-cc70302f3a12/result.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_1a59d357-7fa2-4664-9975-cc70302f3a12/tool.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 420)
+DEBUG      channel:1212 [chan 3] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 3] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 3 opened.
+DEBUG      channel:1212 [chan 3] Sesch channel 3 request ok
+DEBUG      channel:1212 [chan 3] EOF received (3)
+DEBUG      channel:1212 [chan 3] EOF sent (3)
+DEBUG      channel:1212 [chan 4] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 4] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 4 opened.
+DEBUG      channel:1212 [chan 4] Sesch channel 4 request ok
+DEBUG      channel:1212 [chan 4] EOF received (4)
+DEBUG      channel:1212 [chan 4] EOF sent (4)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_ed754fc2-ca55-4531-bef0-8dfe058111a5.tar')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/._tools_peptide_statistics_hpp_82c0c74e-0cdd-45f8-8aa0-3b301c8448e2.tar' to '/tmp/._tools_peptide_statistics_hpp_ed754fc2-ca55-4531-bef0-8dfe058111a5.tar'
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_ed754fc2-ca55-4531-bef0-8dfe058111a5.tar', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_ed754fc2-ca55-4531-bef0-8dfe058111a5.tar', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_ed754fc2-ca55-4531-bef0-8dfe058111a5.tar')
+DEBUG      sftp:158 [chan 2] chmod(b'/tmp/._tools_peptide_statistics_hpp_ed754fc2-ca55-4531-bef0-8dfe058111a5.tar', 420)
+DEBUG      channel:1212 [chan 5] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 5] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 5 opened.
+DEBUG      channel:1212 [chan 5] Sesch channel 5 request ok
+DEBUG      channel:1212 [chan 5] EOF received (5)
+DEBUG      channel:1212 [chan 5] EOF sent (5)
+DEBUG      channel:1212 [chan 6] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 6] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 6 opened.
+DEBUG      channel:1212 [chan 6] Sesch channel 6 request ok
+DEBUG      channel:1212 [chan 6] EOF received (6)
+DEBUG      channel:1212 [chan 6] EOF sent (6)
+DEBUG      channel:1212 [chan 7] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 7] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 7 opened.
+DEBUG      channel:1212 [chan 7] Sesch channel 7 request ok
+DEBUG      channel:1212 [chan 7] EOF received (7)
+DEBUG      channel:1212 [chan 7] EOF sent (7)
+DEBUG      channel:1212 [chan 8] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 8] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 8 opened.
+DEBUG      channel:1212 [chan 8] Sesch channel 8 request ok
+DEBUG      channel:1212 [chan 8] EOF received (8)
+DEBUG      channel:1212 [chan 8] EOF sent (8)
+DEBUG      channel:1212 [chan 9] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 9] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 9 opened.
+DEBUG      channel:1212 [chan 9] Sesch channel 9 request ok
+DEBUG      channel:1212 [chan 9] EOF received (9)
+DEBUG      channel:1212 [chan 9] EOF sent (9)
+DEBUG      channel:1212 [chan 10] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 10] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 10 opened.
+DEBUG      channel:1212 [chan 10] Sesch channel 10 request ok
+DEBUG      channel:1212 [chan 10] EOF received (10)
+DEBUG      channel:1212 [chan 10] EOF sent (10)
+DEBUG      channel:1212 [chan 2] EOF sent (2)
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      workflow_validator:101 ======================Workflow XML Error List==============================
+DEBUG      transport:1819 starting thread (client mode): 0x732a710
+DEBUG      transport:1819 Local version/idstring: SSH-2.0-paramiko_2.7.1
+DEBUG      transport:1819 Remote version/idstring: SSH-2.0-OpenSSH_5.3
+INFO       transport:1819 Connected (version 2.0, client OpenSSH_5.3)
+DEBUG      transport:1819 kex algos:['diffie-hellman-group-exchange-sha256', 'diffie-hellman-group-exchange-sha1', 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1'] server key:['ssh-rsa', 'ssh-dss'] client encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] server encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] client mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] server mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] client compress:['none', 'zlib@openssh.com'] server compress:['none', 'zlib@openssh.com'] client lang:[''] server lang:[''] kex follows?False
+DEBUG      transport:1819 Kex agreed: diffie-hellman-group-exchange-sha256
+DEBUG      transport:1819 HostKey agreed: ssh-rsa
+DEBUG      transport:1819 Cipher agreed: aes128-ctr
+DEBUG      transport:1819 MAC agreed: hmac-sha2-256
+DEBUG      transport:1819 Compression agreed: none
+DEBUG      transport:1819 Got server p (2048 bits)
+DEBUG      transport:1819 kex engine KexGexSHA256 specified hash_algo <built-in function openssl_sha256>
+DEBUG      transport:1819 Switch to new keys ...
+DEBUG      transport:1819 Adding ssh-rsa host key for proteomics2.ucsd.edu: b'5a83e79de463e495cdd79ab30c40c11d'
+DEBUG      transport:1819 Trying discovered key b'efb7b4a8fd36d4ed8e10e10149759b84' in /Users/ben/.ssh/id_rsa_github
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (publickey) failed.
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (password) successful!
+DEBUG      channel:1212 [chan 0] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 0] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 0 opened.
+DEBUG      channel:1212 [chan 0] Sesch channel 0 request ok
+DEBUG      channel:1212 [chan 0] EOF received (0)
+DEBUG      channel:1212 [chan 0] EOF sent (0)
+DEBUG      channel:1212 [chan 1] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 1] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 1 opened.
+DEBUG      channel:1212 [chan 1] Sesch channel 1 request ok
+DEBUG      channel:1212 [chan 1] EOF received (1)
+DEBUG      channel:1212 [chan 1] EOF sent (1)
+DEBUG      channel:1212 [chan 2] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 2] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 2 opened.
+DEBUG      channel:1212 [chan 2] Sesch channel 2 request ok
+INFO       sftp:158 [chan 2] Opened sftp connection (server version 3)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_c9c88f95-f40a-493c-9eb2-c76b88505254/input.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_c9c88f95-f40a-493c-9eb2-c76b88505254/binding.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_c9c88f95-f40a-493c-9eb2-c76b88505254/flow.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_c9c88f95-f40a-493c-9eb2-c76b88505254/result.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_c9c88f95-f40a-493c-9eb2-c76b88505254/tool.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 420)
+DEBUG      channel:1212 [chan 3] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 3] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 3 opened.
+DEBUG      channel:1212 [chan 3] Sesch channel 3 request ok
+DEBUG      channel:1212 [chan 3] EOF received (3)
+DEBUG      channel:1212 [chan 3] EOF sent (3)
+DEBUG      channel:1212 [chan 4] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 4] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 4 opened.
+DEBUG      channel:1212 [chan 4] Sesch channel 4 request ok
+DEBUG      channel:1212 [chan 4] EOF received (4)
+DEBUG      channel:1212 [chan 4] EOF sent (4)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_7925a559-b95b-4550-af0c-0325a8016c44.tar')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/._tools_peptide_statistics_hpp_3a135c14-d4bc-4fd7-a593-92c9c08e764c.tar' to '/tmp/._tools_peptide_statistics_hpp_7925a559-b95b-4550-af0c-0325a8016c44.tar'
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_7925a559-b95b-4550-af0c-0325a8016c44.tar', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_7925a559-b95b-4550-af0c-0325a8016c44.tar', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_7925a559-b95b-4550-af0c-0325a8016c44.tar')
+DEBUG      sftp:158 [chan 2] chmod(b'/tmp/._tools_peptide_statistics_hpp_7925a559-b95b-4550-af0c-0325a8016c44.tar', 420)
+DEBUG      channel:1212 [chan 5] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 5] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 5 opened.
+DEBUG      channel:1212 [chan 5] Sesch channel 5 request ok
+DEBUG      channel:1212 [chan 5] EOF received (5)
+DEBUG      channel:1212 [chan 5] EOF sent (5)
+DEBUG      channel:1212 [chan 6] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 6] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 6 opened.
+DEBUG      channel:1212 [chan 6] Sesch channel 6 request ok
+DEBUG      channel:1212 [chan 6] EOF received (6)
+DEBUG      channel:1212 [chan 6] EOF sent (6)
+DEBUG      channel:1212 [chan 7] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 7] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 7 opened.
+DEBUG      channel:1212 [chan 7] Sesch channel 7 request ok
+DEBUG      channel:1212 [chan 7] EOF received (7)
+DEBUG      channel:1212 [chan 7] EOF sent (7)
+DEBUG      channel:1212 [chan 8] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 8] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 8 opened.
+DEBUG      channel:1212 [chan 8] Sesch channel 8 request ok
+DEBUG      channel:1212 [chan 8] EOF received (8)
+DEBUG      channel:1212 [chan 8] EOF sent (8)
+DEBUG      channel:1212 [chan 9] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 9] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 9 opened.
+DEBUG      channel:1212 [chan 9] Sesch channel 9 request ok
+DEBUG      channel:1212 [chan 9] EOF received (9)
+DEBUG      channel:1212 [chan 9] EOF sent (9)
+DEBUG      channel:1212 [chan 10] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 10] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 10 opened.
+DEBUG      channel:1212 [chan 10] Sesch channel 10 request ok
+DEBUG      channel:1212 [chan 10] EOF received (10)
+DEBUG      channel:1212 [chan 10] EOF sent (10)
+DEBUG      channel:1212 [chan 2] EOF sent (2)
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      workflow_validator:101 ======================Workflow XML Error List==============================
+DEBUG      transport:1819 starting thread (client mode): 0xcf30b90
+DEBUG      transport:1819 Local version/idstring: SSH-2.0-paramiko_2.7.1
+DEBUG      transport:1819 Remote version/idstring: SSH-2.0-OpenSSH_5.3
+INFO       transport:1819 Connected (version 2.0, client OpenSSH_5.3)
+DEBUG      transport:1819 kex algos:['diffie-hellman-group-exchange-sha256', 'diffie-hellman-group-exchange-sha1', 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1'] server key:['ssh-rsa', 'ssh-dss'] client encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] server encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] client mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] server mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] client compress:['none', 'zlib@openssh.com'] server compress:['none', 'zlib@openssh.com'] client lang:[''] server lang:[''] kex follows?False
+DEBUG      transport:1819 Kex agreed: diffie-hellman-group-exchange-sha256
+DEBUG      transport:1819 HostKey agreed: ssh-rsa
+DEBUG      transport:1819 Cipher agreed: aes128-ctr
+DEBUG      transport:1819 MAC agreed: hmac-sha2-256
+DEBUG      transport:1819 Compression agreed: none
+DEBUG      transport:1819 Got server p (2048 bits)
+DEBUG      transport:1819 kex engine KexGexSHA256 specified hash_algo <built-in function openssl_sha256>
+DEBUG      transport:1819 Switch to new keys ...
+DEBUG      transport:1819 Adding ssh-rsa host key for proteomics2.ucsd.edu: b'5a83e79de463e495cdd79ab30c40c11d'
+DEBUG      transport:1819 Trying discovered key b'efb7b4a8fd36d4ed8e10e10149759b84' in /Users/ben/.ssh/id_rsa_github
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (publickey) failed.
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (password) successful!
+DEBUG      channel:1212 [chan 0] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 0] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 0 opened.
+DEBUG      channel:1212 [chan 0] Sesch channel 0 request ok
+DEBUG      channel:1212 [chan 0] EOF received (0)
+DEBUG      channel:1212 [chan 0] EOF sent (0)
+DEBUG      channel:1212 [chan 1] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 1] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 1 opened.
+DEBUG      channel:1212 [chan 1] Sesch channel 1 request ok
+DEBUG      channel:1212 [chan 1] EOF received (1)
+DEBUG      channel:1212 [chan 1] EOF sent (1)
+DEBUG      channel:1212 [chan 2] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 2] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 2 opened.
+DEBUG      channel:1212 [chan 2] Sesch channel 2 request ok
+INFO       sftp:158 [chan 2] Opened sftp connection (server version 3)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_75a39671-f1a1-41b2-b736-9945704bd493/input.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_75a39671-f1a1-41b2-b736-9945704bd493/binding.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_75a39671-f1a1-41b2-b736-9945704bd493/flow.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_75a39671-f1a1-41b2-b736-9945704bd493/result.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_75a39671-f1a1-41b2-b736-9945704bd493/tool.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 420)
+DEBUG      channel:1212 [chan 3] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 3] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 3 opened.
+DEBUG      channel:1212 [chan 3] Sesch channel 3 request ok
+DEBUG      channel:1212 [chan 3] EOF received (3)
+DEBUG      channel:1212 [chan 3] EOF sent (3)
+DEBUG      channel:1212 [chan 4] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 4] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 4 opened.
+DEBUG      channel:1212 [chan 4] Sesch channel 4 request ok
+DEBUG      channel:1212 [chan 4] EOF received (4)
+DEBUG      channel:1212 [chan 4] EOF sent (4)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_b634c133-afbf-461e-b201-0e8a74f94cd1.tar')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/._tools_peptide_statistics_hpp_50d4560a-8de0-4d08-88d4-364bf3ba5320.tar' to '/tmp/._tools_peptide_statistics_hpp_b634c133-afbf-461e-b201-0e8a74f94cd1.tar'
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_b634c133-afbf-461e-b201-0e8a74f94cd1.tar', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_b634c133-afbf-461e-b201-0e8a74f94cd1.tar', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_b634c133-afbf-461e-b201-0e8a74f94cd1.tar')
+DEBUG      sftp:158 [chan 2] chmod(b'/tmp/._tools_peptide_statistics_hpp_b634c133-afbf-461e-b201-0e8a74f94cd1.tar', 420)
+DEBUG      channel:1212 [chan 5] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 5] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 5 opened.
+DEBUG      channel:1212 [chan 5] Sesch channel 5 request ok
+DEBUG      channel:1212 [chan 5] EOF received (5)
+DEBUG      channel:1212 [chan 5] EOF sent (5)
+DEBUG      channel:1212 [chan 6] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 6] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 6 opened.
+DEBUG      channel:1212 [chan 6] Sesch channel 6 request ok
+DEBUG      channel:1212 [chan 6] EOF received (6)
+DEBUG      channel:1212 [chan 6] EOF sent (6)
+DEBUG      channel:1212 [chan 7] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 7] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 7 opened.
+DEBUG      channel:1212 [chan 7] Sesch channel 7 request ok
+DEBUG      channel:1212 [chan 7] EOF received (7)
+DEBUG      channel:1212 [chan 7] EOF sent (7)
+DEBUG      channel:1212 [chan 8] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 8] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 8 opened.
+DEBUG      channel:1212 [chan 8] Sesch channel 8 request ok
+DEBUG      channel:1212 [chan 8] EOF received (8)
+DEBUG      channel:1212 [chan 8] EOF sent (8)
+DEBUG      channel:1212 [chan 9] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 9] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 9 opened.
+DEBUG      channel:1212 [chan 9] Sesch channel 9 request ok
+DEBUG      channel:1212 [chan 9] EOF received (9)
+DEBUG      channel:1212 [chan 9] EOF sent (9)
+DEBUG      channel:1212 [chan 10] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 10] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 10 opened.
+DEBUG      channel:1212 [chan 10] Sesch channel 10 request ok
+DEBUG      channel:1212 [chan 10] EOF received (10)
+DEBUG      channel:1212 [chan 10] EOF sent (10)
+DEBUG      channel:1212 [chan 2] EOF sent (2)
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      workflow_validator:101 ======================Workflow XML Error List==============================
+DEBUG      transport:1819 starting thread (client mode): 0xb3aea90
+DEBUG      transport:1819 Local version/idstring: SSH-2.0-paramiko_2.7.1
+DEBUG      transport:1819 Remote version/idstring: SSH-2.0-OpenSSH_5.3
+INFO       transport:1819 Connected (version 2.0, client OpenSSH_5.3)
+DEBUG      transport:1819 kex algos:['diffie-hellman-group-exchange-sha256', 'diffie-hellman-group-exchange-sha1', 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1'] server key:['ssh-rsa', 'ssh-dss'] client encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] server encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] client mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] server mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] client compress:['none', 'zlib@openssh.com'] server compress:['none', 'zlib@openssh.com'] client lang:[''] server lang:[''] kex follows?False
+DEBUG      transport:1819 Kex agreed: diffie-hellman-group-exchange-sha256
+DEBUG      transport:1819 HostKey agreed: ssh-rsa
+DEBUG      transport:1819 Cipher agreed: aes128-ctr
+DEBUG      transport:1819 MAC agreed: hmac-sha2-256
+DEBUG      transport:1819 Compression agreed: none
+DEBUG      transport:1819 Got server p (2048 bits)
+DEBUG      transport:1819 kex engine KexGexSHA256 specified hash_algo <built-in function openssl_sha256>
+DEBUG      transport:1819 Switch to new keys ...
+DEBUG      transport:1819 Adding ssh-rsa host key for proteomics2.ucsd.edu: b'5a83e79de463e495cdd79ab30c40c11d'
+DEBUG      transport:1819 Trying discovered key b'efb7b4a8fd36d4ed8e10e10149759b84' in /Users/ben/.ssh/id_rsa_github
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (publickey) failed.
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (password) successful!
+DEBUG      channel:1212 [chan 0] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 0] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 0 opened.
+DEBUG      channel:1212 [chan 0] Sesch channel 0 request ok
+DEBUG      channel:1212 [chan 0] EOF received (0)
+DEBUG      channel:1212 [chan 0] EOF sent (0)
+DEBUG      channel:1212 [chan 1] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 1] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 1 opened.
+DEBUG      channel:1212 [chan 1] Sesch channel 1 request ok
+DEBUG      channel:1212 [chan 1] EOF received (1)
+DEBUG      channel:1212 [chan 1] EOF sent (1)
+DEBUG      channel:1212 [chan 2] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 2] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 2 opened.
+DEBUG      channel:1212 [chan 2] Sesch channel 2 request ok
+INFO       sftp:158 [chan 2] Opened sftp connection (server version 3)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_f75810ab-e5d6-4fdd-ade5-f4a1bc77192c/input.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_f75810ab-e5d6-4fdd-ade5-f4a1bc77192c/binding.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_f75810ab-e5d6-4fdd-ade5-f4a1bc77192c/flow.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_f75810ab-e5d6-4fdd-ade5-f4a1bc77192c/result.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_f75810ab-e5d6-4fdd-ade5-f4a1bc77192c/tool.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 420)
+DEBUG      channel:1212 [chan 3] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 3] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 3 opened.
+DEBUG      channel:1212 [chan 3] Sesch channel 3 request ok
+DEBUG      channel:1212 [chan 3] EOF received (3)
+DEBUG      channel:1212 [chan 3] EOF sent (3)
+DEBUG      channel:1212 [chan 4] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 4] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 4 opened.
+DEBUG      channel:1212 [chan 4] Sesch channel 4 request ok
+DEBUG      channel:1212 [chan 4] EOF received (4)
+DEBUG      channel:1212 [chan 4] EOF sent (4)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_c8f8a27f-21a0-476e-b59f-a425bec0eae1.tar')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/._tools_peptide_statistics_hpp_d8be1cd6-aab3-4837-a375-d23cb2b1bd19.tar' to '/tmp/._tools_peptide_statistics_hpp_c8f8a27f-21a0-476e-b59f-a425bec0eae1.tar'
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_c8f8a27f-21a0-476e-b59f-a425bec0eae1.tar', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_c8f8a27f-21a0-476e-b59f-a425bec0eae1.tar', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_c8f8a27f-21a0-476e-b59f-a425bec0eae1.tar')
+DEBUG      sftp:158 [chan 2] chmod(b'/tmp/._tools_peptide_statistics_hpp_c8f8a27f-21a0-476e-b59f-a425bec0eae1.tar', 420)
+DEBUG      channel:1212 [chan 5] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 5] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 5 opened.
+DEBUG      channel:1212 [chan 5] Sesch channel 5 request ok
+DEBUG      channel:1212 [chan 5] EOF received (5)
+DEBUG      channel:1212 [chan 5] EOF sent (5)
+DEBUG      channel:1212 [chan 6] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 6] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 6 opened.
+DEBUG      channel:1212 [chan 6] Sesch channel 6 request ok
+DEBUG      channel:1212 [chan 6] EOF received (6)
+DEBUG      channel:1212 [chan 6] EOF sent (6)
+DEBUG      channel:1212 [chan 7] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 7] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 7 opened.
+DEBUG      channel:1212 [chan 7] Sesch channel 7 request ok
+DEBUG      channel:1212 [chan 7] EOF received (7)
+DEBUG      channel:1212 [chan 7] EOF sent (7)
+DEBUG      channel:1212 [chan 8] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 8] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 8 opened.
+DEBUG      channel:1212 [chan 8] Sesch channel 8 request ok
+DEBUG      channel:1212 [chan 8] EOF received (8)
+DEBUG      channel:1212 [chan 8] EOF sent (8)
+DEBUG      channel:1212 [chan 9] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 9] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 9 opened.
+DEBUG      channel:1212 [chan 9] Sesch channel 9 request ok
+DEBUG      channel:1212 [chan 9] EOF received (9)
+DEBUG      channel:1212 [chan 9] EOF sent (9)
+DEBUG      channel:1212 [chan 10] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 10] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 10 opened.
+DEBUG      channel:1212 [chan 10] Sesch channel 10 request ok
+DEBUG      channel:1212 [chan 10] EOF received (10)
+DEBUG      channel:1212 [chan 10] EOF sent (10)
+DEBUG      channel:1212 [chan 2] EOF sent (2)
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      workflow_validator:101 ======================Workflow XML Error List==============================
+DEBUG      transport:1819 starting thread (client mode): 0x10f04dd0
+DEBUG      transport:1819 Local version/idstring: SSH-2.0-paramiko_2.7.1
+DEBUG      transport:1819 Remote version/idstring: SSH-2.0-OpenSSH_5.3
+INFO       transport:1819 Connected (version 2.0, client OpenSSH_5.3)
+DEBUG      transport:1819 kex algos:['diffie-hellman-group-exchange-sha256', 'diffie-hellman-group-exchange-sha1', 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1'] server key:['ssh-rsa', 'ssh-dss'] client encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] server encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] client mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] server mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] client compress:['none', 'zlib@openssh.com'] server compress:['none', 'zlib@openssh.com'] client lang:[''] server lang:[''] kex follows?False
+DEBUG      transport:1819 Kex agreed: diffie-hellman-group-exchange-sha256
+DEBUG      transport:1819 HostKey agreed: ssh-rsa
+DEBUG      transport:1819 Cipher agreed: aes128-ctr
+DEBUG      transport:1819 MAC agreed: hmac-sha2-256
+DEBUG      transport:1819 Compression agreed: none
+DEBUG      transport:1819 Got server p (2048 bits)
+DEBUG      transport:1819 kex engine KexGexSHA256 specified hash_algo <built-in function openssl_sha256>
+DEBUG      transport:1819 Switch to new keys ...
+DEBUG      transport:1819 Adding ssh-rsa host key for proteomics2.ucsd.edu: b'5a83e79de463e495cdd79ab30c40c11d'
+DEBUG      transport:1819 Trying discovered key b'efb7b4a8fd36d4ed8e10e10149759b84' in /Users/ben/.ssh/id_rsa_github
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (publickey) failed.
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (password) successful!
+DEBUG      channel:1212 [chan 0] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 0] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 0 opened.
+DEBUG      channel:1212 [chan 0] Sesch channel 0 request ok
+DEBUG      channel:1212 [chan 0] EOF received (0)
+DEBUG      channel:1212 [chan 0] EOF sent (0)
+DEBUG      channel:1212 [chan 1] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 1] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 1 opened.
+DEBUG      channel:1212 [chan 1] Sesch channel 1 request ok
+DEBUG      channel:1212 [chan 1] EOF received (1)
+DEBUG      channel:1212 [chan 1] EOF sent (1)
+DEBUG      channel:1212 [chan 2] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 2] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 2 opened.
+DEBUG      channel:1212 [chan 2] Sesch channel 2 request ok
+INFO       sftp:158 [chan 2] Opened sftp connection (server version 3)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_4b3dfa34-e7b9-44aa-8fb6-4f47a9f637be/input.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_4b3dfa34-e7b9-44aa-8fb6-4f47a9f637be/binding.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_4b3dfa34-e7b9-44aa-8fb6-4f47a9f637be/flow.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_4b3dfa34-e7b9-44aa-8fb6-4f47a9f637be/result.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_4b3dfa34-e7b9-44aa-8fb6-4f47a9f637be/tool.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 420)
+DEBUG      channel:1212 [chan 3] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 3] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 3 opened.
+DEBUG      channel:1212 [chan 3] Sesch channel 3 request ok
+DEBUG      channel:1212 [chan 3] EOF received (3)
+DEBUG      channel:1212 [chan 3] EOF sent (3)
+DEBUG      channel:1212 [chan 4] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 4] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 4 opened.
+DEBUG      channel:1212 [chan 4] Sesch channel 4 request ok
+DEBUG      channel:1212 [chan 4] EOF received (4)
+DEBUG      channel:1212 [chan 4] EOF sent (4)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_4fdd44f8-5ad6-4139-8b5a-71034c58885a.tar')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/._tools_peptide_statistics_hpp_7b4371bb-0047-46e9-88e2-26a5c02b22a5.tar' to '/tmp/._tools_peptide_statistics_hpp_4fdd44f8-5ad6-4139-8b5a-71034c58885a.tar'
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_4fdd44f8-5ad6-4139-8b5a-71034c58885a.tar', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_4fdd44f8-5ad6-4139-8b5a-71034c58885a.tar', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_4fdd44f8-5ad6-4139-8b5a-71034c58885a.tar')
+DEBUG      sftp:158 [chan 2] chmod(b'/tmp/._tools_peptide_statistics_hpp_4fdd44f8-5ad6-4139-8b5a-71034c58885a.tar', 420)
+DEBUG      channel:1212 [chan 5] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 5] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 5 opened.
+DEBUG      channel:1212 [chan 5] Sesch channel 5 request ok
+DEBUG      channel:1212 [chan 5] EOF received (5)
+DEBUG      channel:1212 [chan 5] EOF sent (5)
+DEBUG      channel:1212 [chan 6] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 6] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 6 opened.
+DEBUG      channel:1212 [chan 6] Sesch channel 6 request ok
+DEBUG      channel:1212 [chan 6] EOF received (6)
+DEBUG      channel:1212 [chan 6] EOF sent (6)
+DEBUG      channel:1212 [chan 7] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 7] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 7 opened.
+DEBUG      channel:1212 [chan 7] Sesch channel 7 request ok
+DEBUG      channel:1212 [chan 7] EOF received (7)
+DEBUG      channel:1212 [chan 7] EOF sent (7)
+DEBUG      channel:1212 [chan 8] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 8] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 8 opened.
+DEBUG      channel:1212 [chan 8] Sesch channel 8 request ok
+DEBUG      channel:1212 [chan 8] EOF received (8)
+DEBUG      channel:1212 [chan 8] EOF sent (8)
+DEBUG      channel:1212 [chan 9] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 9] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 9 opened.
+DEBUG      channel:1212 [chan 9] Sesch channel 9 request ok
+DEBUG      channel:1212 [chan 9] EOF received (9)
+DEBUG      channel:1212 [chan 9] EOF sent (9)
+DEBUG      channel:1212 [chan 10] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 10] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 10 opened.
+DEBUG      channel:1212 [chan 10] Sesch channel 10 request ok
+DEBUG      channel:1212 [chan 10] EOF received (10)
+DEBUG      channel:1212 [chan 10] EOF sent (10)
+DEBUG      channel:1212 [chan 2] EOF sent (2)
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      workflow_validator:101 ======================Workflow XML Error List==============================
+DEBUG      transport:1819 starting thread (client mode): 0x3d0bf90
+DEBUG      transport:1819 Local version/idstring: SSH-2.0-paramiko_2.7.1
+DEBUG      transport:1819 Remote version/idstring: SSH-2.0-OpenSSH_5.3
+INFO       transport:1819 Connected (version 2.0, client OpenSSH_5.3)
+DEBUG      transport:1819 kex algos:['diffie-hellman-group-exchange-sha256', 'diffie-hellman-group-exchange-sha1', 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1'] server key:['ssh-rsa', 'ssh-dss'] client encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] server encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] client mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] server mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] client compress:['none', 'zlib@openssh.com'] server compress:['none', 'zlib@openssh.com'] client lang:[''] server lang:[''] kex follows?False
+DEBUG      transport:1819 Kex agreed: diffie-hellman-group-exchange-sha256
+DEBUG      transport:1819 HostKey agreed: ssh-rsa
+DEBUG      transport:1819 Cipher agreed: aes128-ctr
+DEBUG      transport:1819 MAC agreed: hmac-sha2-256
+DEBUG      transport:1819 Compression agreed: none
+DEBUG      transport:1819 Got server p (2048 bits)
+DEBUG      transport:1819 kex engine KexGexSHA256 specified hash_algo <built-in function openssl_sha256>
+DEBUG      transport:1819 Switch to new keys ...
+DEBUG      transport:1819 Adding ssh-rsa host key for proteomics2.ucsd.edu: b'5a83e79de463e495cdd79ab30c40c11d'
+DEBUG      transport:1819 Trying discovered key b'efb7b4a8fd36d4ed8e10e10149759b84' in /Users/ben/.ssh/id_rsa_github
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (publickey) failed.
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (password) successful!
+DEBUG      channel:1212 [chan 0] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 0] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 0 opened.
+DEBUG      channel:1212 [chan 0] Sesch channel 0 request ok
+DEBUG      channel:1212 [chan 0] EOF received (0)
+DEBUG      channel:1212 [chan 0] EOF sent (0)
+DEBUG      channel:1212 [chan 1] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 1] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 1 opened.
+DEBUG      channel:1212 [chan 1] Sesch channel 1 request ok
+DEBUG      channel:1212 [chan 1] EOF received (1)
+DEBUG      channel:1212 [chan 1] EOF sent (1)
+DEBUG      channel:1212 [chan 2] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 2] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 2 opened.
+DEBUG      channel:1212 [chan 2] Sesch channel 2 request ok
+INFO       sftp:158 [chan 2] Opened sftp connection (server version 3)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_6dae7ead-132a-40ef-9a50-58b06ca3e66f/input.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_6dae7ead-132a-40ef-9a50-58b06ca3e66f/binding.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_6dae7ead-132a-40ef-9a50-58b06ca3e66f/flow.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_6dae7ead-132a-40ef-9a50-58b06ca3e66f/result.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_6dae7ead-132a-40ef-9a50-58b06ca3e66f/tool.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 420)
+DEBUG      channel:1212 [chan 3] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 3] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 3 opened.
+DEBUG      channel:1212 [chan 3] Sesch channel 3 request ok
+DEBUG      channel:1212 [chan 3] EOF received (3)
+DEBUG      channel:1212 [chan 3] EOF sent (3)
+DEBUG      channel:1212 [chan 4] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 4] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 4 opened.
+DEBUG      channel:1212 [chan 4] Sesch channel 4 request ok
+DEBUG      channel:1212 [chan 4] EOF received (4)
+DEBUG      channel:1212 [chan 4] EOF sent (4)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_61d88e52-9ffe-4f2b-952d-47edb96a37ea.tar')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/._tools_peptide_statistics_hpp_ab76b996-871a-46e4-b5ff-20936b74d670.tar' to '/tmp/._tools_peptide_statistics_hpp_61d88e52-9ffe-4f2b-952d-47edb96a37ea.tar'
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_61d88e52-9ffe-4f2b-952d-47edb96a37ea.tar', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_61d88e52-9ffe-4f2b-952d-47edb96a37ea.tar', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_61d88e52-9ffe-4f2b-952d-47edb96a37ea.tar')
+DEBUG      sftp:158 [chan 2] chmod(b'/tmp/._tools_peptide_statistics_hpp_61d88e52-9ffe-4f2b-952d-47edb96a37ea.tar', 420)
+DEBUG      channel:1212 [chan 5] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 5] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 5 opened.
+DEBUG      channel:1212 [chan 5] Sesch channel 5 request ok
+DEBUG      channel:1212 [chan 5] EOF received (5)
+DEBUG      channel:1212 [chan 5] EOF sent (5)
+DEBUG      channel:1212 [chan 6] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 6] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 6 opened.
+DEBUG      channel:1212 [chan 6] Sesch channel 6 request ok
+DEBUG      channel:1212 [chan 6] EOF received (6)
+DEBUG      channel:1212 [chan 6] EOF sent (6)
+DEBUG      channel:1212 [chan 7] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 7] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 7 opened.
+DEBUG      channel:1212 [chan 7] Sesch channel 7 request ok
+DEBUG      channel:1212 [chan 7] EOF received (7)
+DEBUG      channel:1212 [chan 7] EOF sent (7)
+DEBUG      channel:1212 [chan 8] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 8] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 8 opened.
+DEBUG      channel:1212 [chan 8] Sesch channel 8 request ok
+DEBUG      channel:1212 [chan 8] EOF received (8)
+DEBUG      channel:1212 [chan 8] EOF sent (8)
+DEBUG      channel:1212 [chan 9] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 9] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 9 opened.
+DEBUG      channel:1212 [chan 9] Sesch channel 9 request ok
+DEBUG      channel:1212 [chan 9] EOF received (9)
+DEBUG      channel:1212 [chan 9] EOF sent (9)
+DEBUG      channel:1212 [chan 10] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 10] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 10 opened.
+DEBUG      channel:1212 [chan 10] Sesch channel 10 request ok
+DEBUG      channel:1212 [chan 10] EOF received (10)
+DEBUG      channel:1212 [chan 10] EOF sent (10)
+DEBUG      channel:1212 [chan 2] EOF sent (2)
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      workflow_validator:101 ======================Workflow XML Error List==============================
+DEBUG      transport:1819 starting thread (client mode): 0x6c9fb10
+DEBUG      transport:1819 Local version/idstring: SSH-2.0-paramiko_2.7.1
+DEBUG      transport:1819 Remote version/idstring: SSH-2.0-OpenSSH_5.3
+INFO       transport:1819 Connected (version 2.0, client OpenSSH_5.3)
+DEBUG      transport:1819 kex algos:['diffie-hellman-group-exchange-sha256', 'diffie-hellman-group-exchange-sha1', 'diffie-hellman-group14-sha1', 'diffie-hellman-group1-sha1'] server key:['ssh-rsa', 'ssh-dss'] client encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] server encrypt:['aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'arcfour256', 'arcfour128', 'aes128-cbc', '3des-cbc', 'blowfish-cbc', 'cast128-cbc', 'aes192-cbc', 'aes256-cbc', 'arcfour', 'rijndael-cbc@lysator.liu.se'] client mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] server mac:['hmac-md5', 'hmac-sha1', 'umac-64@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-ripemd160', 'hmac-ripemd160@openssh.com', 'hmac-sha1-96', 'hmac-md5-96'] client compress:['none', 'zlib@openssh.com'] server compress:['none', 'zlib@openssh.com'] client lang:[''] server lang:[''] kex follows?False
+DEBUG      transport:1819 Kex agreed: diffie-hellman-group-exchange-sha256
+DEBUG      transport:1819 HostKey agreed: ssh-rsa
+DEBUG      transport:1819 Cipher agreed: aes128-ctr
+DEBUG      transport:1819 MAC agreed: hmac-sha2-256
+DEBUG      transport:1819 Compression agreed: none
+DEBUG      transport:1819 Got server p (2048 bits)
+DEBUG      transport:1819 kex engine KexGexSHA256 specified hash_algo <built-in function openssl_sha256>
+DEBUG      transport:1819 Switch to new keys ...
+DEBUG      transport:1819 Adding ssh-rsa host key for proteomics2.ucsd.edu: b'5a83e79de463e495cdd79ab30c40c11d'
+DEBUG      transport:1819 Trying discovered key b'efb7b4a8fd36d4ed8e10e10149759b84' in /Users/ben/.ssh/id_rsa_github
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (publickey) failed.
+DEBUG      transport:1819 userauth is OK
+INFO       transport:1819 Authentication (password) successful!
+DEBUG      channel:1212 [chan 0] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 0] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 0 opened.
+DEBUG      channel:1212 [chan 0] Sesch channel 0 request ok
+DEBUG      channel:1212 [chan 0] EOF received (0)
+DEBUG      channel:1212 [chan 0] EOF sent (0)
+DEBUG      channel:1212 [chan 1] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 1] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 1 opened.
+DEBUG      channel:1212 [chan 1] Sesch channel 1 request ok
+DEBUG      channel:1212 [chan 1] EOF received (1)
+DEBUG      channel:1212 [chan 1] EOF sent (1)
+DEBUG      channel:1212 [chan 2] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 2] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 2 opened.
+DEBUG      channel:1212 [chan 2] Sesch channel 2 request ok
+INFO       sftp:158 [chan 2] Opened sftp connection (server version 3)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_297136d2-6067-4de8-a577-fd14878b64e5/input.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/input.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_297136d2-6067-4de8-a577-fd14878b64e5/binding.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/binding.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_297136d2-6067-4de8-a577-fd14878b64e5/flow.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/flow.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_297136d2-6067-4de8-a577-fd14878b64e5/result.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/result.xml', 420)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/peptide_statistics_hpp_0.3+parallelize-cosine_297136d2-6067-4de8-a577-fd14878b64e5/tool.xml' to '/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml'
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml')
+DEBUG      sftp:158 [chan 2] chmod(b'/ccms/workflows/peptide_statistics_hpp/versions/0.3+parallelize-cosine/tool.xml', 420)
+DEBUG      channel:1212 [chan 3] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 3] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 3 opened.
+DEBUG      channel:1212 [chan 3] Sesch channel 3 request ok
+DEBUG      channel:1212 [chan 3] EOF received (3)
+DEBUG      channel:1212 [chan 3] EOF sent (3)
+DEBUG      channel:1212 [chan 4] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 4] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 4 opened.
+DEBUG      channel:1212 [chan 4] Sesch channel 4 request ok
+DEBUG      channel:1212 [chan 4] EOF received (4)
+DEBUG      channel:1212 [chan 4] EOF sent (4)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_9f041a3f-3e35-42b7-9851-c131b6f1dcad.tar')
+DEBUG      sftp:158 [chan 2] normalize(b'.')
+DEBUG      transfer:267 Uploading '/tmp/._tools_peptide_statistics_hpp_fd19408e-5acd-421f-afe3-ef6b45d88bfa.tar' to '/tmp/._tools_peptide_statistics_hpp_9f041a3f-3e35-42b7-9851-c131b6f1dcad.tar'
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_9f041a3f-3e35-42b7-9851-c131b6f1dcad.tar', 'wb')
+DEBUG      sftp:158 [chan 2] open(b'/tmp/._tools_peptide_statistics_hpp_9f041a3f-3e35-42b7-9851-c131b6f1dcad.tar', 'wb') -> 00000000
+DEBUG      sftp:158 [chan 2] close(00000000)
+DEBUG      sftp:158 [chan 2] stat(b'/tmp/._tools_peptide_statistics_hpp_9f041a3f-3e35-42b7-9851-c131b6f1dcad.tar')
+DEBUG      sftp:158 [chan 2] chmod(b'/tmp/._tools_peptide_statistics_hpp_9f041a3f-3e35-42b7-9851-c131b6f1dcad.tar', 420)
+DEBUG      channel:1212 [chan 5] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 5] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 5 opened.
+DEBUG      channel:1212 [chan 5] Sesch channel 5 request ok
+DEBUG      channel:1212 [chan 5] EOF received (5)
+DEBUG      channel:1212 [chan 5] EOF sent (5)
+DEBUG      channel:1212 [chan 6] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 6] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 6 opened.
+DEBUG      channel:1212 [chan 6] Sesch channel 6 request ok
+DEBUG      channel:1212 [chan 6] EOF received (6)
+DEBUG      channel:1212 [chan 6] EOF sent (6)
+DEBUG      channel:1212 [chan 7] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 7] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 7 opened.
+DEBUG      channel:1212 [chan 7] Sesch channel 7 request ok
+DEBUG      channel:1212 [chan 7] EOF received (7)
+DEBUG      channel:1212 [chan 7] EOF sent (7)
+DEBUG      channel:1212 [chan 8] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 8] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 8 opened.
+DEBUG      channel:1212 [chan 8] Sesch channel 8 request ok
+DEBUG      channel:1212 [chan 8] EOF received (8)
+DEBUG      channel:1212 [chan 8] EOF sent (8)
+DEBUG      channel:1212 [chan 9] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 9] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 9 opened.
+DEBUG      channel:1212 [chan 9] Sesch channel 9 request ok
+DEBUG      channel:1212 [chan 9] EOF received (9)
+DEBUG      channel:1212 [chan 9] EOF sent (9)
+DEBUG      channel:1212 [chan 10] Max packet in: 32768 bytes
+DEBUG      channel:1212 [chan 10] Max packet out: 32768 bytes
+DEBUG      transport:1819 Secsh channel 10 opened.
+DEBUG      channel:1212 [chan 10] Sesch channel 10 request ok
+DEBUG      channel:1212 [chan 10] EOF received (10)
+DEBUG      channel:1212 [chan 10] EOF sent (10)
+DEBUG      channel:1212 [chan 2] EOF sent (2)
+DEBUG      transport:1819 Dropping user packet because connection is dead.
+DEBUG      transport:1819 Dropping user packet because connection is dead.

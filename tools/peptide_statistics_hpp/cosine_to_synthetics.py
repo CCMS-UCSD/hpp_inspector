@@ -21,6 +21,17 @@ from datetime import datetime
 
 CUTOFF = {"6": 2.12167006027, "7": 2.32154253572, "8": 2.53031824698, "9": 2.7717776307, "10": 3.0419577266, "11": 3.20404758311, "12": 3.4028353721, "13": 3.14854063781, "14": 3.47053358426, "15": 3.35416414915, "16": 3.34418455532, "17": 3.24904542906, "18": 3.18426919317, "19": 3.01362943461, "20": 3.12316407632, "21": 3.08160158158, "22": 2.59466460406, "23": 2.96230440256, "24": 3.11610830789, "25": 2.93990420679, "26": 2.6947192629, "27": 2.43042157531, "28": 2.5287628139300002, "29": 2.26034401643, "30": 2.60979068254, "31": 2.70004841417, "32": 2.69919517925, "33": 2.18110553715, "34": 1.90115111418, "35": 1.5402648112000001, "36": 1.74919562203, "37": 1.88066887473, "38": 1.58471929702, "39": 1.73377627878, "40": 3.10312899149}
 
+def make_usi(filename, scan, sequence, charge):
+    filename_path = Path(filename.replace('f.',''))
+    dataset = filename_path.parts[0]
+    file = filename_path.stem
+    if 'MSV' in dataset or 'PXD' in dataset:
+        usi = 'mzspec:{}:{}:scan:{}:{}/{}'.format(dataset, file, scan, sequence, charge)
+    else:
+        usi = None
+
+    return usi
+
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
     parser.add_argument('-y','--synthetics', type = Path, help='Matched Synthetics')
@@ -156,7 +167,7 @@ def main():
     print("{}: About to write out PSMs".format(datetime.now().strftime("%H:%M:%S")))
 
     with open(args.output_psms.joinpath(args.jobs.name), 'w') as fw_psm:
-        header = list(all_psms[0].keys()) + ['synthetic_filename','synthetic_scan','cosine']
+        header = list(all_psms[0].keys()) + ['usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine']
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
         for psm in all_psms:
@@ -167,8 +178,10 @@ def main():
             else:
                 synthetic_filename = best_synthetic[0]
                 synthetic_scan = best_synthetic[1]
+            psm['usi'] = make_usi(psm['filename'], psm['scan'], psm['sequence'], psm['charge'])
             psm['synthetic_filename'] = synthetic_filename
             psm['synthetic_scan'] = synthetic_scan
+            psm['synthetic_usi'] = make_usi(synthetic_filename, synthetic_scan, psm['sequence'], psm['charge'])
             psm['cosine'] = cosine
             w_psm.writerow(psm)
     print("{}: Finished writing out PSMs".format(datetime.now().strftime("%H:%M:%S")))

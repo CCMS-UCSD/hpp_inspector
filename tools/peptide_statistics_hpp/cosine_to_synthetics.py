@@ -28,6 +28,7 @@ def arguments():
     parser.add_argument('-i','--input_psms', type = Path, help='Input PSMs')
     parser.add_argument('-o','--output_psms', type = Path, help='Output PSMs')
     parser.add_argument('-t','--peak_tolerance', type = str, help='Peak Tolerance for Matching')
+    parser.add_argument('-c','--cosine_threshold', type = str, help='Cosine Threshold')
 
     if len(sys.argv) < 4:
         parser.print_help()
@@ -69,6 +70,7 @@ def main():
     print("{}: Loaded {} synthetics".format(datetime.now().strftime("%H:%M:%S"),len(synthetic_scans)))
 
     tol = float(args.peak_tolerance)
+    threshold = float(args.cosine_threshold)
 
     cosine_to_synthetic = defaultdict(lambda: (0,('N/A','N/A')))
 
@@ -89,18 +91,22 @@ def main():
                 with open(filepath, 'rb') as f:
                     mzml_object = mzml.PreIndexedMzML(f)
                     for scan in psms_to_consider[filename].keys():
-                        spectrum = mzml_object.get_by_id("controllerType=0 controllerNumber=1 scan={}".format(scan))
-                        peaks = zip(spectrum['m/z array'],spectrum['intensity array'])
                         sequence = psms_to_consider[filename][scan]['sequence']
                         charge = psms_to_consider[filename][scan]['charge']
                         matching_synthetics = synthetic_scans.get((sequence,charge),[])
-                        if len(matching_synthetics) > 0:
-                            peaks = prepare_spectrum(peaks,tol,precursor_func(spectrum))
-                        # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
-                        for synthetic_filescan,synthetic_peaks in matching_synthetics:
-                            cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
-                            if cosine > cosine_to_synthetic[(filename,scan)][0]:
-                                cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
+                        if threshold == 0:
+                            for synthetic_filescan, synthetic_peaks in matching_synthetics:
+                                cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
+                        else:
+                            spectrum = mzml_object.get_by_id("controllerType=0 controllerNumber=1 scan={}".format(scan))
+                            peaks = zip(spectrum['m/z array'],spectrum['intensity array'])
+                            if len(matching_synthetics) > 0:
+                                peaks = prepare_spectrum(peaks,tol,precursor_func(spectrum))
+                            # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
+                            for synthetic_filescan,synthetic_peaks in matching_synthetics:
+                                cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
+                                if cosine > cosine_to_synthetic[(filename,scan)][0]:
+                                    cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
                 # print("{}: About to read {}".format(datetime.now().strftime("%H:%M:%S"),filename))
                 # with mzml.read(filepath) as reader:
                 #     precursor_func = lambda spectrum: float(spectrum['precursorList']['precursor'][0]['isolationWindow']['isolation window target m/z'])
@@ -130,18 +136,22 @@ def main():
                     mzxml_object = mzxml.MzXML(f,use_index = True)
                     # for spectrum in reader:
                     for scan in psms_to_consider[filename].keys():
-                        spectrum = mzxml_object.get_by_id(scan)
-                        peaks = zip(spectrum['m/z array'],spectrum['intensity array'])
                         sequence = psms_to_consider[filename][scan]['sequence']
                         charge = psms_to_consider[filename][scan]['charge']
                         matching_synthetics = synthetic_scans.get((sequence,charge),[])
-                        if len(matching_synthetics) > 0:
-                            peaks = prepare_spectrum(peaks,tol,precursor_func(spectrum))
-                        # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
-                        for synthetic_filescan, synthetic_peaks in matching_synthetics:
-                            cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
-                            if cosine > cosine_to_synthetic[(filename,scan)][0]:
-                                cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
+                        if threshold == 0:
+                            for synthetic_filescan, synthetic_peaks in matching_synthetics:
+                                cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
+                        else:
+                            spectrum = mzxml_object.get_by_id(scan)
+                            peaks = zip(spectrum['m/z array'],spectrum['intensity array'])
+                            if len(matching_synthetics) > 0:
+                                peaks = prepare_spectrum(peaks,tol,precursor_func(spectrum))
+                            # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
+                            for synthetic_filescan, synthetic_peaks in matching_synthetics:
+                                cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
+                                if cosine > cosine_to_synthetic[(filename,scan)][0]:
+                                    cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
 
     print("{}: About to write out PSMs".format(datetime.now().strftime("%H:%M:%S")))
 

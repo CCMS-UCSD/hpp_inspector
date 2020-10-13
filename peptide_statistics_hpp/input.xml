@@ -31,6 +31,11 @@
 			<validator type="float" minimum="0"/>
 		</parameter>
 
+		<parameter name="cosine_threshold" label="Cosine Threshold (Set to 0 to skip cosine calculations)">
+			<default value="0.5"/>
+			<validator type="float" minimum="0"/>
+		</parameter>
+
 		<parameter name="parallel_cosine.parallel_cosine" label="Parallelism (For Cosine Calculations)">
 			<default value="10"/>
 			<validator type="integer"/>
@@ -98,6 +103,14 @@
 		            <cell colspan="3">
 		                <input type="text" parameter="peak_tolerance"/>
 		            </cell>
+								<cell>
+										<label>
+												<content parameter="cosine_threshold"/>
+										</label>
+								</cell>
+								<cell colspan="3">
+										<input type="text" parameter="cosine_threshold"/>
+								</cell>
 		        </row>
 	</block>
 	<block label="Advanced Parallelization Options">

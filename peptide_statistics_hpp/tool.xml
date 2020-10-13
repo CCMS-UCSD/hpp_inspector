@@ -225,7 +225,8 @@
           <arg option="-jobs"             valueRef="jobs"/>
           <arg option="-input_psms"       valueRef="novel_psms_p"/>
           <arg option="-output_psms"      valueRef="novel_psms_w_cosine"/>
-          <arg option="-peak_tolerance"   value="0.05"/>
+          <arg option="-peak_tolerance"   valueRef="@peak_tolerance"/>
+          <arg option="-cosine_threshold"    valueRef="@cosine_threshold"/>
       </execution>
   </tool>
 
@@ -244,7 +245,7 @@
           <arg option="-output_psms"          valueRef="merged_novel_psms_w_cosine"/>
           <arg option="-output_peptides"      valueRef="novel_peptides_w_cosine"/>
           <arg option="-output_proteins"      valueRef="novel_proteins_w_cosine"/>
-          <arg option="-cosine_cutoff"        value="0.5"/>
+          <arg option="-cosine_cutoff"        valueRef="@cosine_threshold"/>
       </execution>
   </tool>
 

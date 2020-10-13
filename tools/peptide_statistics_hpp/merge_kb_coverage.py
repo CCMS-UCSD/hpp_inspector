@@ -201,7 +201,7 @@ def main():
                 for protein in proteins:
                     if len(protein) == 3:
                         accession = protein[0].split('|')[1]
-                        aa_start = int(protein[1]) + 1
+                        aa_start = int(protein[1])
                         aa_end = int(protein[2])
                         if accession in nextprot_pe and (aa_end - aa_start >= 9):
                             added_proteins[accession][peptide].append((aa_start,aa_end))

@@ -181,6 +181,9 @@ def main():
                             precursor_representative['score'] = float(l['score'])
                         if (best_score and best_cosine):
                             precursor_representative['cosine_score_match'] = 'Yes'
+                        else:
+                            precursor_representative['cosine_score_match'] = 'No'
+
                     else:
                         l['database_filename'] = l['filename']
                         l['database_scan'] = l['scan']
@@ -196,7 +199,7 @@ def main():
                         representative_per_precursor[(sequence, charge)] = l
 
     with open(args.output_peptides,'w') as w:
-        header = ['protein','pe','ms_evidence','database_filename','database_scan','database_usi','sequence','charge','score','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match']
+        header = ['protein','pe','ms_evidence','database_filename','database_scan','database_usi','sequence','charge','score','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match']
         r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
         r.writeheader()
         for (sequence, charge), best_psm in representative_per_precursor.items():

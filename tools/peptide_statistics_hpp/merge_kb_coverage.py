@@ -159,12 +159,13 @@ def main():
         r = csv.DictReader(f, delimiter='\t')
         for l in r:
             ms_existence[l['protein'].replace('NX_','')] = l['ms_evidence']
+            nextprot_pe[l['protein'].replace('NX_','')] = int(l['pe'])
 
     # note that this has a limit of 100000000 so with multi-species in ProteinExplorer this will likely need to change
     url = "http://massive.ucsd.edu/ProteoSAFe/ProteinLibraryServlet?task=protein_explorer_proteins&file=&pageSize=100000000&offset=0&query=%2523%257B%2522unroll%2522%253A%2522no%2522%252C%2522include_synthetics%2522%253A%2522yes%2522%252C%2522datasets%2522%253A%2522%2522%252C%2522accession_input%2522%253A%2522%2522%257D&query_type=representative&_=1560375217897"
     proteins = requests.get(url).json()['row_data']
     for protein in proteins:
-        nextprot_pe[protein['accession']] = int(protein['proteinexistance'])
+        # nextprot_pe[protein['accession']] = int(protein['proteinexistance'])
         protein_length[protein['accession']] = int(protein['length'])
     kb_proteins = defaultdict(lambda: defaultdict(list))
     added_proteins = defaultdict(lambda: defaultdict(list))

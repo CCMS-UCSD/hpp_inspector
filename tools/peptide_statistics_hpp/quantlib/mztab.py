@@ -95,7 +95,8 @@ def read(mztab_file, ids, mangled_name = None):
                 rt = float(rt)
             if score:
                 score = -math.log10(float(score))
-            search_engine = row.get('search_engine','[,,MZTAB,]')[1:-1].split(',')[2]
+            search_engine = 'MZTAB'
+            # search_engine = row.get('search_engine','[,,MZTAB,]')[1:-1].split(',')[2]
             ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), search_engine, row['modifications'], rt, protein, parent_mass, score, mangled_name)]
     return ids
 

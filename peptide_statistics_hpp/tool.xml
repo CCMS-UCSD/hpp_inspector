@@ -11,6 +11,7 @@
 
     <pathVar name="uniprot_gff_pkl" path="uniprot_annotations.pkl" />
     <pathVar name="next_prot_pe" path="NextProt_PEs.txt" />
+    <pathVar name="predownloaded_pep" path="kb_pep_11_6_2020.tsv" />
     <pathVar name="synthetics_pkl" path="proteometools.pkl"/>
     <pathVar name="extract_peptides.script" path="extract_peptides.py" />
     <pathVar name="download_latest_kb.script" path="download_latest_kb.py" />
@@ -65,6 +66,7 @@
         <execution env="binary" argConvention="adhoc">
             <arg pathRef="download_latest_kb.script"/>
             <arg option="-params"  valueRef="params"/>
+            <arg option="-backup_kb_pep"  pathRef="predownloaded_pep"/>
             <arg option="-kb_pep"  valueRef="kb_pep"/>
         </execution>
     </tool>

@@ -157,13 +157,13 @@
                     <parameter name="peptide"       value="[sequence]"/>
                     <parameter name="modformat"     value="inspect"/>
                 </column>
-                <column type="jscolumnspectrumviewer" label="Best PSM By Cosine to Synthetic" colspan="6">
+                <column type="jscolumnspectrumviewer" label="Best PSM By Cosine to Synthetic" colspan="4">
                     <parameter name="file"          file="[cosine_filename]"/>
                     <parameter name="scan"          value="[cosine_scan]"/>
                     <parameter name="peptide"       value="[sequence]"/>
                     <parameter name="modformat"     value="inspect"/>
                 </column>
-                <column type="jscolumnspectrumviewer" label="Best Matched Synthetic" colspan="6">
+                <column type="jscolumnspectrumviewer" label="Best Matched Synthetic" colspan="2">
                     <parameter name="file"          file="[synthetic_filename]"/>
                     <parameter name="scan"          value="[synthetic_scan]"/>
                     <parameter name="peptide"       value="[sequence]"/>

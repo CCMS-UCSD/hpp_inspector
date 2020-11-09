@@ -12,6 +12,7 @@ import json
 import time
 from pyteomics import mzml, mzxml
 import ming_spectrum_library as msl
+import ming_psm_library as mpl
 from pathlib import Path
 import pickle
 from datetime import datetime
@@ -46,11 +47,25 @@ def arguments():
         sys.exit(1)
     return parser.parse_args()
 
-def prepare_spectrum(peaks, tol, precursor):
-    peaks = msl.filter_precursor_peaks(peaks,2,precursor)
-    peaks = msl.window_filter_peaks(peaks, 50, 10)
+def prepare_spectrum(peaks, tol, precursor, charge, sequence, process = False):
+
+    charge_set = range(1, int(charge))
+
+    theoretical_peaks = mpl.create_theoretical_peak_map(sequence, ["b",  "b-iso", "y", "y-iso", "b-H2O", "b-NH3", "y-H2O", "y-NH3", "a"], charge_set=charge_set)
+    annotated_peaks, unannotated_peaks = mpl.extract_annotated_peaks(theoretical_peaks, peaks, tol)
+
+    if process:
+        peaks = msl.filter_precursor_peaks(peaks,2,precursor)
+        peaks = msl.window_filter_peaks(peaks, 50, 10)
+
     peaks = sa.normalize_spectrum(sa.convert_to_peaks(peaks))
-    return peaks
+
+    annotated_peaks = sa.normalize_spectrum(sa.convert_to_peaks(annotated_peaks))
+
+    # print("Peaks ", peaks)
+    # print("Annotated Peaks ", annotated_peaks)
+
+    return peaks, annotated_peaks
 
 def main():
     args = arguments()
@@ -84,6 +99,7 @@ def main():
     threshold = float(args.cosine_threshold)
 
     cosine_to_synthetic = defaultdict(lambda: (0,('N/A','N/A')))
+    cosine_to_synthetic_annotated = defaultdict(lambda: (0,('N/A','N/A')))
 
     for filename in psms_to_consider:
         print("{}: Looking at {}".format(datetime.now().strftime("%H:%M:%S"),filename))
@@ -108,16 +124,22 @@ def main():
                         if threshold == 0:
                             for synthetic_filescan, synthetic_peaks in matching_synthetics:
                                 cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
+                                cosine_to_synthetic_annotated[(filename,scan)] = (0,synthetic_filescan)
+
                         else:
                             spectrum = mzml_object.get_by_id("controllerType=0 controllerNumber=1 scan={}".format(scan))
-                            peaks = zip(spectrum['m/z array'],spectrum['intensity array'])
+                            peaks = list(zip(spectrum['m/z array'],spectrum['intensity array']))
                             if len(matching_synthetics) > 0:
-                                peaks = prepare_spectrum(peaks,tol,precursor_func(spectrum))
+                                peaks, annotated_peaks = prepare_spectrum(peaks,tol,precursor_func(spectrum),charge,sequence, True)
                             # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
                             for synthetic_filescan,synthetic_peaks in matching_synthetics:
+                                synthetic_peaks, annotated_synthetic_peaks = prepare_spectrum(synthetic_peaks,tol,precursor_func(spectrum),charge,sequence)
                                 cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
+                                cosine_annotated,_ = sa.score_alignment(annotated_peaks,annotated_synthetic_peaks,0,0,tol)
                                 if cosine > cosine_to_synthetic[(filename,scan)][0]:
                                     cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
+                                if cosine_annotated > cosine_to_synthetic_annotated[(filename,scan)][0]:
+                                    cosine_to_synthetic_annotated[(filename,scan)] = (cosine_annotated,synthetic_filescan)
                 # print("{}: About to read {}".format(datetime.now().strftime("%H:%M:%S"),filename))
                 # with mzml.read(filepath) as reader:
                 #     precursor_func = lambda spectrum: float(spectrum['precursorList']['precursor'][0]['isolationWindow']['isolation window target m/z'])
@@ -153,16 +175,21 @@ def main():
                         if threshold == 0:
                             for synthetic_filescan, synthetic_peaks in matching_synthetics:
                                 cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
+                                cosine_to_synthetic_annotated[(filename,scan)] = (0,synthetic_filescan)
                         else:
                             spectrum = mzxml_object.get_by_id(scan)
-                            peaks = zip(spectrum['m/z array'],spectrum['intensity array'])
+                            peaks = list(zip(spectrum['m/z array'],spectrum['intensity array']))
                             if len(matching_synthetics) > 0:
-                                peaks = prepare_spectrum(peaks,tol,precursor_func(spectrum))
+                                peaks, annotated_peaks = prepare_spectrum(peaks,tol,precursor_func(spectrum),charge,sequence, True)
                             # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
-                            for synthetic_filescan, synthetic_peaks in matching_synthetics:
+                            for synthetic_filescan,synthetic_peaks in matching_synthetics:
+                                synthetic_peaks, annotated_synthetic_peaks = prepare_spectrum(synthetic_peaks,tol,precursor_func(spectrum),charge,sequence)
                                 cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
+                                cosine_annotated,_ = sa.score_alignment(annotated_peaks,annotated_synthetic_peaks,0,0,tol)
                                 if cosine > cosine_to_synthetic[(filename,scan)][0]:
                                     cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
+                                if cosine_annotated > cosine_to_synthetic_annotated[(filename,scan)][0]:
+                                    cosine_to_synthetic_annotated[(filename,scan)] = (cosine_annotated,synthetic_filescan)
 
     print("{}: About to write out PSMs".format(datetime.now().strftime("%H:%M:%S")))
 
@@ -171,7 +198,7 @@ def main():
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
         for psm in all_psms:
-            cosine, best_synthetic = cosine_to_synthetic[(psm['filename'],psm['scan'])]
+            cosine, best_synthetic = cosine_to_synthetic_annotated[(psm['filename'],psm['scan'])]
             if best_synthetic[0] != 'N/A':
                 synthetic_filename = 'f.' + best_synthetic[0].replace('/data/massive/','')
                 synthetic_scan = best_synthetic[1]

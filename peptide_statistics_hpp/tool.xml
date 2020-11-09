@@ -179,24 +179,17 @@
   </tool>
 
   <tool name="merge_kb_coverage">
-      <require name="kb_pep"    type="file"/>
-      <require name="peptide_coverage_merged"    type="file"/>
       <require name="mztab"             type="folder"/>
       <require name="spec_on_server"    type="folder"/>
-      <produce name="novel_proteins" type="file" naming="explicit"  extension="tsv"/>
       <produce name="novel_psms" type="file" naming="explicit"  extension="tsv"/>
 
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="merge_kb_coverage.script"/>
-          <arg option="-kb_pep"        valueRef="kb_pep"/>
-          <arg option="-protein_coverage"  valueRef="peptide_coverage_merged"/>
           <arg option="-spec_on_server"   valueRef="spec_on_server"/>
           <arg option="-synthetics"       pathRef="synthetics_pkl"/>
           <arg option="-mztab"            valueRef="mztab"/>
-          <arg option="-novel_proteins"  valueRef="novel_proteins"/>
           <arg option="-novel_psms"       valueRef="novel_psms"/>
           <arg option="-peak_tolerance"  valueRef="@peak_tolerance"/>
-          <arg option="-nextprot_pe" pathRef="next_prot_pe"/>
       </execution>
   </tool>
 
@@ -233,6 +226,7 @@
   </tool>
 
   <tool name="peptide_protein_cosine">
+    <require name="kb_pep"    type="file"/>
       <require name="novel_psms_w_cosine"             type="folder"/>
       <require name="novel_proteins"                  type="file"/>
       <require name="peptide_coverage_merged"    type="file"/>
@@ -242,12 +236,15 @@
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="peptide_protein_cosine.script"/>
           <arg option="-input_proteins"       valueRef="novel_proteins"/>
+          <arg option="-kb_pep"        valueRef="kb_pep"/>
           <arg option="-input_psms"           valueRef="novel_psms_w_cosine"/>
           <arg option="-protein_coverage"  valueRef="peptide_coverage_merged"/>
           <arg option="-output_psms"          valueRef="merged_novel_psms_w_cosine"/>
           <arg option="-output_peptides"      valueRef="novel_peptides_w_cosine"/>
           <arg option="-output_proteins"      valueRef="novel_proteins_w_cosine"/>
           <arg option="-cosine_cutoff"        valueRef="@cosine_threshold"/>
+          <arg option="-explained_intensity_cutoff"        valueRef="@explained_intensity_threshold"/>
+          <arg option="-nextprot_pe" pathRef="next_prot_pe"/>
       </execution>
   </tool>
 

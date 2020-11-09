@@ -87,11 +87,8 @@
     </bind>
 
     <bind action="merge_kb_coverage" tool="merge_kb_coverage">
-        <inputAsRequirement port="kb_pep"                         requirement="kb_pep"/>
-        <inputAsRequirement port="peptide_coverage_merged"        requirement="peptide_coverage_merged"/>
         <inputAsRequirement port="spec_on_server"                 requirement="spec_on_server"/>
         <inputAsRequirement port="mztab"                          requirement="mztab"/>
-        <productionToOutput port="novel_proteins"                 production="novel_proteins"/>
         <productionToOutput port="novel_psms"                     production="novel_psms"/>
     </bind>
 
@@ -110,8 +107,8 @@
     </bind>
 
     <bind action="peptide_protein_cosine" tool="peptide_protein_cosine">
+        <inputAsRequirement port="kb_pep"                         requirement="kb_pep"/>
         <inputAsRequirement port="novel_psms_w_cosine"       requirement="novel_psms_w_cosine"/>
-        <inputAsRequirement port="novel_proteins"       requirement="novel_proteins"/>
         <inputAsRequirement port="peptide_coverage_merged"        requirement="peptide_coverage_merged"/>
         <productionToOutput port="novel_proteins_w_cosine"     production="novel_proteins_w_cosine"/>
         <productionToOutput port="novel_peptides_w_cosine"     production="novel_peptides_w_cosine"/>

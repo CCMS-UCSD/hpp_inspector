@@ -97,11 +97,8 @@
     </action>
 
 		<action name="merge_kb_coverage">
-			<input   port="kb_pep"       			    object="kb_pep"/>
-			<input   port="peptide_coverage_merged"   object="peptide_coverage_merged"/>
 			<input   port="spec_on_server"      collection="spec_on_server"/>
 			<input   port="mztab"      					collection="mztab"/>
-			<output   port="novel_proteins"         object="novel_proteins"/>
 			<output  port="novel_psms"          object="novel_psms"/>
 		</action>
 
@@ -129,8 +126,8 @@
 		<object name="merged_novel_psms_w_cosine"/>
 
 		<action name="peptide_protein_cosine">
+			<input   port="kb_pep"       			    object="kb_pep"/>
 			<input   port="novel_psms_w_cosine"          collection="novel_psms_w_cosine"/>
-			<input 	 port="novel_proteins" 							 object="novel_proteins"/>
 			<input   port="peptide_coverage_merged"   object="peptide_coverage_merged"/>
 			<output  port="novel_proteins_w_cosine"      object="novel_proteins_w_cosine"/>
 			<output  port="novel_peptides_w_cosine"      object="novel_peptides_w_cosine"/>

@@ -28,13 +28,13 @@ def strip_sequence(sequence):
     whitelist =  ["57.021464","15.994915","14.015650","17.026549","43.005814","42.010565","0.984016"]
     whitelist += ["57.021",   "15.995",   "14.016",   "17.027",   "43.006",   "42.011",   "0.984"   ,"229.163"]
 
-    for mod in whitelist:
-        sequence = sequence.replace(mod,"")
-    if len([s for s in sequence if s.isdigit()]) == 0:
-        p = re.compile('\W|\d')
-        sequence = p.sub("", sequence)
-    else:
-        sequence = None
+    # for mod in whitelist:
+    #     sequence = sequence.replace(mod,"")
+    # if len([s for s in sequence if s.isdigit()]) == 0:
+    p = re.compile('\W|\d')
+    sequence = p.sub("", sequence)
+    # else:
+    #     sequence = None
     return sequence
 
 def load_peptide_list(input_peptide_filename):

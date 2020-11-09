@@ -36,6 +36,11 @@
 			<validator type="float" minimum="0"/>
 		</parameter>
 
+		<parameter name="explained_intensity_threshold" label="Explained Intensity Threshold">
+			<default value="0.5"/>
+			<validator type="float" minimum="0"/>
+		</parameter>
+
 		<parameter name="parallel_cosine.parallel_cosine" label="Parallelism (For Cosine Calculations)">
 			<default value="10"/>
 			<validator type="integer"/>
@@ -110,6 +115,14 @@
 								</cell>
 								<cell colspan="3">
 										<input type="text" parameter="cosine_threshold"/>
+								</cell>
+								<cell>
+										<label>
+												<content parameter="explained_intensity_threshold"/>
+										</label>
+								</cell>
+								<cell colspan="3">
+										<input type="text" parameter="explained_intensity_threshold"/>
 								</cell>
 		        </row>
 	</block>

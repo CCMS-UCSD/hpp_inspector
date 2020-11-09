@@ -65,12 +65,13 @@
         <row>
             <column type="text" field="protein" label="Protein" width="4"/>
             <column type="integer" field="pe" label="PE" width="5"/>
-            <!-- <column type="text" field="ms_evidence" label="Proteomics Evidence" width="2"/> -->
+            <column type="text" field="hpp_match" label="HPP Compliant" width="2"/>
             <column type="text" field="usi" label="USI" width="20"/>
             <!-- <column type="text" field="filename" label="Filename" width="20"/>
             <column type="integer" field="scan" label="Scan" width="4"/>
             <column type="text" field="sequence" label="Sequence" width="20"/> -->
             <column type="float" field="score" label="-log10(EValue)" width="6"/>
+            <column type="float" field="explained_intensity" label="Explained Intensity" width="6"/>
             <column type="text" field="pass" label="Above Library Threshold" width="6"/>
             <column type="text" field="parent_mass" label="Parent Mass" width="20"/>
             <column type="integer" field="charge" label="Charge" width="4"/>
@@ -119,7 +120,7 @@
             <row>
                 <column type="text" field="protein" label="Protein" width="4"/>
                 <column type="integer" field="pe" label="PE" width="5"/>
-                <column type="text" field="ms_evidence" label="Proteomics Evidence" width="2"/>
+                <column type="text" field="hpp_match" label="HPP Compliant" width="2"/>
                 <column type="text" field="sequence" label="Sequence" width="20"/>
                 <column type="text" field="parent_mass" label="Parent Mass" width="20"/>
                 <column type="integer" field="charge" label="Charge" width="4"/>

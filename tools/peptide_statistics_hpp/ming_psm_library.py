@@ -521,25 +521,25 @@ def calculate_theoretical_peptide_mass(peptide_sequence, charge):
 
     return total_peptide_mass
 
-
-
 #Returns both annotated and unannotated peaks
 def extract_annotated_peaks(ion_peak_mapping, peak_list, tolerance):
     extracted_peaks = []
     unannotated_peaks = []
+    ion_vector = []
     for peak in peak_list:
         mass = peak[0]
         isAnnotated = False
         for ion_peak in ion_peak_mapping:
             if abs(mass - ion_peak_mapping[ion_peak]) < tolerance:
                 #extracted_peaks.append(peak)
-                isAnnotated = True
+                isAnnotated = ion_peak
                 break
         if isAnnotated:
             extracted_peaks.append(peak)
+            ion_vector.append((isAnnotated, peak[1]))
         else:
             unannotated_peaks.append(peak)
-    return extracted_peaks, unannotated_peaks
+    return extracted_peaks, unannotated_peaks, ion_vector
 
 def calculated_explained_intensity(peaks, max_charge, peptide, tolerance):
     if len(peaks) == 0:

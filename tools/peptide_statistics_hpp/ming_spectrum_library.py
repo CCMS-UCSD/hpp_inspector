@@ -1104,6 +1104,49 @@ def filter_precursor_peaks(peaks, tolerance_to_precursor, mz):
             new_peaks.append(peak)
     return new_peaks
 
+def filter_isobaric_label_peaks(peaks, tolerance):
+
+    tag_masses_hcd = {
+        'TMT 2-plex': [126.127726, 127.131081],
+        'TMT 6-plex': [
+            126.127726, 127.124761, 128.134436, 129.131471, 130.141145,
+            131.138180
+        ],
+        'TMT 10-plex': [
+            126.127726, 127.124761, 127.131081, 128.128116, 128.134436,
+            129.131471, 129.137790, 130.134825, 130.141145, 131.138180
+        ],
+        'TMT 11-plex': [
+            126.127726, 127.124761, 127.131081, 128.128116, 128.134436,
+            129.131471, 129.137790, 130.134825, 130.141145, 131.138180,
+            131.144499
+        ],
+        'TMT 16-plex': [
+            126.127726, 127.124761, 127.131081, 128.128116, 128.134436,
+            129.131471, 129.137790, 130.134825, 130.141145, 131.138180,
+            131.144499, 132.141535, 132.147855, 133.144890, 133.151210,
+            134.148245
+        ],
+        'iTRAQ 4-plex': [114.1112, 115.1083, 116.1116, 117.1150],
+        'iTRAQ 8-plex': [
+            113.10783, 114.111228, 115.108263, 116.111618, 117.114973,
+            118.112008, 119.115363, 121.122072
+        ]
+    }
+
+    new_peaks = []
+    mod_peaks = [144.105918, 229.162932,304.207146]
+    for peak in peaks:
+        is_tag_peak = peak[0] > 113.10783-tolerance and peak[0] < 134.148245+tolerance
+        is_mod_peak = False
+        for mod_peak in mod_peaks:
+            if abs(peak[0] - mod_peak) > tolerance:
+                is_mod_peak = True
+        if not (is_mod_peak or is_tag_peak):
+            new_peaks.append(peak)
+
+    return new_peaks
+
 def filter_noise_peaks(peaks, min_snr):
     average_noise_level = ming_numerical_utilities.calculate_noise_level_in_peaks(peaks)
     new_peaks = []

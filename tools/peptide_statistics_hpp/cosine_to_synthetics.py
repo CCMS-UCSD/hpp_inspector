@@ -52,6 +52,9 @@ def arguments():
 
 def prepare_spectrum(peaks, tol, precursor, charge, sequence, process = False):
 
+    #filter TMT
+    msl.filter_isobaric_label_peaks(peaks,tol)
+
     charge_set = range(1, int(charge))
 
     theoretical_peaks = mpl.create_theoretical_peak_map(sequence, ["b",  "b-iso", "y", "y-iso", "b-H2O", "b-NH3", "y-H2O", "y-NH3", "a"], charge_set=charge_set)
@@ -60,18 +63,18 @@ def prepare_spectrum(peaks, tol, precursor, charge, sequence, process = False):
         peaks = msl.filter_precursor_peaks(peaks,2,precursor)
         peaks = msl.window_filter_peaks(peaks, 50, 10)
 
-    annotated_peaks, unannotated_peaks = mpl.extract_annotated_peaks(theoretical_peaks, peaks, tol)
+    annotated_peaks, unannotated_peaks, ion_vector = mpl.extract_annotated_peaks(theoretical_peaks, peaks, tol)
 
     peaks = sa.normalize_spectrum(sa.convert_to_peaks(peaks))
 
     explained_intensity = sum(p[0] for p in annotated_peaks)/sum(p[0] for p in annotated_peaks+unannotated_peaks)
 
     annotated_peaks = sa.normalize_spectrum(sa.convert_to_peaks(annotated_peaks))
-
+    ion_vector = sa.normalize_spectrum(sa.convert_to_peaks(ion_vector))
     # print("Peaks ", peaks)
     # print("Annotated Peaks ", annotated_peaks)
 
-    return peaks, annotated_peaks, explained_intensity
+    return peaks, annotated_peaks, ion_vector, explained_intensity
 
 def main():
     args = arguments()
@@ -87,9 +90,9 @@ def main():
     with open(args.jobs) as f:
         r = csv.DictReader(f, delimiter='\t')
         for l in r:
-            synthetic_keys.add((l['sequence'],l['charge']))
+            synthetic_keys.add((l['sequence'].replace('+229.163',''),l['charge']))
             all_psms.append(l)
-            psms_to_consider[l['filename']][l['scan']] = {'sequence':l['sequence'],'charge':l['charge']}
+            psms_to_consider[l['filename']][l['scan']] = {'sequence':l['sequence'].replace('+229.163',''),'charge':l['charge']}
     print("{}: Finished reading psms".format(datetime.now().strftime("%H:%M:%S")))
 
     print("{}: Loading synthetics".format(datetime.now().strftime("%H:%M:%S")))
@@ -127,10 +130,10 @@ def main():
                     for scan in psms_to_consider[filename].keys():
                         sequence = psms_to_consider[filename][scan]['sequence']
                         charge = psms_to_consider[filename][scan]['charge']
-                        matching_synthetics = synthetic_scans.get((sequence,charge),[])
+                        matching_synthetics = synthetic_scans.get((sequence.replace('+229.163',''),charge),[])
                         spectrum = mzml_object.get_by_id("controllerType=0 controllerNumber=1 scan={}".format(scan))
                         peaks = list(zip(spectrum['m/z array'],spectrum['intensity array']))
-                        peaks, annotated_peaks, explained_intensity = prepare_spectrum(peaks,tol,precursor_func(spectrum),charge,sequence, True)
+                        peaks, annotated_peaks, ion_vector, explained_intensity = prepare_spectrum(peaks,tol,precursor_func(spectrum),charge,sequence, True)
                         explained_intensity_per_spectrum[(filename,scan)] = explained_intensity
                         if threshold == 0:
                             for synthetic_filescan, synthetic_peaks in matching_synthetics:
@@ -140,9 +143,9 @@ def main():
                         else:
                             # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
                             for synthetic_filescan,synthetic_peaks in matching_synthetics:
-                                synthetic_peaks, annotated_synthetic_peaks, _ = prepare_spectrum(synthetic_peaks,tol,precursor_func(spectrum),charge,sequence)
+                                synthetic_peaks, annotated_synthetic_peaks, ion_vector_synthetic, _ = prepare_spectrum(synthetic_peaks,tol,precursor_func(spectrum),charge,sequence.replace('+229.163',''))
                                 cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
-                                cosine_annotated,_ = sa.score_alignment(annotated_peaks,annotated_synthetic_peaks,0,0,tol)
+                                cosine_annotated,_ = sa.score_alignment(ion_vector,ion_vector_synthetic,0,0,tol)
                                 if cosine > cosine_to_synthetic[(filename,scan)][0]:
                                     cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
                                 if cosine_annotated > cosine_to_synthetic_annotated[(filename,scan)][0]:
@@ -178,10 +181,10 @@ def main():
                     for scan in psms_to_consider[filename].keys():
                         sequence = psms_to_consider[filename][scan]['sequence']
                         charge = psms_to_consider[filename][scan]['charge']
-                        matching_synthetics = synthetic_scans.get((sequence,charge),[])
+                        matching_synthetics = synthetic_scans.get((sequence.replace('+229.163',''),charge),[])
                         spectrum = mzxml_object.get_by_id(scan)
                         peaks = list(zip(spectrum['m/z array'],spectrum['intensity array']))
-                        peaks, annotated_peaks, explained_intensity = prepare_spectrum(peaks,tol,precursor_func(spectrum),charge,sequence, True)
+                        peaks, annotated_peaks, ion_vector, explained_intensity = prepare_spectrum(peaks,tol,precursor_func(spectrum),charge,sequence, True)
                         explained_intensity_per_spectrum[(filename,scan)] = explained_intensity
                         if threshold == 0:
                             for synthetic_filescan, synthetic_peaks in matching_synthetics:
@@ -190,7 +193,7 @@ def main():
                         else:
                             # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
                             for synthetic_filescan,synthetic_peaks in matching_synthetics:
-                                synthetic_peaks, annotated_synthetic_peaks, _ = prepare_spectrum(synthetic_peaks,tol,precursor_func(spectrum),charge,sequence)
+                                synthetic_peaks, annotated_synthetic_peaks, ion_vector, _ = prepare_spectrum(synthetic_peaks,tol,precursor_func(spectrum),charge,sequence.replace('+229.163',''))
                                 cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
                                 cosine_annotated,_ = sa.score_alignment(annotated_peaks,annotated_synthetic_peaks,0,0,tol)
                                 if cosine > cosine_to_synthetic[(filename,scan)][0]:
@@ -215,7 +218,7 @@ def main():
             psm['usi'] = make_usi(psm['filename'], psm['scan'], psm['sequence'], psm['charge'])
             psm['synthetic_filename'] = synthetic_filename
             psm['synthetic_scan'] = synthetic_scan
-            psm['synthetic_usi'] = make_usi(synthetic_filename, synthetic_scan, psm['sequence'], psm['charge'])
+            psm['synthetic_usi'] = make_usi(synthetic_filename, synthetic_scan, psm['sequence'].replace('+229.163',''), psm['charge'])
             psm['cosine'] = cosine
             psm['explained_intensity'] = explained_intensity_per_spectrum.get((psm['filename'],psm['scan']),0)
             w_psm.writerow(psm)

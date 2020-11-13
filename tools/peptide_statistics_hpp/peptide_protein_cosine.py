@@ -39,6 +39,9 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
     kb_peptides = set(["{} ({}-{})".format(peptide,sorted(positions, key = lambda x: x[0])[0][0],sorted(positions, key = lambda x: x[0])[0][1]) for peptide, positions in existing_peptides.items()])
     added_peptides = set(["{} ({}-{})".format(peptide,sorted(positions, key = lambda x: x[0])[0][0],sorted(positions, key = lambda x: x[0])[0][1]) for peptide, positions in new_peptides.items()])
 
+    print(kb_peptides)
+    print(added_peptides)
+
     novel_peptides = added_peptides.difference(kb_peptides)
     supporting_peptides = added_peptides.intersection(kb_peptides)
 
@@ -62,10 +65,7 @@ def find_coverage(pos, length):
     for p in pos:
         for (start,end) in p:
             for i in range(start,end+1):
-                if i <= len(coverage):
-                    # print(protein)
-                    # print(i)
-                    # print(len(coverage))
+                if i < len(coverage)-1:
                     coverage[i-1] = True
     return len([c for c in coverage if c])
 
@@ -131,10 +131,6 @@ def main():
     representative_per_precursor = {}
     protein_length = {}
 
-    added_proteins = defaultdict(lambda: defaultdict(list))
-    added_proteins_matching_synthetic = defaultdict(lambda: defaultdict(list))
-    added_proteins_explained_intensity = defaultdict(lambda: defaultdict(list))
-
     # note that this has a limit of 100000000 so with multi-species in ProteinExplorer this will likely need to change
     url = "http://massive.ucsd.edu/ProteoSAFe/ProteinLibraryServlet?task=protein_explorer_proteins&file=&pageSize=100000000&offset=0&query=%2523%257B%2522unroll%2522%253A%2522no%2522%252C%2522include_synthetics%2522%253A%2522yes%2522%252C%2522datasets%2522%253A%2522%2522%252C%2522accession_input%2522%253A%2522%2522%257D&query_type=representative&_=1560375217897"
     proteins = requests.get(url).json()['row_data']
@@ -148,11 +144,15 @@ def main():
     added_proteins_w_synthetic = defaultdict(lambda: defaultdict(list))
     has_synthetic = set()
 
+    added_proteins_matching_synthetic = defaultdict(lambda: defaultdict(list))
+    added_proteins_explained_intensity = defaultdict(lambda: defaultdict(list))
+
+
     with open(args.kb_pep) as f:
         r = csv.DictReader(f, delimiter='\t')
         for l in r:
             if int(l['library']) == 2:
-                kb_proteins[l['protein']][l['demodified'].replace('I','L')].append((int(l['aa_start']),int(l['aa_end'])))
+                kb_proteins[l['protein']][l['demodified'].replace('I','L')].append((int(l['aa_start'])-1,int(l['aa_end'])))
             if int(l['library']) == 3 or int(l['library']) == 4:
                 has_synthetic.add(l['demodified'].replace('I','L'))
 
@@ -165,7 +165,6 @@ def main():
     nextprot_pe = {}
     peptide_to_protein = {}
     peptide_to_protein_added = {}
-
 
     with open(args.nextprot_pe) as f:
         r = csv.DictReader(f, delimiter='\t')
@@ -189,9 +188,10 @@ def main():
                     accession = protein[0].split('|')[1]
                     aa_start = int(protein[1])
                     aa_end = int(protein[2])
-                    all_proteins[accession][peptide].append((aa_start,aa_end))
-                    if accession in nextprot_pe and (aa_end - aa_start >= 9) and gene_unique:
-                        added_proteins[accession][peptide].append((aa_start,aa_end))
+                    if accession in nextprot_pe:
+                        all_proteins[accession][peptide].append((aa_start,aa_end))
+                        if (aa_end - aa_start >= 9) and gene_unique:
+                            added_proteins[accession][peptide].append((aa_start,aa_end))
 
     for protein in all_proteins:
         for peptide in all_proteins[protein].keys():
@@ -203,8 +203,6 @@ def main():
             if peptide.replace('I','L') in has_synthetic:
                 added_proteins_w_synthetic[protein][peptide] = added_proteins[protein][peptide]
 
-    print(peptide_to_protein)
-
     with open(args.output_psms,'w') as w:
         header = ['protein','pe','ms_evidence','filename','scan','sequence','charge','usi','score','pass','type','parent_mass','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','hpp_match']
 
@@ -215,12 +213,19 @@ def main():
                 r = csv.DictReader(f, delimiter='\t')
                 for l in r:
                     il_peptide = ''.join([p.replace('I','L') for p in l['sequence'] if p.isalpha()])
-                    protein = peptide_to_protein[il_peptide]
-                    l.update({
-                        'protein': protein,
-                        'pe': nextprot_pe[protein],
-                        'ms_evidence':ms_existence.get(protein,'no')
-                    })
+                    protein = peptide_to_protein.get(il_peptide)
+                    if protein:
+                        l.update({
+                            'protein': protein,
+                            'pe': nextprot_pe[protein],
+                            'ms_evidence':ms_existence.get(protein,'no')
+                        })
+                    else:
+                        l.update({
+                            'protein': '',
+                            'pe': '',
+                            'ms_evidence':''
+                        })
                     if il_peptide in peptide_to_protein_added:
                         l['hpp_match'] = 'Yes'
                     else:
@@ -272,23 +277,31 @@ def main():
         r.writeheader()
         for (sequence, charge), best_psm in representative_per_precursor.items():
             sequence_il = ''.join([p.replace('I','L') for p in sequence if p.isalpha()])
-            protein = peptide_to_protein[sequence_il]
-            best_psm.update({
-                'protein': protein,
-                'pe': nextprot_pe[protein],
-                'ms_evidence':ms_existence.get(protein,'no'),
-                'aa_total':protein_length.get(protein,0)
-            })
-            if il_peptide in peptide_to_protein_added:
-                l['hpp_match'] = 'Yes'
+            protein = peptide_to_protein.get(sequence_il)
+            if protein:
+                best_psm.update({
+                    'protein': protein,
+                    'pe': nextprot_pe[protein],
+                    'ms_evidence':ms_existence.get(protein,'no'),
+                    'aa_total':protein_length.get(protein,0)
+                })
             else:
-                l['hpp_match'] = 'No'
+                best_psm.update({
+                    'protein': '',
+                    'pe': '',
+                    'ms_evidence':'',
+                    'aa_total':''
+                })
+            if il_peptide in peptide_to_protein_added:
+                best_psm['hpp_match'] = 'Yes'
+            else:
+                best_psm['hpp_match'] = 'No'
             r.writerow(best_psm)
-            if sequence_il in added_proteins[best_psm['protein']]:
+            if sequence_il in added_proteins[protein]:
                 if best_psm['explained_intensity'] > args.explained_intensity_cutoff:
                     if best_psm['cosine'] > args.cosine_cutoff:
-                        added_proteins_matching_synthetic[best_psm['protein']][sequence_il] = added_proteins[best_psm['protein']][sequence_il]
-                    added_proteins_explained_intensity[best_psm['protein']][sequence_il] = added_proteins[best_psm['protein']][sequence_il]
+                        added_proteins_matching_synthetic[protein][sequence_il] = added_proteins[protein][sequence_il]
+                    added_proteins_explained_intensity[protein][sequence_il] = added_proteins[protein][sequence_il]
 
     with open(args.output_proteins, 'w') as fo:
 
@@ -333,9 +346,9 @@ def main():
                     'ms_evidence':ms_existence.get(protein,'no'),
                     'aa_total':protein_length.get(protein,0)
                 }
-                protein_dict.update(find_overlap(kb_proteins[protein],added_proteins_explained_intensity[protein_dict['protein']],int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
-                protein_dict.update(find_overlap(kb_proteins_w_synthetic[protein],added_proteins_matching_synthetic[protein_dict['protein']],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
-                protein_dict.update(find_overlap(kb_proteins_w_synthetic[protein],added_proteins_matching_synthetic[protein_dict['protein']],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine')[0])
+                protein_dict.update(find_overlap(kb_proteins[protein],added_proteins_explained_intensity[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
+                protein_dict.update(find_overlap(kb_proteins_w_synthetic[protein],added_proteins_matching_synthetic[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
+                protein_dict.update(find_overlap(kb_proteins_w_synthetic[protein],added_proteins_matching_synthetic[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine')[0])
                 w.writerow(protein_dict)
 
 if __name__ == '__main__':

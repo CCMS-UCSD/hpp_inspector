@@ -69,7 +69,7 @@ def main():
                     'sequence':psm[0].sequence,
                     'charge':psm[0].charge,
                     'score':psm[0].score,
-                    'pass':'Above' if psm[0].score > CUTOFF[str(len(peptide))] else 'Below',
+                    'pass':'Above' if psm[0].score > CUTOFF.get(str(len(peptide)),0) else 'Below',
                     'parent_mass':psm[0].parent_mass,
                 }
                 w_psm.writerow(psm_row)

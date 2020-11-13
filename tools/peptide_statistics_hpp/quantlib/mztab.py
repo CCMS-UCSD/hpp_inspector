@@ -59,10 +59,10 @@ def find_mod(modification):
         if psi_mod_split[1] == 'MS:1001524':
             return '-{}'.format(psi_mod_split[3])
         else:
-            print(modification)
+            # print(modification)
             raise Exception
     else:
-        print(modification)
+        # print(modification)
         return modification.split(":")[1]
 
 def read(mztab_file, ids, mangled_name = None):
@@ -93,8 +93,10 @@ def read(mztab_file, ids, mangled_name = None):
             score = row.get('opt_global_EValue',0)
             if rt:
                 rt = float(rt)
-            if score:
+            if float(score) > 0:
                 score = -math.log10(float(score))
+            else:
+                score = 100
             search_engine = 'MZTAB'
             # search_engine = row.get('search_engine','[,,MZTAB,]')[1:-1].split(',')[2]
             ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), search_engine, row['modifications'], rt, protein, parent_mass, score, mangled_name)]

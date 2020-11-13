@@ -35,9 +35,15 @@ def sqrt_normalize_spectrum(spectrum):
         output_spectrum.append(Peak(s.mz,s.intensity/normed_value))
     return output_spectrum
 
+def find_match_peaks_efficient(spec1, spec2, shift, tolerance):
+    try:
+        return find_match_peaks_mz(spec1, spec2, shift, tolerance)
+    except:
+        return find_match_peaks_ions(spec1, spec2)
+
 #reimplementation of find_match_peaks, but much more efficient
 # Assumes that shift is equal to spec1 - spec2
-def find_match_peaks_efficient(spec1, spec2, shift, tolerance):
+def find_match_peaks_mz(spec1, spec2, shift, tolerance):
     adj_tolerance =  tolerance + 0.000001
     spec2_mass_list = []
 
@@ -55,8 +61,23 @@ def find_match_peaks_efficient(spec1, spec2, shift, tolerance):
 
         for j in range(left_bound_index,right_bound_index):
             alignment_mapping.append(Alignment(i,j))
+
     return alignment_mapping
 
+# Assumes that shift is equal to spec1 - spec2
+def find_match_peaks_ions(spec1, spec2):
+
+    alignment_mapping = []
+
+    spec1_dict = {ion:i for i,(ion,intensity) in enumerate(spec1)}
+    spec2_dict = {ion:i for i,(ion,intensity) in enumerate(spec2)}
+
+    for ion, i in spec1_dict.items():
+        if ion in spec2_dict:
+            j = spec2_dict[ion]
+            alignment_mapping.append(Alignment(i,j))
+
+    return alignment_mapping
 
 
 # Assumes that shift is equal to spec1 - spec2

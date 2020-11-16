@@ -46,6 +46,14 @@
 			<validator type="integer"/>
 		</parameter>
 
+		<parameter name="peptide_coverage_merged_external" label="Coverage (External)">
+			<fileGenerator type="upload" purpose="peptide_coverage_merged_external" target="peptide_coverage_merged_external"/>
+		</parameter>
+
+		<parameter name="novel_psms_w_cosine_external" label="PSMs (External)">
+			<fileGenerator type="upload" purpose="novel_psms_w_cosine_external" target="novel_psms_w_cosine_external"/>
+		</parameter>
+
 </parameters>
 
 	<!-- Input form layout -->
@@ -138,4 +146,28 @@
       </cell>
     </row>
   </block>
+	<block label="Advanced Combine Jobs">
+		<row>
+						<cell>
+								<label>
+										<content parameter="peptide_coverage_merged_external"/>
+								</label>
+						</cell>
+						<cell colspan="3">
+								<module id="peptide_coverage_merged_external" type="fileSelector">
+										<property name="label">peptide_coverage_merged</property>
+								</module>
+						</cell>
+						<cell>
+								<label>
+										<content parameter="novel_psms_w_cosine_external"/>
+								</label>
+						</cell>
+						<cell colspan="3">
+								<module id="novel_psms_w_cosine_external" type="fileSelector">
+										<property name="label">merged_novel_psms_w_cosine</property>
+								</module>
+						</cell>
+				</row>
+	</block>
 </interface>

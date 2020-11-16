@@ -13,19 +13,21 @@ import time
 from pyteomics import mzml
 from pathlib import Path
 import pickle
+from itertools import chain
 
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
-    parser.add_argument('-k','--kb_pep', type = str, help='Peptides from KB')
-    parser.add_argument('-n','--input_proteins', type = Path, help='Input Proteins')
+    parser.add_argument('-k','--kb_pep', type = Path, help='Peptides from KB')
     parser.add_argument('-x','--input_psms', type = Path, help='Input PSMs')
+    parser.add_argument('-y','--input_psms_external', type = Path, help='Input PSMs (External)')
     parser.add_argument('-e','--output_psms', type = Path, help='Output PSMs')
     parser.add_argument('-p','--output_peptides', type = Path, help='Output Peptides')
     parser.add_argument('-r','--output_proteins', type = Path, help='Output Proteins')
-    parser.add_argument('-c','--protein_coverage', type = str, help='Added Protein Coverage')
+    parser.add_argument('-c','--protein_coverage', type = Path, help='Added Protein Coverage')
+    parser.add_argument('-d','--protein_coverage_external', type = Path, help='Added Protein Coverage (External)')
     parser.add_argument('-t','--cosine_cutoff', type = float, help='Cosine Cutoff')
     parser.add_argument('-l','--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
-    parser.add_argument('-z','--nextprot_pe', type = str, help='NextProt PEs')
+    parser.add_argument('-z','--nextprot_pe', type = Path, help='NextProt PEs')
 
     if len(sys.argv) < 4:
         parser.print_help()
@@ -125,6 +127,29 @@ def hupo_nonoverlapping(segments, just_noncontained = True):
 
     return max_score_at_pep[-1]
 
+def read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,nextprot_pe):
+    with open(protein_coverage_file) as f:
+        r = csv.DictReader(f, delimiter='\t')
+        for l in r:
+            proteins_w_coords = l['proteins_w_coords']
+            peptide = l['il_peptide']
+            gene_unique = l['gene_unique'] == 'True'
+            proteins = [
+                [p.split(' ')[0]] + p.split(' ')[1].replace('(','').replace(')','').split('-')
+                for p in
+                proteins_w_coords.split(';')
+            ]
+            for protein in proteins:
+                if len(protein) == 3:
+                    accession = protein[0].split('|')[1]
+                    aa_start = int(protein[1])
+                    aa_end = int(protein[2])
+                    if accession in nextprot_pe:
+                        all_proteins[accession][peptide].append((aa_start,aa_end))
+                        if (aa_end - aa_start >= 9) and gene_unique:
+                            added_proteins[accession][peptide].append((aa_start,aa_end))
+    return all_proteins,added_proteins
+
 def main():
     args = arguments()
 
@@ -172,26 +197,10 @@ def main():
             ms_existence[l['protein'].replace('NX_','')] = l['ms_evidence']
             nextprot_pe[l['protein'].replace('NX_','')] = int(l['pe'])
 
-    with open(args.protein_coverage) as f:
-        r = csv.DictReader(f, delimiter='\t')
-        for l in r:
-            proteins_w_coords = l['proteins_w_coords']
-            peptide = l['il_peptide']
-            gene_unique = l['gene_unique'] == 'True'
-            proteins = [
-                [p.split(' ')[0]] + p.split(' ')[1].replace('(','').replace(')','').split('-')
-                for p in
-                proteins_w_coords.split(';')
-            ]
-            for protein in proteins:
-                if len(protein) == 3:
-                    accession = protein[0].split('|')[1]
-                    aa_start = int(protein[1])
-                    aa_end = int(protein[2])
-                    if accession in nextprot_pe:
-                        all_proteins[accession][peptide].append((aa_start,aa_end))
-                        if (aa_end - aa_start >= 9) and gene_unique:
-                            added_proteins[accession][peptide].append((aa_start,aa_end))
+    read_protein_coverage(args.protein_coverage,all_proteins,added_proteins,nextprot_pe)
+
+    for protein_coverage_file in args.protein_coverage_external.glob('*'):
+        all_proteins,added_proteins = read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,nextprot_pe)
 
     for protein in all_proteins:
         for peptide in all_proteins[protein].keys():
@@ -208,7 +217,7 @@ def main():
 
         o = csv.DictWriter(w, delimiter='\t',fieldnames = header)
         o.writeheader()
-        for input_psm in args.input_psms.glob('*'):
+        for input_psm in chain(args.input_psms.glob('*'),args.input_psms_external.glob('*')):
             with open(input_psm) as f:
                 r = csv.DictReader(f, delimiter='\t')
                 for l in r:
@@ -292,7 +301,7 @@ def main():
                     'ms_evidence':'',
                     'aa_total':''
                 })
-            if il_peptide in peptide_to_protein_added:
+            if sequence_il in peptide_to_protein_added:
                 best_psm['hpp_match'] = 'Yes'
             else:
                 best_psm['hpp_match'] = 'No'

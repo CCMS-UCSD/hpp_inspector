@@ -14,6 +14,12 @@
         <download port="spec_on_server" type="folder">
                 <query name="resource" value="spec_on_server"/>
         </download>
+        <download port="novel_psms_w_cosine_external" type="folder">
+                <query name="resource" value="novel_psms_w_cosine_external"/>
+        </download>
+        <download port="peptide_coverage_merged_external" type="folder">
+                <query name="resource" value="peptide_coverage_merged_external"/>
+        </download>
         <download port="synthetics" type="file">
                 <query name="resource" value="synthetics"/>
         </download>
@@ -110,6 +116,8 @@
         <inputAsRequirement port="kb_pep"                         requirement="kb_pep"/>
         <inputAsRequirement port="novel_psms_w_cosine"       requirement="novel_psms_w_cosine"/>
         <inputAsRequirement port="peptide_coverage_merged"        requirement="peptide_coverage_merged"/>
+        <inputAsRequirement port="novel_psms_w_cosine_external"       requirement="novel_psms_w_cosine_external"/>
+        <inputAsRequirement port="peptide_coverage_merged_external"        requirement="peptide_coverage_merged_external"/>
         <productionToOutput port="novel_proteins_w_cosine"     production="novel_proteins_w_cosine"/>
         <productionToOutput port="novel_peptides_w_cosine"     production="novel_peptides_w_cosine"/>
         <productionToOutput port="merged_novel_psms_w_cosine"     production="merged_novel_psms_w_cosine"/>

@@ -19,18 +19,21 @@
     <collection name="debug_protein_coverage"/>
 
     <object name="protein_coverage"/>
-		<object name="novel_proteins"/>
 		<object name="novel_psms"/>
 		<object name="novel_peptides"/>
     <object name="unique_peptides_list"/>
 	<object name="library_coverage_summary_statistics"/>
 
+	<collection name="peptide_coverage_merged_external"/>
+	<collection name="novel_psms_w_cosine_external"/>
     <action name="begin">
         <output port="mztab"       			 collection="mztab"/>
 				<output port="spec_on_server"       collection="spec_on_server"/>
         <output port="fastadb" 		  object="fastadb"/>
 				<output port="synthetics" 		  object="synthetics"/>
         <output port="params" object="workflowParameters"/>
+				<output port="peptide_coverage_merged_external"       			 collection="peptide_coverage_merged_external"/>
+				<output port="novel_psms_w_cosine_external"       collection="novel_psms_w_cosine_external"/>
     </action>
 
 		<action name="extract_peptides">
@@ -129,6 +132,8 @@
 			<input   port="kb_pep"       			    object="kb_pep"/>
 			<input   port="novel_psms_w_cosine"          collection="novel_psms_w_cosine"/>
 			<input   port="peptide_coverage_merged"   object="peptide_coverage_merged"/>
+			<input   port="novel_psms_w_cosine_external"       collection="novel_psms_w_cosine_external"/>
+			<input   port="peptide_coverage_merged_external"   collection="peptide_coverage_merged_external"/>
 			<output  port="novel_proteins_w_cosine"      object="novel_proteins_w_cosine"/>
 			<output  port="novel_peptides_w_cosine"      object="novel_peptides_w_cosine"/>
 			<output  port="merged_novel_psms_w_cosine"   object="merged_novel_psms_w_cosine"/>

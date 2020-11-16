@@ -85,24 +85,29 @@ def main():
 
     psms_to_consider = defaultdict(lambda: defaultdict(dict))
     all_psms = []
+    psms_header = []
 
     print("{}: Reading psms".format(datetime.now().strftime("%H:%M:%S")))
     with open(args.jobs) as f:
         r = csv.DictReader(f, delimiter='\t')
+        psms_header = r.fieldnames
         for l in r:
             synthetic_keys.add((l['sequence'].replace('+229.163',''),l['charge']))
             all_psms.append(l)
             psms_to_consider[l['filename']][l['scan']] = {'sequence':l['sequence'].replace('+229.163',''),'charge':l['charge']}
     print("{}: Finished reading psms".format(datetime.now().strftime("%H:%M:%S")))
 
-    print("{}: Loading synthetics".format(datetime.now().strftime("%H:%M:%S")))
-    with open(args.synthetics,'rb') as f:
-        for _ in range(pickle.load(f)):
-            partial_loaded_synthetics = pickle.load(f)
-            for key in synthetic_keys:
-                if key in partial_loaded_synthetics:
-                    synthetic_scans[key].extend(partial_loaded_synthetics[key])
-    print("{}: Loaded {} synthetics".format(datetime.now().strftime("%H:%M:%S"),len(synthetic_scans)))
+    if len(synthetic_keys) > 0:
+        print("{}: Loading synthetics".format(datetime.now().strftime("%H:%M:%S")))
+        with open(args.synthetics,'rb') as f:
+            for _ in range(pickle.load(f)):
+                partial_loaded_synthetics = pickle.load(f)
+                for key in synthetic_keys:
+                    if key in partial_loaded_synthetics:
+                        synthetic_scans[key].extend(partial_loaded_synthetics[key])
+        print("{}: Loaded {} synthetics".format(datetime.now().strftime("%H:%M:%S"),len(synthetic_scans)))
+    else:
+        print("Not loading synthetics, nothing to match")
 
     tol = float(args.peak_tolerance)
     threshold = float(args.cosine_threshold)
@@ -204,7 +209,7 @@ def main():
     print("{}: About to write out PSMs".format(datetime.now().strftime("%H:%M:%S")))
 
     with open(args.output_psms.joinpath(args.jobs.name), 'w') as fw_psm:
-        header = list(all_psms[0].keys()) + ['usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','explained_intensity']
+        header = psms_header + ['usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','explained_intensity']
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
         for psm in all_psms:

@@ -51,6 +51,11 @@ def find_mod(modification):
         'UNIMOD:28':'-17.026549',
         'UNIMOD:34':'+14.015650',
         'UNIMOD:35':'+15.994915',
+        'UNIMOD:214':'+144.102063',
+        'UNIMOD:259':'+8.014199',
+        'UNIMOD:267':'+10.008269',
+        'UNIMOD:730':'+304.205360',
+        'UNIMOD:731':'+304.199040',
         'UNIMOD:737':'+229.162932'
     }
     if 'UNIMOD' in modification:

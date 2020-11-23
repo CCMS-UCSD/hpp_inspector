@@ -21,28 +21,28 @@ else:
 def usage():
     print("<input fasta> <input peptides> <input parameters file> <input gff pkl file> <output results folder>")
 
+# def strip_sequence(sequence):
+#     if sequence[2] == "." and sequence[-2] == ".":
+#         sequence = sequence[2:-2]
+#     # whitelist =  ["57.021464","15.994915","14.015650","17.026549","43.005814","42.010565","0.984016"]
+#     # whitelist += ["57.021",   "15.995",   "14.016",   "17.027",   "43.006",   "42.011",   "0.984"   ,"229.163"]
+#
+#     # for mod in whitelist:
+#     #     sequence = sequence.replace(mod,"")
+#     # if len([s for s in sequence if s.isdigit()]) == 0:
+#     p = re.compile('\W|\d')
+#     sequence = p.sub("", sequence)
+#     # else:
+#     #     sequence = None
+#     return sequence
+
 def strip_sequence(sequence):
     if sequence[1] == "." and sequence[-2] == ".":
         sequence = sequence[2:-2]
-    whitelist =  ["57.021464","15.994915","14.015650","17.026549","43.005814","42.010565","0.984016"]
-    whitelist += ["57.021",   "15.995",   "14.016",   "17.027",   "43.006",   "42.011",   "0.984"   ,"229.163"]
 
-    for mod in whitelist:
-        sequence = sequence.replace(mod,"")
-    if len([s for s in sequence if s.isdigit()]) == 0:
-        p = re.compile('\W|\d')
-        sequence = p.sub("", sequence)
-    else:
-        sequence = None
+    p = re.compile('\W|\d')
+    sequence = p.sub("", sequence)
     return sequence
-
-# def strip_sequence(sequence):
-#     if sequence[1] == "." and sequence[-1] == ".":
-#         sequence = sequence[1:-1]
-#
-#     p = re.compile('\W|\d')
-#     sequence = p.sub("", sequence)
-#     return sequence
 
 def load_peptide_list(input_peptide_filename):
     row_count, table_data = ming_fileio_library.parse_table_with_headers(input_peptide_filename)

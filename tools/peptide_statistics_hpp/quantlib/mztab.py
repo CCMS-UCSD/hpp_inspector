@@ -16,16 +16,16 @@ def peptide_string(sequence,modifications):
         return sequence
     else:
         new_sequence = sequence.split()
-        # mods = dict([
-        #         (int(mod.split("-")[0]),find_mod(mod.split("-")[1]))
-        #         for mod in modifications.split(",")
-        #         if find_mod(mod.split("-")[1]) != None
-        #     ])
         mods = dict([
-                (int(mod.split("-")[0]),find_mod(''.join(mod.split("-")[1:])))
-                for mod in re.split("/\,(?![^\[]*\])/g", modifications)
-                if find_mod(''.join(mod.split("-")[1:])) != None
+                (int(mod.split("-")[0]),find_mod(mod.split("-")[1]))
+                for mod in modifications.split(",")
+                if find_mod(mod.split("-")[1]) != None
             ])
+        # mods = dict([
+        #         (int(mod.split("-")[0]),find_mod(''.join(mod.split("-")[1:])))
+        #         for mod in re.split("/\,(?![^\[]*\])/g", modifications)
+        #         if find_mod(''.join(mod.split("-")[1:])) != None
+        #     ])
         new_sequence = []
         new_sequence.append(mods.get(0,""))
         for (i,s) in enumerate(sequence):
@@ -61,12 +61,12 @@ def find_mod(modification):
     if 'UNIMOD' in modification:
         return convert.get(modification)
     elif 'PSI-MS' in modification:
-        psi_mod_split = modificatiom[1:-1].split(',')
-        if psi_mod_split[1] == 'MS:1001524':
-            return '-{}'.format(psi_mod_split[3])
-        else:
+        # psi_mod_split = modificatiom[1:-1].split(',')
+        # if psi_mod_split[1] == 'MS:1001524':
+        #     return '-{}'.format(psi_mod_split[3])
+        # else:
             # print(modification)
-            raise Exception
+        raise Exception
     else:
         # print(modification)
         return modification.split(":")[1]

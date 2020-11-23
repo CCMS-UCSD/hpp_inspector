@@ -15,8 +15,8 @@ def usage():
     print("<input fasta> <input peptides> <output results file>")
 
 def strip_sequence(sequence):
-    if sequence[1] == "." and sequence[-1] == ".":
-        sequence = sequence[1:-1]
+    if sequence[1] == "." and sequence[-2] == ".":
+        sequence = sequence[2:-2]
 
     p = re.compile('\W|\d')
     sequence = p.sub("", sequence)

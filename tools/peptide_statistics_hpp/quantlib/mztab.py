@@ -17,9 +17,9 @@ def peptide_string(sequence,modifications):
     else:
         new_sequence = sequence.split()
         mods = dict([
-                (int(mod.split("-")[0]),find_mod(mod.split("-")[1]))
+                (int(mod.split("-")[0]),find_mod("-".join(mod.split("-")[1:])))
                 for mod in modifications.split(",")
-                if find_mod(mod.split("-")[1]) != None
+                if find_mod("-".join(mod.split("-")[1:])) != None
             ])
         # mods = dict([
         #         (int(mod.split("-")[0]),find_mod(''.join(mod.split("-")[1:])))

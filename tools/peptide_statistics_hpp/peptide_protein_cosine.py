@@ -390,17 +390,17 @@ def main():
         w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames)
         w.writeheader()
 
-        for protein in added_proteins.keys():
+        for protein in set(all_proteins.keys()).union(set(kb_proteins.keys())):
             if (protein in nextprot_pe):
                 protein_dict = {
                     'protein': protein,
-                    'pe': nextprot_pe[protein],
+                    'pe': nextprot_pe.get(protein,0),
                     'ms_evidence':ms_existence.get(protein,'no'),
                     'aa_total':protein_length.get(protein,0)
                 }
                 protein_dict.update(find_overlap(kb_proteins[protein],added_proteins_explained_intensity[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
                 protein_dict.update(find_overlap(kb_proteins_w_synthetic[protein],added_proteins_matching_synthetic[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
-                protein_dict.update(find_overlap(kb_proteins_w_synthetic[protein],added_proteins_matching_synthetic[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine')[0])
+                protein_dict.update(find_overlap({},added_proteins_explained_intensity[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine')[0])
                 protein_dict.update({
                     'cosine_cutoff':args.cosine_cutoff,
                     'explained_intensity_cutoff':args.explained_intensity_cutoff

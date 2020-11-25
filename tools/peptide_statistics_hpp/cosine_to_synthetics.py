@@ -147,7 +147,6 @@ def main():
                             for synthetic_filescan, synthetic_peaks in matching_synthetics:
                                 cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
                                 cosine_to_synthetic_annotated[(filename,scan)] = (0,synthetic_filescan)
-
                         else:
                             # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
                             for synthetic_filescan,synthetic_peaks in matching_synthetics:

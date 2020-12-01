@@ -28,7 +28,8 @@ def arguments():
     parser.add_argument('-d','--protein_coverage_external', type = Path, help='Added Protein Coverage (External)')
     parser.add_argument('-t','--cosine_cutoff', type = float, help='Cosine Cutoff')
     parser.add_argument('-l','--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
-    parser.add_argument('-z','--nextprot_pe', type = Path, help='NextProt PEs')
+    parser.add_argument('-z','--nextprot_pe', type = Path, help='NextProt PEs (Latest)')
+    parser.add_argument('-w','--nextprot_releases', type = Path, help='NextProt Releases')
 
     if len(sys.argv) < 4:
         parser.print_help()
@@ -39,8 +40,8 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
     kb_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in existing_peptides.values()])
     added_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in new_peptides.values()])
 
-    kb_peptides = set(["{} ({}-{})".format(peptide,sorted(positions, key = lambda x: x[0])[0][0],sorted(positions, key = lambda x: x[0])[0][1]) for peptide, positions in existing_peptides.items()])
-    added_peptides = set(["{} ({}-{})".format(peptide,sorted(positions, key = lambda x: x[0])[0][0],sorted(positions, key = lambda x: x[0])[0][1]) for peptide, positions in new_peptides.items()])
+    kb_peptides = set(["{} ({}-{})".format(peptide.replace('L','I'),sorted(positions, key = lambda x: x[0])[0][0],sorted(positions, key = lambda x: x[0])[0][1]) for peptide, positions in existing_peptides.items()])
+    added_peptides = set(["{} ({}-{})".format(peptide.replace('L','I'),sorted(positions, key = lambda x: x[0])[0][0],sorted(positions, key = lambda x: x[0])[0][1]) for peptide, positions in new_peptides.items()])
 
     # print(kb_peptides)
     # print(added_peptides)
@@ -53,24 +54,38 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
     nonoverlapping_intersection = hupo_nonoverlapping(kb_pos.union(added_pos))
     nonoverlapping_all_kb = hupo_nonoverlapping(kb_pos)
 
+    added_coverage = find_coverage(list(existing_peptides.values()), list(new_peptides.values()), protein_length)
+    total_coverage = find_coverage([],list(existing_peptides.values()) + list(new_peptides.values()), protein_length)
+
     return {
         'supporting_peptides'+name:','.join(supporting_peptides) if len(supporting_peptides) >= 1 else ' ',
         'novel_peptides'+name:','.join(novel_peptides) if len(novel_peptides) >= 1 else ' ',
         'kb_hpp'+name:nonoverlapping_all_kb,
         'new_hpp'+name:nonoverlapping_added_peptides,
         'combined_hpp'+name:nonoverlapping_intersection,
-        'added_kb_coverage'+name:find_coverage(list(existing_peptides.values()) + list(new_peptides.values()),protein_length),
+        'added_kb_coverage'+name:added_coverage,
+        'total_coverage'+name:total_coverage,
+        'coverage_increase':total_coverage/(total_coverage-added_coverage) if (total_coverage-added_coverage) != 0 else 1000,
         'promoted'+name:'Yes' if (nonoverlapping_all_kb < 2 and nonoverlapping_intersection >= 2) else 'No'
     }, [s.split(' ')[0] for s in supporting_peptides]
 
-def find_coverage(pos, length):
-    coverage = [False for _ in range(length)]
-    for p in pos:
+def find_coverage(current_kb, new_kb, length):
+
+    current_coverage = [False for _ in range(length)]
+    added_coverage = [False for _ in range(length)]
+
+    for p in current_kb:
         for (start,end) in p:
             for i in range(start,end+1):
-                if i < len(coverage)-1:
-                    coverage[i-1] = True
-    return len([c for c in coverage if c])
+                if i < len(current_coverage)-1:
+                    current_coverage[i-1] = True
+    for p in new_kb:
+        for (start,end) in p:
+            for i in range(start,end+1):
+                if i < len(added_coverage)-1:
+                    added_coverage[i-1] = True if not current_coverage[i-1] else False
+
+    return len([c for c in added_coverage if c])
 
 def hupo_nonoverlapping(segments, just_noncontained = True):
     if len(segments) == 0:
@@ -215,6 +230,17 @@ def main():
         for l in r:
             ms_existence[l['protein'].replace('NX_','')] = l['ms_evidence']
             nextprot_pe[l['protein'].replace('NX_','')] = int(l['pe'])
+
+    nextprot_releases_pe = {}
+
+    for nextprot_release in args.nextprot_releases.glob('*'):
+        release_str = nextprot_release.stem
+        nextprot_releases_pe[release_str] = {}
+        for pe_file in nextprot_release.glob('ac_lists/*PE*'):
+            pe = pe_file.stem.split('_')[3].replace('PE','')
+            with open(pe_file) as f:
+                for l in f:
+                    nextprot_releases_pe[release_str][l.rstrip().replace('NX_','')] = pe
 
     all_proteins,added_proteins,pep_mapping_info = read_protein_coverage(args.protein_coverage,all_proteins,added_proteins,pep_mapping_info,nextprot_pe)
 
@@ -368,24 +394,30 @@ def main():
             'new_hpp',
             'combined_hpp',
             'added_kb_coverage',
+            'total_coverage',
+            'coverage_increase'
             'supporting_peptides_w_synthetic',
             'novel_peptides_w_synthetic',
             'kb_hpp_w_synthetic',
             'new_hpp_w_synthetic',
             'combined_hpp_w_synthetic',
             'added_kb_coverage_w_synthetic',
-            'supporting_peptides_w_synthetic_cosine',
-            'novel_peptides_w_synthetic_cosine',
-            'kb_hpp_w_synthetic_cosine',
-            'new_hpp_w_synthetic_cosine',
-            'combined_hpp_w_synthetic_cosine',
-            'added_kb_coverage_w_synthetic_cosine',
+            'total_coverage_w_synthetic',
+            'coverage_increase_w_synthetic',
+            'supporting_peptides_without_kb',
+            'novel_peptides_without_kb',
+            'kb_hpp_without_kb',
+            'new_hpp_without_kb',
+            'combined_hpp_without_kb',
+            'added_kb_coverage_without_kb',
+            'total_coverage_without_kb',
+            'coverage_increase_without_kb',
             'promoted',
             'promoted_w_synthetic',
-            'promoted_w_synthetic_cosine',
+            'promoted_without_kb',
             'cosine_cutoff',
             'explained_intensity_cutoff'
-        ]
+        ] + ['_dyn_#{}'.format(release) for release in sorted(nextprot_releases_pe.keys())]
 
         w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames)
         w.writeheader()
@@ -400,11 +432,13 @@ def main():
                 }
                 protein_dict.update(find_overlap(kb_proteins[protein],added_proteins_explained_intensity[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
                 protein_dict.update(find_overlap(kb_proteins_w_synthetic[protein],added_proteins_matching_synthetic[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
-                protein_dict.update(find_overlap({},added_proteins_explained_intensity[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine')[0])
+                protein_dict.update(find_overlap({},added_proteins_explained_intensity[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_without_kb')[0])
                 protein_dict.update({
                     'cosine_cutoff':args.cosine_cutoff,
                     'explained_intensity_cutoff':args.explained_intensity_cutoff
                 })
+                for release, pe_dict in nextprot_releases_pe.items():
+                    protein_dict['_dyn_#{}'.format(release)] = pe_dict.get(protein,0)
                 w.writerow(protein_dict)
 
 if __name__ == '__main__':

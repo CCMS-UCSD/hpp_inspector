@@ -11,7 +11,8 @@
 
     <pathVar name="uniprot_gff_pkl" path="uniprot_annotations.pkl" />
     <pathVar name="next_prot_pe" path="NextProt_PEs.txt" />
-    <pathVar name="predownloaded_pep" path="kb_pep_11_6_2020.tsv" />
+    <pathVar name="nextprot_releases" path="nextprot_releases" />
+    <pathVar name="predownloaded_pep" path="kb_pep_massive.tsv" />
     <pathVar name="synthetics_pkl" path="proteometools.pkl"/>
     <pathVar name="extract_peptides.script" path="extract_peptides.py" />
     <pathVar name="download_latest_kb.script" path="download_latest_kb.py" />
@@ -247,6 +248,7 @@
           <arg option="-cosine_cutoff"        valueRef="@cosine_threshold"/>
           <arg option="-explained_intensity_cutoff"        valueRef="@explained_intensity_threshold"/>
           <arg option="-nextprot_pe" pathRef="next_prot_pe"/>
+          <arg option="-nextprot_releases" pathRef="nextprot_releases"/>
       </execution>
   </tool>
 

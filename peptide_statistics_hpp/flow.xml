@@ -26,6 +26,9 @@
 
 	<collection name="peptide_coverage_merged_external"/>
 	<collection name="novel_psms_w_cosine_external"/>
+
+	<collection name="sqlite"/>
+
     <action name="begin">
         <output port="mztab"       			 collection="mztab"/>
 				<output port="spec_on_server"       collection="spec_on_server"/>
@@ -139,6 +142,13 @@
 			<output  port="merged_novel_psms_w_cosine"   object="merged_novel_psms_w_cosine"/>
 		</action>
 
+		<action name="convert_tsv_to_sqlite">
+			<input  port="novel_proteins_w_cosine"      object="novel_proteins_w_cosine"/>
+			<input  port="novel_peptides_w_cosine"      object="novel_peptides_w_cosine"/>
+			<input  port="merged_novel_psms_w_cosine"   object="merged_novel_psms_w_cosine"/>
+			<output port="sqlite" 											collection="sqlite"/>
+		</action>
+
     <action name="end">
         <input port="unique_peptides_list"       object="unique_peptides_list"/>
         <input port="protein_coverage" object="protein_coverage"/>
@@ -149,5 +159,6 @@
 				<input port="novel_proteins_w_cosine" object="novel_proteins_w_cosine"/>
 				<input port="merged_novel_psms_w_cosine" object="merged_novel_psms_w_cosine"/>
 				<input port="novel_peptides_w_cosine" object="novel_peptides_w_cosine"/>
+				<input port="sqlite" collection="sqlite"/>
 		</action>
 </flow>

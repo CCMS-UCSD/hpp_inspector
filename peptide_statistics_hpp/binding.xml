@@ -123,6 +123,13 @@
         <productionToOutput port="merged_novel_psms_w_cosine"     production="merged_novel_psms_w_cosine"/>
     </bind>
 
+    <bind action="convert_tsv_to_sqlite" tool="convert_tsv_to_sqlite">
+        <inputAsRequirement port="novel_proteins_w_cosine"     requirement="novel_proteins_w_cosine"/>
+        <inputAsRequirement port="novel_peptides_w_cosine"     requirement="novel_peptides_w_cosine"/>
+        <inputAsRequirement port="merged_novel_psms_w_cosine"  requirement="merged_novel_psms_w_cosine"/>
+        <productionToOutput port="sqlite"                      production="sqlite"/>
+    </bind>
+
     <bind action="end" type="upload">
         <url value="{livesearch.upload}"/>
         <query name="task" valueRef="@task"/>
@@ -151,6 +158,9 @@
         </upload>
         <upload port="library_output" type="folder">
             <query name="resource" value="library_output"/>
+        </upload>
+        <upload port="sqlite" type="folder">
+            <query name="resource" value="sqlite"/>
         </upload>
     </bind>
 </binding>

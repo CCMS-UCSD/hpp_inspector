@@ -395,7 +395,7 @@ def main():
             'combined_hpp',
             'added_kb_coverage',
             'total_coverage',
-            'coverage_increase'
+            'coverage_increase',
             'supporting_peptides_w_synthetic',
             'novel_peptides_w_synthetic',
             'kb_hpp_w_synthetic',

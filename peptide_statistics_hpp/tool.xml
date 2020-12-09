@@ -14,6 +14,7 @@
     <pathVar name="nextprot_releases" path="nextprot_releases" />
     <pathVar name="predownloaded_pep" path="kb_pep_massive.tsv" />
     <pathVar name="synthetics_pkl" path="proteometools.pkl"/>
+    <pathVar name="msv_to_pxd_mapping" path="accession_map.json"/>
     <pathVar name="extract_peptides.script" path="extract_peptides.py" />
     <pathVar name="download_latest_kb.script" path="download_latest_kb.py" />
     <pathVar name="merge_kb_coverage.script" path="merge_kb_coverage.py" />
@@ -249,6 +250,7 @@
           <arg option="-explained_intensity_cutoff"        valueRef="@explained_intensity_threshold"/>
           <arg option="-nextprot_pe" pathRef="next_prot_pe"/>
           <arg option="-nextprot_releases" pathRef="nextprot_releases"/>
+          <arg option="-msv_to_pxd_mapping" pathRef="msv_to_pxd_mapping"/>
       </execution>
   </tool>
 

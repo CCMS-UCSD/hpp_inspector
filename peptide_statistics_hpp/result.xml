@@ -24,7 +24,7 @@
                 <parameter name="USETASK" value="True"/>
                 <parameter name="REQUESTPARAMETER=view" value="view_added_peptides"/>
                 <parameter name="HASHPARAMTER=protein_input" value="[protein]"/>
-                <parameter name="HASHPARAMTER=hpp_match_input" value="Yes"/>
+                <parameter name="HASHPARAMTER=hpp_match_input" value="1"/>
                 <!-- <parameter name="HASHPARAMTER=cosine_lowerinput" value="[cosine_cutoff]"/> -->
                 <parameter name="LABEL" value="[protein]"/>
                 <parameter name="PASS_URL" value="True"/>
@@ -89,13 +89,11 @@
             <column type="text" field="hpp_match" label="HPP Compliant" width="2"/>
             <column type="text" field="usi" label="USI" width="20"/>
             <!-- <column type="text" field="filename" label="Filename" width="20"/>
-            <column type="integer" field="scan" label="Scan" width="4"/>
-            <column type="text" field="sequence" label="Sequence" width="20"/> -->
+            <column type="integer" field="scan" label="Scan" width="4"/> -->
             <column type="float" field="score" label="-log10(EValue)" width="6"/>
             <column type="float" field="explained_intensity" label="Explained Intensity" width="6"/>
             <column type="text" field="pass" label="Above Library Threshold" width="6"/>
-            <column type="text" field="parent_mass" label="Parent Mass" width="20"/>
-            <column type="integer" field="charge" label="Charge" width="4"/>
+            <column type="text" field="parent_mass" label="Precursor Mass" width="20"/>
             <column type="text" field="synthetic_usi" label="Synthetic Match" width="20"/>
             <!-- <column type="text" field="synthetic_filename" label="Synthetic Filename" width="20"/>
             <column type="integer" field="synthetic_scan" label="Synthetic Scan" width="4"/> -->
@@ -115,6 +113,8 @@
                 <parameter name="USETASK" value="True"/>\
                 <parameter name="PASS_URL" value="True"/>\
             </column>
+            <column type="text" field="sequence" label="Sequence" width="20"/>
+            <column type="integer" field="charge" label="Charge" width="4"/>
         </row>
         <row expander="image">
             <column type="jscolumnspectrumviewer" label="Input PSM" colspan="6">
@@ -140,30 +140,32 @@
                 </parsers>
             </data>
             <row>
-                <column type="text" field="protein" label="Protein" width="4"/>
-                <column type="integer" field="aa_start" label="AA Start" width="1"/>
-                <column type="integer" field="aa_end" label="AA End" width="1"/>
-                <column type="integer" field="pe" label="PE" width="5"/>
-                <column type="text" field="hpp_match" label="HPP Compliant" width="2"/>
-                <column label="Sequence/Charge" type="genericurlgenerator" width="5">
+                <column type="text" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+                <column type="integer" field="aa_start" label="AA Start" width="1" tooltip="Start location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
+                <column type="integer" field="aa_end" label="AA End" width="1" tooltip="End location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
+                <column type="integer" field="pe" label="Protein Existence (PE) Level" width="5" tooltip="Protein Existence (PE) Level from neXtProt 2020 release."/>
+                <column type="text" field="sequence" label="Sequence" width="20"/>
+                <column type="integer" field="charge" label="Charge" width="4"/>
+                <column type="text" field="hpp_match" label="Compliant with HPP Data Interpretation Guidelines" width="2" tooltip="Peptide follows HPP Data Interpretation Guidelines (2019-10-15) for use in detecting missing proteins (1/0)."/>
+                <column label="Link to all PSMs" type="genericurlgenerator" width="5" tooltip="Link to all PSMs for this sequence and charge.">
                     <parameter name="URLBASE" value="result.jsp"/>
                     <parameter name="USETASK" value="True"/>
                     <parameter name="REQUESTPARAMETER=view" value="view_added_psm"/>
-                    <parameter name="HASHPARAMTER=usi_input" value=":[sequence]/[charge]"/>
+                    <parameter name="HASHPARAMTER=sequence_input" value="[sequence]"/>
+                    <parameter name="HASHPARAMTER=charge_lowerinput" value="[charge]"/>
+                    <parameter name="HASHPARAMTER=charge_upperinput" value="[charge]"/>
                     <!-- <parameter name="HASHPARAMTER=cosine_lowerinput" value="[cosine_cutoff]"/> -->
-                    <parameter name="LABEL" value="[sequence]/[charge]"/>
+                    <parameter name="LABEL" value="All PSMs"/>
                     <parameter name="PASS_URL" value="True"/>
                 </column>
-                <!-- <column type="text" field="sequence" label="Sequence" width="20"/> -->
-                <column type="text" field="parent_mass" label="Parent Mass" width="20"/>
-                <!-- <column type="integer" field="charge" label="Charge" width="4"/> -->
+                <column type="text" field="parent_mass" label="Precursor Mass" width="20"/>
                 <!-- <column type="text" field="type" label="Evidence Type" width="6"/> -->
-                <column type="float" field="score" label="-log10(EValue)" width="6"/>
+                <column type="float" field="score" label="Peptide Spectrum Match (PSM) Identification Score" width="6" tooltip="Score for Peptide Spectrum Match (PSM) indicates the quality of this spectrum for this particular peptide."/>
                 <!-- <column type="text" field="pass" label="Above Library Threshold" width="6"/> -->
-                <column type="float" field="cosine" label="Best Cosine to Synthetic" width="6"/>
-                <column type="integer" field="canonical_matches" label="Canonical Protein Matches" width="1"/>
-                <column type="text" field="gene_unique" label="Gene Unique" width="2"/>
-                <column type="text" field="type" label="Evidence Type" width="6"/>
+                <column type="float" field="cosine" label="Best Annotated Cosine to Synthetic Spectrum Match" width="6" tooltip="Spectrum cosine using only annotated peaks from the input spectrum and closest matching synthetic."/>
+                <column type="integer" field="canonical_matches" label="#Protein Matches" width="1" tooltip = "Number of proteins the peptide matches to with a single amino acid variant."/>
+                <column type="text" field="gene_unique" label="Gene Unique" width="2" tooltip = "Peptide matches uniquely to a single gene with a single amino acid variant (True/False)."/>
+                <column type="text" field="type" label="Evidence Type" width="6" tooltip = "Novelty of sequence compared to MassIVE-KB.  If the sequence is not uniquely mapping, the value N/A is used."/>
                 <column label="Add to Library" type="genericurlgenerator" width="12">
                     <parameter name="URLBASE" value="/ProteoSAFe/addToLibrary.jsp"/>
                     <parameter name="REQUESTPARAMETER=file" value="[filename]"/>
@@ -177,9 +179,9 @@
                     <parameter name="USETASK" value="True"/>\
                     <parameter name="PASS_URL" value="True"/>\
                 </column>
-                <column type="text" field="database_usi" label="Best DB Match" width="20"/>
-                <column type="text" field="cosine_usi" label="Best Cosine Match" width="20"/>
-                <column type="text" field="synthetic_usi" label="Synthetic Match" width="20"/>
+                <column type="text" field="database_usi" label="Best Peptide Spectrum Match (PSM) By PSM Identification Score" width="20"/>
+                <column type="text" field="cosine_usi" label="Best Peptide Spectrum Match (PSM) By Cosine to Synthetic Peptide Spectra" width="20"/>
+                <column type="text" field="synthetic_usi" label="Most-similar Synthetic Peptide Spectrum" width="20"/>
                 <!-- <column type="text" field="database_filename" label="Best DB Filename" width="20"/>
                 <column type="integer" field="database_scan" label="Best DB Scan" width="4"/>
                 <column type="text" field="cosine_filename" label="Best Cosine Filename" width="20"/>

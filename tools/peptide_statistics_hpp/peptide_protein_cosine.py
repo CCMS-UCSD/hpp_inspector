@@ -30,11 +30,42 @@ def arguments():
     parser.add_argument('-l','--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
     parser.add_argument('-z','--nextprot_pe', type = Path, help='NextProt PEs (Latest)')
     parser.add_argument('-w','--nextprot_releases', type = Path, help='NextProt Releases')
+    parser.add_argument('-m','--msv_to_pxd_mapping', type = Path, help='MSV to PXD Mapping')
 
     if len(sys.argv) < 4:
         parser.print_help()
         sys.exit(1)
     return parser.parse_args()
+
+def add_brackets(pep):
+    aa_breakpoints = []
+    pep = pep.replace('+','[+').replace('-','[-')
+    for i,aa in enumerate(pep[1:]):
+        if not pep[i-1].isalpha() and pep[i].isalpha():
+            aa_breakpoints.append(i)
+    for i,breakpoint in enumerate(reversed(aa_breakpoints)):
+        end_bracket = ']'
+        if i == len(aa_breakpoints)-1 and pep[0] == '[':
+            end_bracket = ']-'
+        pep = pep[:breakpoint] + end_bracket + pep[breakpoint:]
+    return pep
+
+def msv_to_pxd(msv, msv_mapping):
+    mapping = msv_mapping.get(msv,{}).get('px_accession')
+    if not mapping:
+        mapping = msv
+    return mapping
+
+def correct_usi(usi_input, msv_mapping):
+    if '[' in usi_input or 'PXD' in usi_input:
+        return usi_input
+    else:
+        split_usi = usi_input.split(':')
+        split_usi[1] = msv_to_pxd(split_usi[1], msv_mapping)
+        split_usi[5] = '/'.join([add_brackets(split_usi[5].split('/')[0]),split_usi[5].split('/')[1]])
+    #     return usi_link(':'.join(split_usi))
+        return ':'.join(split_usi)
+
 
 def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, name):
     kb_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in existing_peptides.values()])
@@ -65,7 +96,7 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
         'combined_hpp'+name:nonoverlapping_intersection,
         'added_kb_coverage'+name:added_coverage,
         'total_coverage'+name:total_coverage,
-        'coverage_increase':total_coverage/(total_coverage-added_coverage) if (total_coverage-added_coverage) != 0 else 1000,
+        'coverage_increase'+name:total_coverage/(total_coverage-added_coverage) if total_coverage-added_coverage != 0 else 1000,
         'promoted'+name:'Yes' if (nonoverlapping_all_kb < 2 and nonoverlapping_intersection >= 2) else 'No'
     }, [s.split(' ')[0] for s in supporting_peptides]
 
@@ -201,6 +232,9 @@ def main():
     added_proteins_matching_synthetic = defaultdict(lambda: defaultdict(list))
     added_proteins_explained_intensity = defaultdict(lambda: defaultdict(list))
 
+    with open(args.msv_to_pxd_mapping) as json_file:
+        msv_mapping = json.load(json_file)
+
     kb_seq = set()
     kb_seq_matching = set()
 
@@ -271,6 +305,9 @@ def main():
                 for l in r:
                     il_peptide = ''.join([p.replace('I','L') for p in l['sequence'] if p.isalpha()])
                     protein = peptide_to_protein.get(il_peptide)
+                    l['usi'] = correct_usi(l['usi'], msv_mapping)
+                    l['synthetic_usi'] = correct_usi(l['synthetic_usi'], msv_mapping) if l['synthetic_usi'] != '' else l['synthetic_usi']
+                    # l['sequence'] = l['sequence'] if '[' in l['sequence'] else add_brackets(l['sequence'])
                     if protein:
                         l.update({
                             'protein': protein,
@@ -287,16 +324,17 @@ def main():
                     if il_peptide in all_proteins.get(protein,{}):
                         l['aa_start'],l['aa_end'] = all_proteins[protein][il_peptide][0]
                     else:
-                        l['aa_start'],l['aa_end'] = "",""
+                        l['aa_start'],l['aa_end'] = "N/A","N/A"
 
                     if il_peptide in added_proteins[protein]:
                         if il_peptide in kb_seq:
-                            l['type'] = 'Matching'
+                            l['type'] = 'Matches existing evidence'
                         else:
-                            l['type'] = 'Added'
-                        l['hpp_match'] = 'Yes'
+                            l['type'] = 'New protein evidence'
+                        l['hpp_match'] = 'True'
                     else:
-                        l['hpp_match'] = 'No'
+                        l['type'] = 'N/A'
+                        l['hpp_match'] = 'False'
                     o.writerow(l)
                     sequence, charge = l['sequence'],l['charge']
                     if (sequence, charge) in representative_per_precursor:
@@ -363,15 +401,16 @@ def main():
             if sequence_il in all_proteins.get(protein,{}):
                 best_psm['aa_start'],best_psm['aa_end'] = all_proteins[protein][sequence_il][0]
             else:
-                best_psm['aa_start'],best_psm['aa_end'] = "",""
+                best_psm['aa_start'],best_psm['aa_end'] = "N/A","N/A"
             if sequence_il in added_proteins.get(protein,{}):
                 if sequence_il in kb_seq:
-                    best_psm['type'] = 'Matching'
+                    best_psm['type'] = 'Matches existing evidence'
                 else:
-                    best_psm['type'] = 'Added'
-                best_psm['hpp_match'] = 'Yes'
+                    best_psm['type'] = 'New protein evidence'
+                best_psm['hpp_match'] = 'True'
             else:
-                best_psm['hpp_match'] = 'No'
+                best_psm['hpp_match'] = 'False'
+                l['type'] = 'N/A'
             r.writerow(best_psm)
             if sequence_il in added_proteins[protein]:
                 if best_psm['explained_intensity'] > args.explained_intensity_cutoff:

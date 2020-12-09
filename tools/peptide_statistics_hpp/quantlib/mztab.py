@@ -105,7 +105,7 @@ def read(mztab_file, ids, mangled_name = None):
                 score = 100
             search_engine = 'MZTAB'
             # search_engine = row.get('search_engine','[,,MZTAB,]')[1:-1].split(',')[2]
-            ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), search_engine, row['modifications'], rt, protein, parent_mass, score, mangled_name)]
+            ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), search_engine, row['modifications'], rt, protein, parent_mass, score, mangled_name, None)]
     return ids
 
 def read_lib(mztab_file, ids):
@@ -119,5 +119,7 @@ def read_lib(mztab_file, ids):
             charge = int(l['charge'])
             parent_mass = float(l.get('mz',1))
             score = float(l['score'])
-            ids[(filename, scan)] = [psm.PSM(peptide, charge, 'MSGF_AMB', ' ', None, None, parent_mass, score, filename)]
+            tolerance = float(l['fragment_tolerance']) if l.get('fragment_tolerance') else None
+            fragmentation_method = l['fragmentation_method']
+            ids[(filename, scan)] = [psm.PSM(peptide, charge, 'MSGF_AMB', ' ', None, None, parent_mass, score, filename, tolerance)]
     return ids

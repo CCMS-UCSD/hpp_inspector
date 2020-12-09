@@ -129,7 +129,7 @@ def main():
             print("File {} likely moved or doesn't exist.".format(filepath))
         else:
             if exts[0] == '.mzML':
-                precursor_func = lambda spectrum: float(spectrum['precursorList']['precursor'][0]['isolationWindow']['isolation window target m/z'])
+                precursor_func = lambda spectrum: float(spectrum['precursorList']['precursor'][0]['selectedIonList'][0]['selectedIon']['selected ion m/z'])
                 with open(filepath, 'rb') as f:
                     mzml_object = mzml.PreIndexedMzML(f)
                     for scan in psms_to_consider[filename].keys():

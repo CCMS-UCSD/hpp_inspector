@@ -120,6 +120,6 @@ def read_lib(mztab_file, ids):
             parent_mass = float(l.get('mz',1))
             score = float(l['score'])
             tolerance = float(l['fragment_tolerance']) if l.get('fragment_tolerance') else None
-            fragmentation_method = l['fragmentation_method']
+            fragmentation_method = l.get('fragmentation_method')
             ids[(filename, scan)] = [psm.PSM(peptide, charge, 'MSGF_AMB', ' ', None, None, parent_mass, score, filename, tolerance)]
     return ids

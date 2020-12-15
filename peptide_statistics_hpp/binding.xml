@@ -124,7 +124,7 @@
     </bind>
 
     <bind action="convert_tsv_to_sqlite" tool="convert_tsv_to_sqlite">
-        <inputAsRequirement port="novel_proteins_w_cosine"     requirement="novel_proteins_w_cosine"/>
+        <!-- <inputAsRequirement port="novel_proteins_w_cosine"     requirement="novel_proteins_w_cosine"/> -->
         <inputAsRequirement port="novel_peptides_w_cosine"     requirement="novel_peptides_w_cosine"/>
         <inputAsRequirement port="merged_novel_psms_w_cosine"  requirement="merged_novel_psms_w_cosine"/>
         <productionToOutput port="sqlite"                      production="sqlite"/>

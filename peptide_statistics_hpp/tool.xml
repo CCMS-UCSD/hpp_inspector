@@ -266,7 +266,7 @@
   <tool name="convert_tsv_to_sqlite">
       <require name="merged_novel_psms_w_cosine"      type="file"/>
       <require name="novel_peptides_w_cosine"         type="file"/>
-      <require name="novel_proteins_w_cosine"         type="file"/>
+      <!-- <require name="novel_proteins_w_cosine"         type="file"/> -->
       <produce name="sqlite"                          type="folder"/>
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="convert_tsv_to_sqlite.script"/>
@@ -274,7 +274,7 @@
           <arg valueRef="sqlite"/>
           <arg option="view_added_psm" valueRef="merged_novel_psms_w_cosine"/>
           <arg option="view_added_peptides" valueRef="novel_peptides_w_cosine"/>
-          <arg option="view_added" valueRef="novel_proteins_w_cosine"/>
+          <!-- <arg option="view_added" valueRef="novel_proteins_w_cosine"/> -->
       </execution>
   </tool>
 

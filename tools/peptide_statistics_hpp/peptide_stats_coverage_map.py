@@ -83,6 +83,7 @@ def main():
     partition_of_node = params_map["node_partition"]
 
     proteome = ming_protein_library.parse_fasta_proteome_file(input_fasta_filename, input_nextprot_pe)
+    proteome.create_decoy_proteins()
     #IL substitution for proteome
 
     protein_to_gene = {}

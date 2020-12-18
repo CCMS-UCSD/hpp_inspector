@@ -294,6 +294,7 @@ def main():
     output_file = open(sys.argv[5], "w")
 
     proteome = ming_protein_library.parse_fasta_proteome_file(input_uniprot_fasta_filename,input_nextprot_pe)
+    proteome.create_decoy_proteins()
     protein_to_annotations_map = pickle.load(open(input_uniprot_gff_pkl_filename, "r"))
     peptide_list = load_peptide_list(input_peptide_list_filename)
 

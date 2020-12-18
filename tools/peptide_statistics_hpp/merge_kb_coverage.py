@@ -49,16 +49,16 @@ def main():
 
     peptide_to_psm = defaultdict(list)
     for filescan,psm in ids.items():
-        #Don't include improper bioplex files
-        if not ('j10022_RNF14' in filescan[0] or 'j12271_TMPRSS3' in filescan[0] or 'j13961_ADAM32' in filescan[0] or 'j9837_ADCYAP1' in filescan[0] or 'q8920_ACCN4' in filescan[0]):
-            peptide_to_psm[''.join([p.replace('I','L') for p in psm[0].sequence if p.isalpha()])].append((filescan,psm))
+        #Don't include improper bioplex files - seems to be fixed
+        # if not ('j10022_RNF14' in filescan[0] or 'j12271_TMPRSS3' in filescan[0] or 'j13961_ADAM32' in filescan[0] or 'j9837_ADCYAP1' in filescan[0] or 'q8920_ACCN4' in filescan[0]):
+        peptide_to_psm[''.join([p.replace('I','L') for p in psm[0].sequence if p.isalpha()])].append((filescan,psm))
 
     supporting_peptides = set()
 
     psms_to_consider = defaultdict(set)
 
     with open(args.novel_psms, 'w') as fw_psm:
-        header = ['filename','scan','sequence','charge','score','pass','type','parent_mass']
+        header = ['filename','scan','sequence','charge','score','pass','type','parent_mass','frag_tol']
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
         for peptide, psms in peptide_to_psm.items():
@@ -71,6 +71,7 @@ def main():
                     'score':psm[0].score,
                     'pass':'Above' if psm[0].score > CUTOFF.get(str(len(peptide)),0) else 'Below',
                     'parent_mass':psm[0].parent_mass,
+                    'frag_tol':psm[0].fragment_tolerance
                 }
                 w_psm.writerow(psm_row)
 

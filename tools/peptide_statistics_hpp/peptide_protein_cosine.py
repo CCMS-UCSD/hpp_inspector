@@ -43,6 +43,8 @@ def add_brackets(pep):
     for i,aa in enumerate(pep[1:]):
         if not pep[i-1].isalpha() and pep[i].isalpha():
             aa_breakpoints.append(i)
+        elif not pep[i].isalpha() and i == (len(pep)-2):
+            aa_breakpoints.append(i+2)
     for i,breakpoint in enumerate(reversed(aa_breakpoints)):
         end_bracket = ']'
         if i == len(aa_breakpoints)-1 and pep[0] == '[':
@@ -67,7 +69,7 @@ def correct_usi(usi_input, msv_mapping):
         return ':'.join(split_usi)
 
 
-def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, name):
+def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, name, max_seq_output = 10):
     kb_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in existing_peptides.values()])
     added_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in new_peptides.values()])
 
@@ -89,8 +91,8 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
     total_coverage = find_coverage([],list(existing_peptides.values()) + list(new_peptides.values()), protein_length)
 
     return {
-        'supporting_peptides'+name:','.join(supporting_peptides) if len(supporting_peptides) >= 1 else ' ',
-        'novel_peptides'+name:','.join(novel_peptides) if len(novel_peptides) >= 1 else ' ',
+        'supporting_peptides'+name:','.join(list(supporting_peptides)[:max_seq_output]) if len(supporting_peptides) >= 1 else ' ',
+        'novel_peptides'+name:','.join(list(novel_peptides)[:max_seq_output]) if len(novel_peptides) >= 1 else ' ',
         'kb_hpp'+name:nonoverlapping_all_kb,
         'new_hpp'+name:nonoverlapping_added_peptides,
         'combined_hpp'+name:nonoverlapping_intersection,
@@ -204,6 +206,8 @@ def read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,pep_
                     aa_start = int(protein[1])
                     aa_end = int(protein[2])
                     if accession in nextprot_pe:
+                        if 'XXX_' in protein[0]:
+                            accession = 'XXX_{}'.format(accession)
                         all_proteins[accession][il_peptide].append((aa_start,aa_end))
                         if (aa_end - aa_start >= 9) and gene_unique and sp_matches_saav == 1:
                             added_proteins[accession][il_peptide].append((aa_start,aa_end))
@@ -295,7 +299,7 @@ def main():
                 added_proteins_w_synthetic[protein][peptide] = added_proteins[protein][peptide]
 
     with open(args.output_psms,'w') as w:
-        header = ['protein','pe','ms_evidence','filename','scan','sequence','charge','usi','score','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end']
+        header = ['protein','decoy','pe','ms_evidence','filename','scan','sequence','charge','usi','score','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end']
 
         o = csv.DictWriter(w, delimiter='\t',fieldnames = header)
         o.writeheader()
@@ -309,18 +313,19 @@ def main():
                     l['synthetic_usi'] = correct_usi(l['synthetic_usi'], msv_mapping) if l['synthetic_usi'] != '' else l['synthetic_usi']
                     # l['sequence'] = l['sequence'] if '[' in l['sequence'] else add_brackets(l['sequence'])
                     if protein:
+                        protein_no_decoy = protein.replace('XXX_','')
                         l.update({
                             'protein': protein,
-                            'pe': nextprot_pe.get(protein,''),
-                            'ms_evidence':ms_existence.get(protein,'no')
+                            'pe': nextprot_pe.get(protein_no_decoy,''),
+                            'ms_evidence':ms_existence.get(protein_no_decoy,'no')
                         })
+                        l.update(pep_mapping_info[il_peptide])
                     else:
                         l.update({
                             'protein': '',
                             'pe': '',
                             'ms_evidence':''
                         })
-                    l.update(pep_mapping_info[il_peptide])
                     if il_peptide in all_proteins.get(protein,{}):
                         l['aa_start'],l['aa_end'] = all_proteins[protein][il_peptide][0]
                     else:
@@ -384,12 +389,14 @@ def main():
             sequence_il = ''.join([p.replace('I','L') for p in sequence if p.isalpha()])
             protein = peptide_to_protein.get(sequence_il)
             if protein:
+                protein_no_decoy = protein.replace('XXX_','')
                 best_psm.update({
                     'protein': protein,
-                    'pe': nextprot_pe.get(protein,''),
-                    'ms_evidence':ms_existence.get(protein,'no'),
-                    'aa_total':protein_length.get(protein,0)
+                    'pe': nextprot_pe.get(protein_no_decoy,''),
+                    'ms_evidence':ms_existence.get(protein_no_decoy,'no'),
+                    'aa_total':protein_length.get(protein_no_decoy,0)
                 })
+                best_psm.update(pep_mapping_info[sequence_il])
             else:
                 best_psm.update({
                     'protein': '',
@@ -397,7 +404,6 @@ def main():
                     'ms_evidence':'',
                     'aa_total':''
                 })
-            best_psm.update(pep_mapping_info[sequence_il])
             if sequence_il in all_proteins.get(protein,{}):
                 best_psm['aa_start'],best_psm['aa_end'] = all_proteins[protein][sequence_il][0]
             else:
@@ -413,8 +419,8 @@ def main():
                 l['type'] = 'N/A'
             r.writerow(best_psm)
             if sequence_il in added_proteins[protein]:
-                if best_psm['explained_intensity'] > args.explained_intensity_cutoff:
-                    if best_psm['cosine'] > args.cosine_cutoff:
+                if best_psm['explained_intensity'] >= args.explained_intensity_cutoff:
+                    if best_psm['cosine'] >= args.cosine_cutoff:
                         added_proteins_matching_synthetic[protein][sequence_il] = added_proteins[protein][sequence_il]
                     added_proteins_explained_intensity[protein][sequence_il] = added_proteins[protein][sequence_il]
 
@@ -462,12 +468,13 @@ def main():
         w.writeheader()
 
         for protein in set(all_proteins.keys()).union(set(kb_proteins.keys())):
-            if (protein in nextprot_pe):
+            protein_no_decoy = protein.replace('XXX_','')
+            if (protein_no_decoy in nextprot_pe):
                 protein_dict = {
                     'protein': protein,
-                    'pe': nextprot_pe.get(protein,0),
-                    'ms_evidence':ms_existence.get(protein,'no'),
-                    'aa_total':protein_length.get(protein,0)
+                    'pe': nextprot_pe.get(protein_no_decoy,0),
+                    'ms_evidence':ms_existence.get(protein_no_decoy,'no'),
+                    'aa_total':protein_length.get(protein_no_decoy,0)
                 }
                 protein_dict.update(find_overlap(kb_proteins[protein],added_proteins_explained_intensity[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
                 protein_dict.update(find_overlap(kb_proteins_w_synthetic[protein],added_proteins_matching_synthetic[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
@@ -477,7 +484,7 @@ def main():
                     'explained_intensity_cutoff':args.explained_intensity_cutoff
                 })
                 for release, pe_dict in nextprot_releases_pe.items():
-                    protein_dict['_dyn_#{}'.format(release)] = pe_dict.get(protein,0)
+                    protein_dict['_dyn_#{}'.format(release)] = pe_dict.get(protein_no_decoy,0)
                 w.writerow(protein_dict)
 
 if __name__ == '__main__':

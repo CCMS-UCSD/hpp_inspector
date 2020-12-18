@@ -55,43 +55,43 @@ def outputs_for_protein_explorer(psms, representatives_input_name, representativ
         representatives_input.writeheader()
         representatives_filtered.writeheader()
         provenance_spectra.writeheader()
-
-        for ((filename,scan),psm_list) in psms.items():
-            psm = psm_list[0]
-            peptide = psm.sequence
-            charge = psm.charge
-            msv = filename.split('/')[0].replace('f.','')
-            if msv in msv_to_task:
-                dataset_task = msv_to_task[msv]
-            else:
-                dataset_task = convert_msv_to_task(msv)
-                msv_to_task[msv] = dataset_task
-            provenance_spectra.writerow({
-                'filename': filename[2:],
-                'annotation': peptide,
-                'charge': charge,
-                'workflow': psm.kind,
-                'proteosafe_task': dataset_task,
-                'proteosafe_moddecode_task':'',
-                'search_url': 'https://massive.ucsd.edu/ProteoSAFe/result.jsp?task={}&view=group_by_spectrum&file={}'.format(dataset_task, psm.search_filename),
-                'scan':scan,
-                'modifications':psm.modifications
-            })
-            if (peptide,charge) not in seen_representatives:
-                seen_representatives.add((peptide,charge))
-                representatives_input.writerow({
-                    'peptide':peptide,
-                    'charge':charge,
-                    'length':len([p for p in peptide if p.isalpha()]),
-                    'mz':psm.parent_mass,
-                    'score':psm.score,
-                    'originalfile_filename':filename[2:],
-                    'originalfile_scan':scan
-                })
-                representatives_filtered.writerow({
-                    'peptide':peptide,
-                    'charge':charge
-                })
+        #
+        # for ((filename,scan),psm_list) in psms.items():
+        #     psm = psm_list[0]
+        #     peptide = psm.sequence
+        #     charge = psm.charge
+        #     msv = filename.split('/')[0].replace('f.','')
+        #     if msv in msv_to_task:
+        #         dataset_task = msv_to_task[msv]
+        #     else:
+        #         dataset_task = convert_msv_to_task(msv)
+        #         msv_to_task[msv] = dataset_task
+        #     provenance_spectra.writerow({
+        #         'filename': filename[2:],
+        #         'annotation': peptide,
+        #         'charge': charge,
+        #         'workflow': psm.kind,
+        #         'proteosafe_task': dataset_task,
+        #         'proteosafe_moddecode_task':'',
+        #         'search_url': 'https://massive.ucsd.edu/ProteoSAFe/result.jsp?task={}&view=group_by_spectrum&file={}'.format(dataset_task, psm.search_filename),
+        #         'scan':scan,
+        #         'modifications':psm.modifications
+        #     })
+        #     if (peptide,charge) not in seen_representatives:
+        #         seen_representatives.add((peptide,charge))
+        #         representatives_input.writerow({
+        #             'peptide':peptide,
+        #             'charge':charge,
+        #             'length':len([p for p in peptide if p.isalpha()]),
+        #             'mz':psm.parent_mass,
+        #             'score':psm.score,
+        #             'originalfile_filename':filename[2:],
+        #             'originalfile_scan':scan
+        #         })
+        #         representatives_filtered.writerow({
+        #             'peptide':peptide,
+        #             'charge':charge
+        #         })
 
 
 

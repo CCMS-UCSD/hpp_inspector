@@ -19,14 +19,15 @@
         <row>
           <!-- <column type="float" field="kb_coverage" label="Coverage (KB Only)" width="2"/>
           <column type="float" field="new_coverage" label="Coverage (Added Only)" width="2"/> -->
-            <column label="Protein" type="genericurlgenerator" width="5">
+          <column type="text" field="protein" label="Protein" width="4"/>
+            <column label="View Peptides" type="genericurlgenerator" width="5">
                 <parameter name="URLBASE" value="result.jsp"/>
                 <parameter name="USETASK" value="True"/>
                 <parameter name="REQUESTPARAMETER=view" value="view_added_peptides"/>
                 <parameter name="HASHPARAMTER=protein_input" value="[protein]"/>
-                <parameter name="HASHPARAMTER=hpp_match_input" value="1"/>
+                <parameter name="HASHPARAMTER=hpp_match_input" value="True"/>
                 <!-- <parameter name="HASHPARAMTER=cosine_lowerinput" value="[cosine_cutoff]"/> -->
-                <parameter name="LABEL" value="[protein]"/>
+                <parameter name="LABEL" value="View HPP Compliant Peptides"/>
                 <parameter name="PASS_URL" value="True"/>
             </column>
             <column type="integer" field="aa_total" label="Protein Length" width="3"/>

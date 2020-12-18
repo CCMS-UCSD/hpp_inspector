@@ -95,6 +95,8 @@ def main():
     output_coverage_filename = os.path.join(output_results_folder, str(partition_of_node) + ".json")
 
     proteome = ming_protein_library.parse_fasta_proteome_file(input_fasta_filename,input_nextprot_pe)
+    proteome.create_decoy_proteins()
+
     protein_list = proteome.protein_list
     protein_count = len(protein_list)
     #Lets alternate what we get

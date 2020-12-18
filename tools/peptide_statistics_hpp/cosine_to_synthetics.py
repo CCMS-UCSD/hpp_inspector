@@ -94,10 +94,19 @@ def main():
         for l in r:
             synthetic_keys.add((l['sequence'].replace('+229.163','').replace('+229.162932',''),l['charge']))
             all_psms.append(l)
-            psms_to_consider[l['filename']][l['scan']] = {'sequence':l['sequence'],'charge':l['charge']}
+            try:
+                tolerance = float(l['frag_tol'])
+            except:
+                tolerance = None
+            psms_to_consider[l['filename']][l['scan']] = {'sequence':l['sequence'],'charge':l['charge'], 'tolerance':tolerance}
     print("{}: Finished reading psms".format(datetime.now().strftime("%H:%M:%S")))
 
-    if len(synthetic_keys) > 0:
+
+    tol = float(args.peak_tolerance)
+    threshold = float(args.cosine_threshold)
+    explained_intensity = float(args.explained_intensity)
+
+    if len(synthetic_keys) > 0 and threshold > 0:
         print("{}: Loading synthetics".format(datetime.now().strftime("%H:%M:%S")))
         with open(args.synthetics,'rb') as f:
             for _ in range(pickle.load(f)):
@@ -109,109 +118,109 @@ def main():
     else:
         print("Not loading synthetics, nothing to match")
 
-    tol = float(args.peak_tolerance)
-    threshold = float(args.cosine_threshold)
-
-    cosine_to_synthetic = defaultdict(lambda: (0,('N/A','N/A')))
-    cosine_to_synthetic_annotated = defaultdict(lambda: (0,('N/A','N/A')))
+    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
+    cosine_to_synthetic_annotated = defaultdict(lambda: (-1,('N/A','N/A')))
     explained_intensity_per_spectrum = {}
 
-    for filename in psms_to_consider:
-        print("{}: Looking at {}".format(datetime.now().strftime("%H:%M:%S"),filename))
-        exts = Path(filename).suffixes
-        if 'MSV' in filename:
-            filepath = filename.replace('f.','/data/massive/')
-            if filepath[0] == 'M':
-                filepath = '/data/massive/' + filepath
-        else:
-            filepath = filename
-        if not Path(filepath).exists():
-            print("File {} likely moved or doesn't exist.".format(filepath))
-        else:
-            if exts[0] == '.mzML':
-                precursor_func = lambda spectrum: float(spectrum['precursorList']['precursor'][0]['selectedIonList']['selectedIon'][0]['selected ion m/z'])
-                with open(filepath, 'rb') as f:
-                    mzml_object = mzml.PreIndexedMzML(f)
-                    for scan in psms_to_consider[filename].keys():
-                        sequence = psms_to_consider[filename][scan]['sequence']
-                        charge = psms_to_consider[filename][scan]['charge']
-                        matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
-                        try:
-                            spectrum = mzml_object.get_by_id("controllerType=0 controllerNumber=1 scan={}".format(scan))
-                        except:
-                            spectrum = mzml_object.get_by_id("scan={}".format(scan))
-                        peaks = list(zip(spectrum['m/z array'],spectrum['intensity array']))
-                        peaks, annotated_peaks, ion_vector, explained_intensity = prepare_spectrum(peaks,tol,precursor_func(spectrum),charge,sequence, True)
-                        explained_intensity_per_spectrum[(filename,scan)] = explained_intensity
-                        if threshold == 0:
-                            for synthetic_filescan, synthetic_peaks in matching_synthetics:
-                                cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
-                                cosine_to_synthetic_annotated[(filename,scan)] = (0,synthetic_filescan)
-                        else:
-                            # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
-                            for synthetic_filescan,synthetic_peaks in matching_synthetics:
-                                synthetic_peaks, annotated_synthetic_peaks, ion_vector_synthetic, _ = prepare_spectrum(synthetic_peaks,tol,precursor_func(spectrum),charge,sequence.replace('+229.163','').replace('+229.162932',''))
-                                cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
-                                cosine_annotated,_ = sa.score_alignment(ion_vector,ion_vector_synthetic,0,0,tol)
-                                if cosine > cosine_to_synthetic[(filename,scan)][0]:
-                                    cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
-                                if cosine_annotated > cosine_to_synthetic_annotated[(filename,scan)][0]:
-                                    cosine_to_synthetic_annotated[(filename,scan)] = (cosine_annotated,synthetic_filescan)
-                # print("{}: About to read {}".format(datetime.now().strftime("%H:%M:%S"),filename))
-                # with mzml.read(filepath) as reader:
-                #     precursor_func = lambda spectrum: float(spectrum['precursorList']['precursor'][0]['isolationWindow']['isolation window target m/z'])
-                #     for spectrum in reader:
-                #         spec_id = {idx.split('=')[0]:idx.split('=')[1] for idx in spectrum['id'].split(' ')}
-                #         scan = spec_id['scan']
-                #         if scan in psms_to_consider[filename]:
-                #             peaks = zip(spectrum['m/z array'],spectrum['intensity array'])
-                #             sequence = psms_to_consider[filename][scan]['sequence']
-                #             charge = psms_to_consider[filename][scan]['charge']
-                #             print((sequence,charge))
-                #             matching_synthetics = synthetic_scans.get((sequence,charge),[])
-                #             if len(matching_synthetics) > 0:
-                #                 peaks = prepare_spectrum(peaks,tol,precursor_func(spectrum))
-                #                 print("{}: {}".format(datetime.now().strftime("%H:%M:%S"),peaks))
-                #             print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
-                #             for synthetic_filescan,synthetic_peaks in matching_synthetics:
-                #                 cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
-                #                 if cosine > cosine_to_synthetic[(filename,scan)][0]:
-                #                     cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
-            if exts[0] == '.mgf':
-                pass
-            if exts[0] == '.mzXML':
-                print("{}: About to read {}".format(datetime.now().strftime("%H:%M:%S"),filename))
-                precursor_func = lambda spectrum: float(spectrum["precursorMz"][0]["precursorMz"])
-                with open(filepath, 'rb') as f:
-                    mzxml_object = mzxml.MzXML(f,use_index = True)
-                    # for spectrum in reader:
-                    for scan in psms_to_consider[filename].keys():
-                        sequence = psms_to_consider[filename][scan]['sequence']
-                        charge = psms_to_consider[filename][scan]['charge']
-                        matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
-                        spectrum = mzxml_object.get_by_id(scan)
-                        peaks = list(zip(spectrum['m/z array'],spectrum['intensity array']))
-                        peaks, annotated_peaks, ion_vector, explained_intensity = prepare_spectrum(peaks,tol,precursor_func(spectrum),charge,sequence, True)
-                        explained_intensity_per_spectrum[(filename,scan)] = explained_intensity
-                        if threshold == 0:
-                            for synthetic_filescan, synthetic_peaks in matching_synthetics:
-                                cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
-                                cosine_to_synthetic_annotated[(filename,scan)] = (0,synthetic_filescan)
-                        else:
-                            # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
-                            for synthetic_filescan,synthetic_peaks in matching_synthetics:
-                                synthetic_peaks, annotated_synthetic_peaks, ion_vector, _ = prepare_spectrum(synthetic_peaks,tol,precursor_func(spectrum),charge,sequence.replace('+229.163','').replace('+229.162932',''))
-                                cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
-                                cosine_annotated,_ = sa.score_alignment(annotated_peaks,annotated_synthetic_peaks,0,0,tol)
-                                if cosine > cosine_to_synthetic[(filename,scan)][0]:
-                                    cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
-                                if cosine_annotated > cosine_to_synthetic_annotated[(filename,scan)][0]:
-                                    cosine_to_synthetic_annotated[(filename,scan)] = (cosine_annotated,synthetic_filescan)
+    if threshold > 0 or explained_intensity > 0:
+        for filename in psms_to_consider:
+            print("{}: Looking at {}".format(datetime.now().strftime("%H:%M:%S"),filename))
+            exts = Path(filename).suffixes
+            if 'MSV' in filename:
+                filepath = filename.replace('f.','/data/massive/')
+                if filepath[0] == 'M':
+                    filepath = '/data/massive/' + filepath
+            else:
+                filepath = filename
+            if not Path(filepath).exists():
+                print("File {} likely moved or doesn't exist.".format(filepath))
+            else:
+                if exts[0] == '.mzML':
+                    precursor_func = lambda spectrum: float(spectrum['precursorList']['precursor'][0]['selectedIonList']['selectedIon'][0]['selected ion m/z'])
+                    with open(filepath, 'rb') as f:
+                        mzml_object = mzml.PreIndexedMzML(f)
+                        for scan in psms_to_consider[filename].keys():
+                            sequence = psms_to_consider[filename][scan]['sequence']
+                            charge = psms_to_consider[filename][scan]['charge']
+                            tolerance = psms_to_consider[filename][scan]['tolerance'] if psms_to_consider[filename][scan]['tolerance'] else tol
+                            matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
+                            try:
+                                spectrum = mzml_object.get_by_id("controllerType=0 controllerNumber=1 scan={}".format(scan))
+                            except:
+                                spectrum = mzml_object.get_by_id("scan={}".format(scan))
+                            peaks = list(zip(spectrum['m/z array'],spectrum['intensity array']))
+                            peaks, annotated_peaks, ion_vector, explained_intensity = prepare_spectrum(peaks,tolerance,precursor_func(spectrum),charge,sequence, True)
+                            explained_intensity_per_spectrum[(filename,scan)] = explained_intensity
+                            if threshold == 0:
+                                for synthetic_filescan, synthetic_peaks in matching_synthetics:
+                                    cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
+                                    cosine_to_synthetic_annotated[(filename,scan)] = (0,synthetic_filescan)
+                            else:
+                                # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
+                                for synthetic_filescan,synthetic_peaks in matching_synthetics:
+                                    synthetic_peaks, annotated_synthetic_peaks, ion_vector_synthetic, _ = prepare_spectrum(synthetic_peaks,0.05,precursor_func(spectrum),charge,sequence.replace('+229.163','').replace('+229.162932',''))
+                                    cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tolerance)
+                                    cosine_annotated,_ = sa.score_alignment(ion_vector,ion_vector_synthetic,0,0,tolerance)
+                                    if cosine > cosine_to_synthetic[(filename,scan)][0]:
+                                        cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
+                                    if cosine_annotated > cosine_to_synthetic_annotated[(filename,scan)][0]:
+                                        cosine_to_synthetic_annotated[(filename,scan)] = (cosine_annotated,synthetic_filescan)
+                    # print("{}: About to read {}".format(datetime.now().strftime("%H:%M:%S"),filename))
+                    # with mzml.read(filepath) as reader:
+                    #     precursor_func = lambda spectrum: float(spectrum['precursorList']['precursor'][0]['isolationWindow']['isolation window target m/z'])
+                    #     for spectrum in reader:
+                    #         spec_id = {idx.split('=')[0]:idx.split('=')[1] for idx in spectrum['id'].split(' ')}
+                    #         scan = spec_id['scan']
+                    #         if scan in psms_to_consider[filename]:
+                    #             peaks = zip(spectrum['m/z array'],spectrum['intensity array'])
+                    #             sequence = psms_to_consider[filename][scan]['sequence']
+                    #             charge = psms_to_consider[filename][scan]['charge']
+                    #             print((sequence,charge))
+                    #             matching_synthetics = synthetic_scans.get((sequence,charge),[])
+                    #             if len(matching_synthetics) > 0:
+                    #                 peaks = prepare_spectrum(peaks,tol,precursor_func(spectrum))
+                    #                 print("{}: {}".format(datetime.now().strftime("%H:%M:%S"),peaks))
+                    #             print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
+                    #             for synthetic_filescan,synthetic_peaks in matching_synthetics:
+                    #                 cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tol)
+                    #                 if cosine > cosine_to_synthetic[(filename,scan)][0]:
+                    #                     cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
+                if exts[0] == '.mgf':
+                    pass
+                if exts[0] == '.mzXML':
+                    print("{}: About to read {}".format(datetime.now().strftime("%H:%M:%S"),filename))
+                    precursor_func = lambda spectrum: float(spectrum["precursorMz"][0]["precursorMz"])
+                    with open(filepath, 'rb') as f:
+                        mzxml_object = mzxml.MzXML(f,use_index = True)
+                        # for spectrum in reader:
+                        for scan in psms_to_consider[filename].keys():
+                            sequence = psms_to_consider[filename][scan]['sequence']
+                            charge = psms_to_consider[filename][scan]['charge']
+                            tolerance = psms_to_consider[filename][scan]['tolerance'] if psms_to_consider[filename][scan]['tolerance'] else tol
+                            matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
+                            spectrum = mzxml_object.get_by_id(scan)
+                            peaks = list(zip(spectrum['m/z array'],spectrum['intensity array']))
+                            peaks, annotated_peaks, ion_vector, explained_intensity = prepare_spectrum(peaks,tolerance,precursor_func(spectrum),charge,sequence, True)
+                            explained_intensity_per_spectrum[(filename,scan)] = explained_intensity
+                            if threshold == 0:
+                                for synthetic_filescan, synthetic_peaks in matching_synthetics:
+                                    cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
+                                    cosine_to_synthetic_annotated[(filename,scan)] = (0,synthetic_filescan)
+                            else:
+                                # print("{}: About to calculate {} cosines".format(datetime.now().strftime("%H:%M:%S"),len(matching_synthetics)))
+                                for synthetic_filescan,synthetic_peaks in matching_synthetics:
+                                    synthetic_peaks, annotated_synthetic_peaks, ion_vector, _ = prepare_spectrum(synthetic_peaks,0.05,precursor_func(spectrum),charge,sequence.replace('+229.163','').replace('+229.162932',''))
+                                    cosine,_ = sa.score_alignment(peaks,synthetic_peaks,0,0,tolerance)
+                                    cosine_annotated,_ = sa.score_alignment(annotated_peaks,annotated_synthetic_peaks,0,0,tolerance)
+                                    if cosine > cosine_to_synthetic[(filename,scan)][0]:
+                                        cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
+                                    if cosine_annotated > cosine_to_synthetic_annotated[(filename,scan)][0]:
+                                        cosine_to_synthetic_annotated[(filename,scan)] = (cosine_annotated,synthetic_filescan)
 
     print("{}: About to write out PSMs".format(datetime.now().strftime("%H:%M:%S")))
 
     with open(args.output_psms.joinpath(args.jobs.name), 'w') as fw_psm:
-        header = psms_header + ['usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','explained_intensity','frag_tol']
+        header = psms_header + ['usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','explained_intensity']
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
         for psm in all_psms:
@@ -228,7 +237,7 @@ def main():
             psm['synthetic_usi'] = make_usi(synthetic_filename, synthetic_scan, psm['sequence'].replace('+229.163','').replace('+229.162932',''), psm['charge'])
             psm['cosine'] = cosine
             psm['explained_intensity'] = explained_intensity_per_spectrum.get((psm['filename'],psm['scan']),0)
-            psm['frag_tol'] = tol
+            psm['frag_tol'] = psm['frag_tol'] if psm['frag_tol'] != 0 else tol
             w_psm.writerow(psm)
     print("{}: Finished writing out PSMs".format(datetime.now().strftime("%H:%M:%S")))
 

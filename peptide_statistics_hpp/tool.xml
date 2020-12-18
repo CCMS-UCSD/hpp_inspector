@@ -224,6 +224,7 @@
           <arg option="-output_psms"      valueRef="novel_psms_w_cosine"/>
           <arg option="-peak_tolerance"   valueRef="@peak_tolerance"/>
           <arg option="-cosine_threshold"    valueRef="@cosine_threshold"/>
+          <arg option="-explained_intensity"        valueRef="@explained_intensity_threshold"/>
       </execution>
   </tool>
 

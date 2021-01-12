@@ -8,7 +8,7 @@ import re
 import ming_fileio_library
 import distance
 import regex
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from csv import DictReader
 
 if (sys.version_info > (3, 0)):
@@ -18,6 +18,7 @@ else:
     # Python 2 code in this block
     import cPickle as pickle
 
+ProteomeMatch = namedtuple('ProteomeMatch','protein, start_pos, end_pos, il_ambiguous, mismatches')
 
 class ProteinAnnotation:
     def __init__(self, annotation_class, start_site, end_site, annotation_text):
@@ -27,7 +28,7 @@ class ProteinAnnotation:
         self.annotation_text = annotation_text
 
 
-def parse_fasta_proteome_file(filename, external_PE = False):
+def parse_fasta_proteome_file(filename, output_raw = False, external_PE = False):
 
     pe_ref = {}
 
@@ -43,6 +44,7 @@ def parse_fasta_proteome_file(filename, external_PE = False):
     gene_name = ""
     PE_number = "10"
     proteome = Proteome()
+    raw_lines = []
 
     for line in open(filename, "r"):
         line = line.strip()
@@ -56,7 +58,8 @@ def parse_fasta_proteome_file(filename, external_PE = False):
                 proteome.add_protein(new_protein)
 
 
-            protein_name = line.split(" ")[0][1:]
+            protein_name = line.split(" ")[0][1:].split(";")[0].replace("GFFtoFASTA@","")
+            raw_lines.append(line)
             protein_sequence = ""
             #Try to get gene name
             name_splits = line.split(" ")
@@ -78,7 +81,10 @@ def parse_fasta_proteome_file(filename, external_PE = False):
     new_protein.pe_number = PE_number
     proteome.add_protein(new_protein)
 
-    return proteome
+    if output_raw:
+        return proteome, raw_lines
+    else:
+        return proteome
 
 class Proteome:
     def __init__(self):
@@ -172,6 +178,7 @@ class Proteome:
 
         return peptide_mapping
 
+    from collections import defaultdict, namedtuple
 
     def find_overlapping(self, peptide_len, prefixes, suffixes):
         overlapping = []
@@ -195,6 +202,53 @@ class Proteome:
                 else:
                     suffix_pos += 1
         return overlapping
+
+
+    def find_match(self, peptide, protein_map, prefixes, suffixes):
+        overlapping = set()
+        prefixes = [(True,prefix) for prefix in prefixes]
+        suffixes = [(False,suffix) for suffix in suffixes]
+        for is_prefix, (pos, protein) in prefixes + suffixes:
+            if is_prefix:
+                start_pos = pos
+                end_pos = pos+len(peptide)
+            else:
+                start_pos = pos+4-len(peptide)
+                end_pos = pos+4
+            protein_subsequence = protein_map[protein].sequence[start_pos:end_pos]
+            matches = 0
+            il_matches = 0
+            for aa_protein, aa_peptide in zip(protein_subsequence, peptide):
+                if aa_protein.replace('I','L') == aa_peptide.replace('I','L'):
+                    il_matches += 1
+                    if aa_protein == aa_peptide:
+                        matches += 1
+            if il_matches >= len(peptide)-1:
+                overlapping.add(ProteomeMatch(protein,start_pos,end_pos-1,matches!=il_matches,len(peptide)-il_matches))
+        return overlapping
+
+    #This is the fast way to do this
+    def get_peptides_mapped_to_proteins_efficient_w_coordinates_w_mismatch(self, peptide_list):
+        peptide_mapping = defaultdict(list)
+
+        fourmer_hash_to_proteins = defaultdict(list)
+        for protein in self.protein_list:
+            substring_set = set()
+            for i in range(len(protein.sequence)):
+                #do the IL substitution before mapping, since we want to keep track of both exact matches and I/L matches
+                substring = protein.sequence[i:i+4].replace('I','L')
+                fourmer_hash_to_proteins[substring].append((i,protein.protein))
+
+        for peptide in peptide_list:
+            il_peptide = peptide.replace('I','L')
+
+            protein_candidates_prefix = fourmer_hash_to_proteins[il_peptide[:4]]
+            protein_candidates_suffix = fourmer_hash_to_proteins[il_peptide[-4:]]
+
+            protein_candidates = self.find_match(peptide, self.protein_map, protein_candidates_prefix, protein_candidates_suffix)
+            peptide_mapping[peptide] = list(protein_candidates)
+
+        return peptide_mapping
 
     #This is the fast way to do this
     def get_peptides_mapped_to_proteins_efficient_w_coordinates(self, peptide_list):

@@ -100,6 +100,10 @@
             <column type="integer" field="synthetic_scan" label="Synthetic Scan" width="4"/> -->
             <column type="integer" field="canonical_matches" label="Canonical Protein Matches" width="1"/>
             <column type="text" field="gene_unique" label="Gene Unique" width="2"/>
+            <column type="integer" field="exon_junctions_covered" label="Exon Junctions Covered" width="1"/>
+            <column type="integer" field="exons_covered_no_junction" label="Complete Exons Covered" width="1"/>
+            <column type="integer" field="total_unique_exons_covered" label="Total Exons Covered" width="1"/>
+            <column type="text" field="exons_mapped" label="All Mapped Exons" width="10"/>
             <column type="text" field="type" label="Evidence Type" width="6"/>
             <column label="Add to Library" type="genericurlgenerator" width="12">
                 <parameter name="URLBASE" value="/ProteoSAFe/addToLibrary.jsp"/>
@@ -166,6 +170,9 @@
                 <column type="float" field="cosine" label="Best Annotated Cosine to Synthetic Spectrum Match" width="6" tooltip="Spectrum cosine using only annotated peaks from the input spectrum and closest matching synthetic."/>
                 <column type="integer" field="canonical_matches" label="#Protein Matches" width="1" tooltip = "Number of proteins the peptide matches to with a single amino acid variant."/>
                 <column type="text" field="gene_unique" label="Gene Unique" width="2" tooltip = "Peptide matches uniquely to a single gene with a single amino acid variant (True/False)."/>
+                <column type="integer" field="exon_junctions_covered" label="Exon Junctions Covered" width="1"/>
+                <column type="integer" field="exons_covered_no_junction" label="Complete Exons Covered" width="1"/>
+                <column type="integer" field="total_unique_exons_covered" label="Total Exons Covered" width="1"/>
                 <column type="text" field="type" label="Evidence Type" width="6" tooltip = "Novelty of sequence compared to MassIVE-KB.  If the sequence is not uniquely mapping, the value N/A is used."/>
                 <column label="Add to Library" type="genericurlgenerator" width="12">
                     <parameter name="URLBASE" value="/ProteoSAFe/addToLibrary.jsp"/>
@@ -183,6 +190,7 @@
                 <column type="text" field="database_usi" label="Best Peptide Spectrum Match (PSM) By PSM Identification Score" width="20"/>
                 <column type="text" field="cosine_usi" label="Best Peptide Spectrum Match (PSM) By Cosine to Synthetic Peptide Spectra" width="20"/>
                 <column type="text" field="synthetic_usi" label="Most-similar Synthetic Peptide Spectrum" width="20"/>
+                <column type="text" field="all_mapped_exons" label="All Mapped Exons" width="10"/>
                 <!-- <column type="text" field="database_filename" label="Best DB Filename" width="20"/>
                 <column type="integer" field="database_scan" label="Best DB Scan" width="4"/>
                 <column type="text" field="cosine_filename" label="Best Cosine Filename" width="20"/>

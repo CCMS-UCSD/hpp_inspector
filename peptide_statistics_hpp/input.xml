@@ -54,6 +54,14 @@
 			<fileGenerator type="upload" purpose="novel_psms_w_cosine_external" target="novel_psms_w_cosine_external"/>
 		</parameter>
 
+		<parameter name="dna" label="DNA Folder">
+			<fileGenerator type="upload" purpose="dna" target="dna"/>
+		</parameter>
+
+		<parameter name="gff" label="GFF File">
+			<fileGenerator type="upload" purpose="gff" target="gff"/>
+		</parameter>
+
 </parameters>
 
 	<!-- Input form layout -->
@@ -133,6 +141,30 @@
 										<input type="text" parameter="explained_intensity_threshold"/>
 								</cell>
 		        </row>
+	</block>
+	<block label="Advanced Exon Mapping Options">
+		<row>
+			<cell>
+						<label>
+								<content parameter="dna"/>
+						</label>
+				</cell>
+				<cell colspan="3">
+						<module id="dna" type="fileSelector">
+								<property name="label">DNA Folder</property>
+						</module>
+				</cell>
+		<cell>
+						<label>
+								<content parameter="gff"/>
+						</label>
+				</cell>
+				<cell colspan="3">
+						<module id="gff" type="fileSelector">
+								<property name="label">GFF File</property>
+						</module>
+				</cell>
+		</row>
 	</block>
 	<block label="Advanced Parallelization Options">
     <row>

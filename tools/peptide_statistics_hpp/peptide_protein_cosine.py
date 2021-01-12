@@ -15,6 +15,8 @@ from pathlib import Path
 import pickle
 from itertools import chain
 
+csv.field_size_limit(sys.maxsize)
+
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
     parser.add_argument('-k','--kb_pep', type = Path, help='Peptides from KB')
@@ -186,16 +188,26 @@ def read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,pep_
             gene_unique = l['gene_unique'] == 'True'
             sp_matches_saav = int(l['num_proteins_no_iso_no_tr'])
 
-            proteins = [
-                [p.split(' ')[0]] + p.split(' ')[1].replace('(','').replace(')','').split('-')
-                for p in
-                proteins_w_coords.split(';')
-            ]
+            if proteins_w_coords != "":
+                proteins = [
+                    [p.split(' ')[0]] + p.split(' ')[1].replace('(','').replace(')','').split('-')
+                    for p in
+                    proteins_w_coords.split(';')
+                ]
+            else:
+                proteins = []
+
+            mapped_exons_str = l["mapped_exons"]
+            exons = mapped_exons_str.split(';')
 
             match_obj = {
                 'gene_unique': gene_unique,
                 'canonical_matches': int(sp_matches_saav),
-                'all_proteins_w_coords': proteins_w_coords
+                'all_proteins_w_coords': proteins_w_coords,
+                'all_mapped_exons': mapped_exons_str,
+                'exon_junctions_covered': l['exon_junctions_covered'],
+                'exons_covered_no_junction': l['exons_covered_no_junction'],
+                'total_unique_exons_covered': l['total_unique_exons_covered']
             }
 
             pep_info[il_peptide] = match_obj
@@ -204,13 +216,28 @@ def read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,pep_
                 if len(protein) == 3:
                     accession = protein[0].split('|')[1]
                     aa_start = int(protein[1])
-                    aa_end = int(protein[2])
+                    aa_end = int(protein[2].replace('A',''))
+                    il_ambiguous = 'A' in protein[2]
                     if accession in nextprot_pe:
                         if 'XXX_' in protein[0]:
                             accession = 'XXX_{}'.format(accession)
                         all_proteins[accession][il_peptide].append((aa_start,aa_end))
                         if (aa_end - aa_start >= 9) and gene_unique and sp_matches_saav == 1:
                             added_proteins[accession][il_peptide].append((aa_start,aa_end))
+
+            exon_str_to_exon = lambda x: [tuple(x.split('/')) for x in x.split('-')]
+            for exon in exons:
+                print(exon)
+                chr,complete_exons_str,mapped_exons_str = exon.split(':')
+                complete = exon_str_to_exon(complete_exons_str)
+                mapped = exon_str_to_exon(mapped_exons_str)
+                mapped_str = '-'.join(["{}/{}".format(m[0],m[1]) for m in mapped])
+                complete_str = '-'.join(["{}/{}".format(c[0],c[1]) for c in complete])
+                print("\t{0}:{1} ({2})".format(chr, mapped_str, complete_str))
+                    # for transcript in mapping_transcripts:
+                    #     print("\t\t{0} {1}".format(*transcript))
+
+
     return all_proteins,added_proteins,pep_info
 
 def main():
@@ -280,9 +307,7 @@ def main():
                 for l in f:
                     nextprot_releases_pe[release_str][l.rstrip().replace('NX_','')] = pe
 
-    all_proteins,added_proteins,pep_mapping_info = read_protein_coverage(args.protein_coverage,all_proteins,added_proteins,pep_mapping_info,nextprot_pe)
-
-    for protein_coverage_file in args.protein_coverage_external.glob('*'):
+    for protein_coverage_file in chain(args.protein_coverage.glob('*'),args.protein_coverage_external.glob('*')):
         all_proteins,added_proteins,pep_mapping_info = read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,pep_mapping_info,nextprot_pe)
 
     for protein in all_proteins:
@@ -299,7 +324,7 @@ def main():
                 added_proteins_w_synthetic[protein][peptide] = added_proteins[protein][peptide]
 
     with open(args.output_psms,'w') as w:
-        header = ['protein','decoy','pe','ms_evidence','filename','scan','sequence','charge','usi','score','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end']
+        header = ['protein','decoy','pe','ms_evidence','filename','scan','sequence','charge','usi','score','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
 
         o = csv.DictWriter(w, delimiter='\t',fieldnames = header)
         o.writeheader()
@@ -382,7 +407,7 @@ def main():
                         representative_per_precursor[(sequence, charge)] = l
 
     with open(args.output_peptides,'w') as w:
-        header = ['protein','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','charge','score','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol']
+        header = ['protein','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','charge','score','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
         r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
         r.writeheader()
         for (sequence, charge), best_psm in representative_per_precursor.items():

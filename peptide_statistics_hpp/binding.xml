@@ -26,17 +26,22 @@
         <download port="fastadb" type="folder">
             <query name="resource" value="fastadb"/>
         </download>
+        <download port="dna" type="folder">
+                <query name="resource" value="dna"/>
+            </download>
+        <download port="gff" type="file">
+            <query name="resource" value="gff"/>
+        </download>
         <downloadParams>
             <query name="resource" value="params"/>
         </downloadParams>
 
     </bind>
 
-    <bind action="extract_peptides" tool="extract_peptides">
+    <bind action="extract_from_mztab" tool="extract_from_mztab">
         <inputAsRequirement port="mztab"             requirement="mztab"/>
-        <inputAsRequirement port="params"             requirement="params"/>
-        <productionToOutput port="peptidelist"    production="peptidelist"/>
-        <productionToOutput port="library_output"    production="library_output"/>
+        <productionToOutput port="peptide_list"    production="peptide_list"/>
+        <productionToOutput port="novel_psms"    production="novel_psms"/>
     </bind>
 
     <bind action="download_latest_kb" tool="download_latest_kb">
@@ -44,65 +49,17 @@
         <productionToOutput port="kb_pep"    production="kb_pep"/>
     </bind>
 
-    <bind action="protein_coverage_calculation_paramgeneration" tool="protein_coverage_calculation_paramgeneration">
-        <inputAsRequirement port="peptidelist"             requirement="peptidelist"/>
-        <inputAsRequirement port="fastadb"             requirement="fastadb"/>
-        <inputAsRequirement port="params"             requirement="params"/>
-        <productionToOutput port="parallel_params"    production="parallel_params"/>
-    </bind>
-
-	<bind action="protein_coverage_calculation_map" tool="protein_coverage_calculation_map">
-        <inputAsRequirement port="peptidelist"             requirement="peptidelist"/>
-        <inputAsRequirement port="fastadb"             requirement="fastadb"/>
-        <inputAsRequirement port="params"             requirement="params"/>
-        <inputAsRequirement port="parallel_params"    requirement="parallel_params"/>
-		<productionToOutput port="intermediate_protein_coverage"    production="intermediate_protein_coverage"/>
-        <productionToOutput port="debug_protein_coverage"    production="debug_protein_coverage"/>
-    </bind>
-
-    <bind action="unique_peptide_calculation_map" tool="unique_peptide_calculation_map">
-        <inputAsRequirement port="peptidelist"             requirement="peptidelist"/>
-        <inputAsRequirement port="fastadb"             requirement="fastadb"/>
-        <inputAsRequirement port="params"             requirement="params"/>
-        <inputAsRequirement port="parallel_params"    requirement="parallel_params"/>
-		<productionToOutput port="intermediate_unique_peptide_coverage"    production="intermediate_unique_peptide_coverage"/>
-    </bind>
-
-	<bind action="protein_coverage_calculation_reduce" tool="protein_coverage_calculation_reduce">
-        <inputAsRequirement port="peptidelist"             requirement="peptidelist"/>
-        <inputAsRequirement port="fastadb"             requirement="fastadb"/>
-        <inputAsRequirement port="params"             requirement="params"/>
-        <inputAsRequirement port="intermediate_protein_coverage"    requirement="intermediate_protein_coverage"/>
-        <inputAsRequirement port="intermediate_unique_peptide_coverage"    requirement="intermediate_unique_peptide_coverage"/>
-		<productionToOutput port="protein_coverage"    production="protein_coverage"/>
-        <productionToOutput port="unique_peptides_list"    production="unique_peptides_list"/>
-        <productionToOutput port="library_coverage_summary_statistics"    production="library_coverage_summary_statistics"/>
-    </bind>
-
-    <bind action="peptide_stats_coverage_map" tool="peptide_stats_coverage_map">
-        <inputAsRequirement port="peptidelist"             requirement="peptidelist"/>
-        <inputAsRequirement port="fastadb"             requirement="fastadb"/>
-        <inputAsRequirement port="params"             requirement="params"/>
-        <inputAsRequirement port="parallel_params"    requirement="parallel_params"/>
-		<productionToOutput port="intermediate_peptide_coverage"    production="intermediate_peptide_coverage"/>
-    </bind>
-
-    <bind action="peptide_stats_coverage_reduce" tool="merge_tsv_efficient">
-        <inputAsRequirement port="input_folder"       requirement="input_folder"/>
-        <productionToOutput port="output_file"           production="output_file"/>
-    </bind>
-
-    <bind action="merge_kb_coverage" tool="merge_kb_coverage">
-        <inputAsRequirement port="spec_on_server"                 requirement="spec_on_server"/>
-        <inputAsRequirement port="mztab"                          requirement="mztab"/>
-        <productionToOutput port="novel_psms"                     production="novel_psms"/>
+    <bind action="map_peptides" tool="map_peptides">
+        <inputAsRequirement port="peptide_list"             requirement="peptide_list"/>
+        <inputAsRequirement port="fastadb"                  requirement="fastadb"/>
+        <inputAsRequirement port="exon_fasta"               requirement="exon_fasta"/>
+		    <productionToOutput port="peptide_coverage"         production="peptide_coverage"/>
     </bind>
 
     <bind action="calculate_cosine_p" tool="split_identifications">
         <inputAsRequirement port="novel_psms"       requirement="novel_psms"/>
         <productionToOutput port="novel_psms_p"     production="novel_psms_p"/>
         <productionToOutput port="jobs"     production="jobs"/>
-
     </bind>
 
     <bind action="calculate_cosine" tool="calculate_cosine">
@@ -115,7 +72,7 @@
     <bind action="peptide_protein_cosine" tool="peptide_protein_cosine">
         <inputAsRequirement port="kb_pep"                         requirement="kb_pep"/>
         <inputAsRequirement port="novel_psms_w_cosine"       requirement="novel_psms_w_cosine"/>
-        <inputAsRequirement port="peptide_coverage_merged"        requirement="peptide_coverage_merged"/>
+        <inputAsRequirement port="peptide_coverage"        requirement="peptide_coverage"/>
         <inputAsRequirement port="novel_psms_w_cosine_external"       requirement="novel_psms_w_cosine_external"/>
         <inputAsRequirement port="peptide_coverage_merged_external"        requirement="peptide_coverage_merged_external"/>
         <productionToOutput port="novel_proteins_w_cosine"     production="novel_proteins_w_cosine"/>
@@ -128,6 +85,15 @@
         <inputAsRequirement port="novel_peptides_w_cosine"     requirement="novel_peptides_w_cosine"/>
         <inputAsRequirement port="merged_novel_psms_w_cosine"  requirement="merged_novel_psms_w_cosine"/>
         <productionToOutput port="sqlite"                      production="sqlite"/>
+    </bind>
+
+    <!-- Exon mapping -->
+
+    <bind action="make_fasta_from_gff" tool="make_fasta_from_gff">
+        <inputAsRequirement port="dna"             requirement="dna"/>
+        <inputAsRequirement port="gff"             requirement="gff"/>
+        <inputAsRequirement port="params"          requirement="params"/>
+        <productionToOutput port="exon_fasta"      production="fastadb"/>
     </bind>
 
     <bind action="end" type="upload">

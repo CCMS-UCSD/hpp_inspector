@@ -14,6 +14,7 @@ from pyteomics import mzml
 from pathlib import Path
 import pickle
 from itertools import chain
+import explorer_export
 
 csv.field_size_limit(sys.maxsize)
 
@@ -21,9 +22,9 @@ def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
     parser.add_argument('-k','--kb_pep', type = Path, help='Peptides from KB')
     parser.add_argument('-s','--skip_kb', type = Path, help='Skip Peptides from KB')
-    parser.add_argument('-x','--input_psms', type = Path, help='Input PSMs')
+    parser.add_argument('-a','--input_psms', type = Path, help='Input PSMs')
     parser.add_argument('-y','--input_psms_external', type = Path, help='Input PSMs (External)')
-    parser.add_argument('-e','--output_psms', type = Path, help='Output PSMs')
+    parser.add_argument('-o','--output_psms', type = Path, help='Output PSMs')
     parser.add_argument('-p','--output_peptides', type = Path, help='Output Peptides')
     parser.add_argument('-r','--output_proteins', type = Path, help='Output Proteins')
     parser.add_argument('-c','--protein_coverage', type = Path, help='Added Protein Coverage')
@@ -33,6 +34,11 @@ def arguments():
     parser.add_argument('-z','--nextprot_pe', type = Path, help='NextProt PEs (Latest)')
     parser.add_argument('-w','--nextprot_releases', type = Path, help='NextProt Releases')
     parser.add_argument('-m','--msv_to_pxd_mapping', type = Path, help='MSV to PXD Mapping')
+    parser.add_argument('-g','--external_provenance', type = Path, help='Provenance from Library Creation')
+    parser.add_argument('-v','--library_version', type = int, help='Library Version')
+    parser.add_argument('-n','--library_name', type = int, help='Library Name')
+    parser.add_argument('-x','--export_explorers', type = int, help='Export Explorer Tables (0/1)')
+    parser.add_argument('-e','--explorers_output', type = Path, help='Tables for Explorers')
 
     if len(sys.argv) < 4:
         parser.print_help()
@@ -207,10 +213,9 @@ def read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,pep_
                 'all_mapped_exons': mapped_exons_str,
                 'exon_junctions_covered': l['exon_junctions_covered'],
                 'exons_covered_no_junction': l['exons_covered_no_junction'],
-                'total_unique_exons_covered': l['total_unique_exons_covered']
+                'total_unique_exons_covered': l['total_unique_exons_covered'],
+                'mapped_proteins' : []
             }
-
-            pep_info[il_peptide] = match_obj
 
             for protein in proteins:
                 if len(protein) == 3:
@@ -221,21 +226,21 @@ def read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,pep_
                     if accession in nextprot_pe:
                         if 'XXX_' in protein[0]:
                             accession = 'XXX_{}'.format(accession)
+                        else:
+                            match_obj['mapped_proteins'].append((accession,(aa_start,aa_end),il_ambiguous))
                         all_proteins[accession][il_peptide].append((aa_start,aa_end))
                         if (aa_end - aa_start >= 9) and gene_unique and sp_matches_saav == 1:
                             added_proteins[accession][il_peptide].append((aa_start,aa_end))
 
+            pep_info[il_peptide] = match_obj
+
             exon_str_to_exon = lambda x: [tuple(x.split('/')) for x in x.split('-')]
-            for exon in exons:
-                print(exon)
-                chr,complete_exons_str,mapped_exons_str = exon.split(':')
-                complete = exon_str_to_exon(complete_exons_str)
-                mapped = exon_str_to_exon(mapped_exons_str)
-                mapped_str = '-'.join(["{}/{}".format(m[0],m[1]) for m in mapped])
-                complete_str = '-'.join(["{}/{}".format(c[0],c[1]) for c in complete])
-                print("\t{0}:{1} ({2})".format(chr, mapped_str, complete_str))
-                    # for transcript in mapping_transcripts:
-                    #     print("\t\t{0} {1}".format(*transcript))
+            # for exon in exons:
+            #     chr,complete_exons_str,mapped_exons_str = exon.split(':')
+            #     complete = exon_str_to_exon(complete_exons_str)
+            #     mapped = exon_str_to_exon(mapped_exons_str)
+            #     mapped_str = '-'.join(["{}/{}".format(m[0],m[1]) for m in mapped])
+            #     complete_str = '-'.join(["{}/{}".format(c[0],c[1]) for c in complete])
 
 
     return all_proteins,added_proteins,pep_info
@@ -324,7 +329,7 @@ def main():
                 added_proteins_w_synthetic[protein][peptide] = added_proteins[protein][peptide]
 
     with open(args.output_psms,'w') as w:
-        header = ['protein','decoy','pe','ms_evidence','filename','scan','sequence','charge','usi','score','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
+        header = ['protein','decoy','pe','ms_evidence','filename','scan','sequence','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
 
         o = csv.DictWriter(w, delimiter='\t',fieldnames = header)
         o.writeheader()
@@ -345,6 +350,7 @@ def main():
                             'ms_evidence':ms_existence.get(protein_no_decoy,'no')
                         })
                         l.update(pep_mapping_info[il_peptide])
+                        l.pop('mapped_proteins')
                     else:
                         l.update({
                             'protein': '',
@@ -407,7 +413,7 @@ def main():
                         representative_per_precursor[(sequence, charge)] = l
 
     with open(args.output_peptides,'w') as w:
-        header = ['protein','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','charge','score','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
+        header = ['protein','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
         r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
         r.writeheader()
         for (sequence, charge), best_psm in representative_per_precursor.items():
@@ -422,6 +428,7 @@ def main():
                     'aa_total':protein_length.get(protein_no_decoy,0)
                 })
                 best_psm.update(pep_mapping_info[sequence_il])
+                best_psm.pop('mapped_proteins')
             else:
                 best_psm.update({
                     'protein': '',
@@ -511,6 +518,9 @@ def main():
                 for release, pe_dict in nextprot_releases_pe.items():
                     protein_dict['_dyn_#{}'.format(release)] = pe_dict.get(protein_no_decoy,0)
                 w.writerow(protein_dict)
+
+    if args.export_explorers and args.export_explorers == 1:
+        explorer_export.output_for_explorer(args.explorers_output, pep_mapping_info, representative_per_precursor, args.external_provenance, args.library_name, args.library_version)
 
 if __name__ == '__main__':
     main()

@@ -62,6 +62,32 @@
 			<fileGenerator type="upload" purpose="gff" target="gff"/>
 		</parameter>
 
+
+		<parameter name="export_explorers" label="Export Explorer Tables">
+			<options>
+				<option label="Yes" value="1" />
+				<option label="No" value="0" />
+			</options>
+			<default value="0" />
+			<validator type="set" />
+		</parameter>
+
+		<parameter name="library_name" label="Library Name">
+			<options>
+							<option label="MassIVE-KB (in-vivo)" value="2" />
+			</options>
+			<default value="2" />
+			<validator type="set" />
+		</parameter>
+
+		<parameter name="library_version" label="Library Version">
+			<validator type="integer"/>
+		</parameter>
+
+		<parameter name="external_provenance" label="Unprocessed Provenance">
+			<fileGenerator type="upload" purpose="external_provenance" target="external_provenance"/>
+		</parameter>
+
 </parameters>
 
 	<!-- Input form layout -->
@@ -198,6 +224,48 @@
 						<cell colspan="3">
 								<module id="novel_psms_w_cosine_external" type="fileSelector">
 										<property name="label">merged_novel_psms_w_cosine</property>
+								</module>
+						</cell>
+				</row>
+	</block>
+	<block label="Advanced Explorer Outputs">
+		<row>
+			<cell>
+				<label>
+					<content parameter="export_explorers"/>
+				</label>
+			</cell>
+			<cell colspan="2">
+				<input type="select" parameter="export_explorers"/>
+			</cell>
+		</row>
+		<row>
+				<cell>
+					<label>
+						<content parameter="library_name"/>
+					</label>
+				</cell>
+				<cell colspan="2">
+					<input type="select" parameter="library_name"/>
+				</cell>
+				<cell>
+					<label>
+						<content parameter="library_version"/>
+					</label>
+				</cell>
+				<cell colspan="2">
+					<input type="text" parameter="library_version"/>
+				</cell>
+			</row>
+			<row>
+						<cell>
+								<label>
+										<content parameter="external_provenance"/>
+								</label>
+						</cell>
+						<cell colspan="3">
+								<module id="external_provenance" type="fileSelector">
+										<property name="label">external_provenance</property>
 								</module>
 						</cell>
 				</row>

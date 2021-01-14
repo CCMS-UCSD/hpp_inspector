@@ -28,7 +28,8 @@
 	<collection name="peptide_coverage"/>
 	<collection name="peptide_coverage_merged_external"/>
 	<collection name="novel_psms_w_cosine_external"/>
-
+	<object name="external_provenance"/>
+	<collection name="explorer_export"/>
 	<collection name="sqlite"/>
 
     <action name="begin">
@@ -39,8 +40,9 @@
         <output port="params" object="workflowParameters"/>
 				<output port="peptide_coverage_merged_external"       			 collection="peptide_coverage_merged_external"/>
 				<output port="novel_psms_w_cosine_external"       collection="novel_psms_w_cosine_external"/>
-				<output  port="dna"             collection="dna"/>
-				<output  port="gff"             object="gff"/>
+				<output  port="dna"             								collection="dna"/>
+				<output  port="gff"             								object="gff"/>
+				<output  port="external_provenance"             object="external_provenance"/>
     </action>
 
 		<action name="extract_from_mztab">
@@ -91,9 +93,11 @@
 			<input   port="peptide_coverage"   collection="peptide_coverage"/>
 			<input   port="novel_psms_w_cosine_external"       collection="novel_psms_w_cosine_external"/>
 			<input   port="peptide_coverage_merged_external"   collection="peptide_coverage_merged_external"/>
+			<input   port="external_provenance"   object="external_provenance"/>
 			<output  port="novel_proteins_w_cosine"      object="novel_proteins_w_cosine"/>
 			<output  port="novel_peptides_w_cosine"      object="novel_peptides_w_cosine"/>
 			<output  port="merged_novel_psms_w_cosine"   object="merged_novel_psms_w_cosine"/>
+			<output  port="explorer_export"   					collection="explorer_export"/>
 		</action>
 
 		<action name="convert_tsv_to_sqlite">
@@ -106,7 +110,7 @@
 		<object name="dna"/>
 		<object name="gff"/>
 		<object name="exon_fasta"/>
-		
+
 		<!-- Exon mapping -->
 		<action name="make_fasta_from_gff" >
 			<input  port="dna"             collection="dna"/>
@@ -126,5 +130,6 @@
 				<input port="merged_novel_psms_w_cosine" object="merged_novel_psms_w_cosine"/>
 				<input port="novel_peptides_w_cosine" object="novel_peptides_w_cosine"/>
 				<input port="sqlite" collection="sqlite"/>
+				<input port="explorer_export" collection="explorer_export"/>
 		</action>
 </flow>

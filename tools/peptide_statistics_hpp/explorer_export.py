@@ -1,3 +1,6 @@
+from pathlib import Path
+from csv import DictReader, DictWriter
+from collections import defaultdict
 
 def headers(key):
     return {
@@ -102,29 +105,64 @@ def headers(key):
 
 def table_output(index,table,output_folder,output_rows, postprocess = ''):
     print("{}: {} rows".format(table,len(output_rows)));
-    variant_output_file = os.path.join(output_folder,"{}_{}.tsv".format(index,table))
+    variant_output_file = output_folder.joinpath("{}_{}.tsv".format(index,table))
     variant_output_file_processed = variant_output_file
     if postprocess:
-        variant_output_file_processed = os.path.join(output_folder,"{}{}_{}.tsv".format(index,postprocess,table))
+        variant_output_file_processed = output_folder.joinpath("{}{}_{}.tsv".format(index,postprocess,table))
     with open(variant_output_file, 'w') as w:
         for (i,row) in enumerate(output_rows):
             w.write("{}\n".format(",".join(["\"{}\"".format(r) for r in row])))
 
+def table_from_dataset_proteins(dataset_protein_dict):
+    dataset_protein_rows = []
+    for ((dataset,protein),d) in dataset_protein_dict.items():
+        dataset_protein_rows.append([
+            dataset,
+            protein,
+            str(len(d['unique_peptides'])),
+            str(len(d['exon_unique'].intersection(d['unique_peptides']))),
+            str(len(d['splice_junction'].intersection(d['unique_peptides']))),
+            str(len(d['exon_mapped'])),
+            str(d['psms_shared']),
+            str(d['psms_unique'])
+        ])
+    return dataset_protein_rows
+
+def table_from_proteins(protein_dict, hupo_mapping, unique_mapping, library_id, library_version):
+    protein_rows = []
+    for (protein,d) in protein_dict.items():
+        protein_rows.append([
+            protein,
+            library_id,
+            library_version,
+            str(unique_mapping.get(protein,0)),
+            str(len(d['exon_unique'].intersection(d['unique_peptides']))),
+            str(len(d['splice_junction'].intersection(d['unique_peptides']))),
+            str(len(d['exon_mapped'])),
+            str(len(d['peptides'])),
+            str(len(d['variants'])),
+            str(len(d['modifications'])),
+            str(len(d['datasets'])),
+            str(d['psms_shared']),
+            str(d['psms_unique']),
+            str(hupo_mapping.get(protein,0))
+        ])
+    return protein_rows
 
 def mapping_to_peptides_and_mapping(input_mapping, library_id):
-    output_peptides, output_mapping = [],[]
+    peptides, mappings = [],[]
     for peptide, mapping_obj in input_mapping.items():
-        output_peptides.append([
+        peptides.append([
             peptide,
             mapping_obj['canonical_matches'],
-            mapping_obj['gene_unique'],
-            0,
-            0,
-            0,
+            1 if mapping_obj['gene_unique'] else 2,
+            1 if (mapping_obj['exon_junctions_covered'] + mapping_obj['exons_covered_no_junction']) == 1 else 0,
+            mapping_obj['exon_junctions_covered'],
+            mapping_obj['total_unique_exons_covered'],
             len(peptide)
         ])
-        for protein,(start_aa, end_aa),exact in mapping_obj['mappings']:
-            output_mapping.append([
+        for protein,(start_aa,end_aa),exact in mapping_obj['mapped_proteins']:
+            mappings.append([
                 peptide,
                 "#peptide_id:" + peptide,
                 protein,
@@ -132,4 +170,140 @@ def mapping_to_peptides_and_mapping(input_mapping, library_id):
                 end_aa,
                 library_id if exact else 0
             ])
-    return output_peptides, output_mapping
+    return peptides, mappings
+
+def representatives_to_representatives_and_variants(representatives_table, library_id, library_version):
+    representatives, variants = [], []
+    for (sequence, charge), representative in representatives_table.items():
+        just_sequence = "".join([p for p in sequence if p.isalpha()])
+        representatives.append([
+            library_id,
+            representative['charge'],
+            '#provenance_id:{}.scan={}'.format(representative['database_filename'],representative['database_scan']),
+            "#variant_id:" + sequence,
+            "#peptide_id:" + just_sequence,
+            library_version,
+            representative['score']
+        ])
+        variants.append([
+            representative['sequence'],
+            just_sequence,
+            "#peptide_id:" + just_sequence,
+            float(representative['parent_mass']),
+            representative['modifications']
+        ])
+    return representatives, variants
+
+def update_provenance(input_provenance, input_representatives, input_mappings, library_id, output_provenance):
+    proteins_stats = defaultdict(
+        lambda : {
+            'exon_unique':set(),
+            'splice_junction':set(),
+            'exon_mapped':set(),
+            'unique_peptides':set(),
+            'peptides':set(),
+            'variants':set(),
+            'modifications':set(),
+            'datasets':set(),
+            'psms_unique':0,
+            'psms_shared':0,
+            'hupo_nonoverlapping':0
+        }
+    )
+    dataset_proteins = defaultdict(lambda : {'exon_unique':set(),'splice_junction':set(),'exon_mapped':set(), 'unique_peptides':set(), 'psms_unique':0, 'psms_shared':0})
+    provenance_representatives = []
+
+    provenance_file = None
+    provenance_generator = None
+
+    if Path(input_provenance).is_file():
+        print("External Provenance File")
+        provenance_file = open(input_provenance)
+        provenance_lines = DictReader(provenance_file, delimiter = '\t')
+
+        get_sequence = lambda l: l['annotation']
+        get_charge = lambda l: l['charge']
+        get_filename = lambda l: l['filename']
+        get_scan = lambda l: l['scan']
+        get_proteosafe_task = lambda l: l['proteosafe_task']
+        get_workflow = lambda l, a: l.get('workflow',a)
+        get_search_url = lambda l: l.get('search_url','https://proteomics2.ucsd.edu/ProteoSAFe/status.jsp?task={}'.format(get_proteosafe_task(l)))
+    else:
+        provenance_lines = input_provenance.values()
+        get_sequence = lambda l: l['sequence']
+        get_charge = lambda l: l['charge']
+        get_filename = lambda l: l['filename']
+        get_scan = lambda l: l['scan']
+        get_proteosafe_task = lambda l: l['proteosafe_task']
+        get_workflow = lambda l, a: l.get('workflow',a)
+        get_search_url = lambda l: l.get('search_url','https://proteomics2.ucsd.edu/ProteoSAFe/status.jsp?task={}'.format(get_proteosafe_task(l)))
+
+    with open(output_provenance, 'w') as w:
+        for l in provenance_lines:
+            if (get_sequence(l),get_charge(l)) in input_representatives:
+                precursor_il = "".join([p.replace('I','L') for p in get_sequence(l)])
+                sequence_il = "".join([p.replace('I','L') for p in get_sequence(l) if p.isalpha()])
+                dataset = get_filename(l).split('/')[0]
+                mappings = input_mappings[sequence_il]
+                # for peptide in peptide_il_map[il_peptide]:
+                just_accessions = set([p[0] for p in mappings['mapped_proteins']])
+                exon_unique = 1 if (mappings['exon_junctions_covered'] + mappings['exons_covered_no_junction']) == 1 else 0
+                splice_junction = mappings['exon_junctions_covered']
+                exon_mapped = mappings['total_unique_exons_covered']
+                if len(just_accessions) > 0:
+                    for protein in just_accessions:
+                        proteins_stats[protein]['psms_shared'] += 1
+                        dataset_proteins[(dataset,protein)]['psms_shared'] += 1
+                        proteins_stats[protein]['peptides'].add(sequence_il)
+                        proteins_stats[protein]['variants'].add(precursor_il)
+                        proteins_stats[protein]['datasets'].add(dataset)
+                        if len(just_accessions) == 1:
+                            proteins_stats[protein]['psms_unique'] += 1
+                            dataset_proteins[(dataset,protein)]['psms_unique'] += 1
+                            dataset_proteins[(dataset,protein)]['unique_peptides'].add(sequence_il)
+                            proteins_stats[protein]['unique_peptides'].add(sequence_il)
+                        if int(exon_mapped) > 0:
+                            dataset_proteins[(dataset,protein)]['exon_mapped'].add(sequence_il)
+                            proteins_stats[protein]['exon_mapped'].add(sequence_il)
+                        if int(splice_junction) > 0:
+                            dataset_proteins[(dataset,protein)]['splice_junction'].add(sequence_il)
+                            proteins_stats[protein]['splice_junction'].add(sequence_il)
+                        if int(exon_unique) > 0:
+                            dataset_proteins[(dataset,protein)]['exon_unique'].add(sequence_il)
+                            proteins_stats[protein]['exon_unique'].add(sequence_il)
+                w.write(','.join([
+                    get_filename(l),
+                    'scan={}'.format(get_scan(l)),
+                    dataset,
+                    get_charge(l),
+                    get_proteosafe_task(l),
+                    get_workflow(l,'MSGF_PLUS').upper(),
+                    get_search_url(l),
+                    get_sequence(l)
+                ]))
+                provenance_representatives.append((
+                    '#provenance_id:{}.scan={}'.format(get_filename(l),get_scan(l)),
+                    '#representative_id:{}.{}.{}'.format(get_sequence(l),get_charge(l),library_id)
+                ))
+
+    return provenance_representatives, dataset_proteins, proteins_stats
+
+
+def output_for_explorer(output_folder, input_mappings, input_representatives, input_provenance, library_id, library_version):
+    peptides, mappings = mapping_to_peptides_and_mapping(input_mappings, library_id)
+    representatives, variants = representatives_to_representatives_and_variants(input_representatives, library_id, library_version)
+    # need to stream provenance
+    output_provenance = output_folder.joinpath("{}_{}.tsv".format(5,'psm_provenance'))
+    provenance_representatives, dataset_protein_dict, proteins_stats_dict = update_provenance(input_provenance, input_representatives, input_mappings, library_id, output_provenance)
+
+    dataset_proteins = table_from_dataset_proteins(dataset_protein_dict)
+    protein_stats = table_from_proteins(proteins_stats_dict, {}, {}, library_id, library_version)
+
+    table_output(2, 'peptides', output_folder, peptides)
+    table_output(3, 'variants', output_folder, variants)
+    table_output(4, 'peptide_mapping', output_folder, mappings)
+    # table_output(5, 'psm_provenance', args.output_folder, provenance)
+    table_output(6, 'representatives', output_folder, representatives, 'a')
+    table_output(7, 'provenance_representative', output_folder, provenance_representatives, 'b')
+    table_output(8, 'protein_datasets', output_folder, dataset_proteins)
+    table_output(9, 'protein_statistics', output_folder, protein_stats)

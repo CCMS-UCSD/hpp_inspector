@@ -32,6 +32,9 @@
         <download port="gff" type="file">
             <query name="resource" value="gff"/>
         </download>
+        <download port="external_provenance" type="file">
+            <query name="resource" value="external_provenance"/>
+        </download>
         <downloadParams>
             <query name="resource" value="params"/>
         </downloadParams>
@@ -75,9 +78,11 @@
         <inputAsRequirement port="peptide_coverage"        requirement="peptide_coverage"/>
         <inputAsRequirement port="novel_psms_w_cosine_external"       requirement="novel_psms_w_cosine_external"/>
         <inputAsRequirement port="peptide_coverage_merged_external"        requirement="peptide_coverage_merged_external"/>
+        <inputAsRequirement port="external_provenance"        requirement="external_provenance"/>
         <productionToOutput port="novel_proteins_w_cosine"     production="novel_proteins_w_cosine"/>
         <productionToOutput port="novel_peptides_w_cosine"     production="novel_peptides_w_cosine"/>
         <productionToOutput port="merged_novel_psms_w_cosine"     production="merged_novel_psms_w_cosine"/>
+        <productionToOutput port="explorer_export"     production="explorer_export"/>
     </bind>
 
     <bind action="convert_tsv_to_sqlite" tool="convert_tsv_to_sqlite">
@@ -128,5 +133,8 @@
         <upload port="sqlite" type="folder">
             <query name="resource" value="sqlite"/>
         </upload>
+      <upload port="explorer_export" type="folder">
+          <query name="resource" value="explorer_export"/>
+      </upload>
     </bind>
 </binding>

@@ -113,9 +113,10 @@ def read_lib(mztab_file, ids):
     with open(mztab_file) as f:
         r = csv.DictReader(f, delimiter = '\t')
         for l in r:
-            filename = l['filename']
-            scan = int(l['scan'].replace('scan=',''))
-            peptide = l['annotation']
+            #fall back to old way of naming this file
+            filename = l['filename'] if ('filename' in l) else l['originalfile_filename']
+            scan = int(l['scan'].replace('scan=','')) if ('scan' in l) else int(l['originalfile_scan'])
+            peptide = l['annotation'] if ('annotation' in l) else l['peptide']
             charge = int(l['charge'])
             parent_mass = float(l.get('mz',1))
             score = float(l['score'])

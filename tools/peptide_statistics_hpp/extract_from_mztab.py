@@ -41,7 +41,7 @@ def main():
     peptides = set()
 
     with open(args.novel_psms, 'w') as fw_psm:
-        header = ['filename','scan','sequence','charge','score','pass','type','parent_mass','frag_tol']
+        header = ['filename','scan','sequence','charge','score','pass','type','parent_mass','frag_tol','modifications']
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
         for (filescan,psm) in ids.items():
@@ -54,7 +54,8 @@ def main():
                 'score':psm[0].score,
                 'pass':'N/A',
                 'parent_mass':psm[0].parent_mass,
-                'frag_tol':psm[0].fragment_tolerance if psm[0].fragment_tolerance else float(args.peak_tolerance)
+                'frag_tol':psm[0].fragment_tolerance if psm[0].fragment_tolerance else float(args.peak_tolerance),
+                'modifications':psm[0].modifications
             }
             w_psm.writerow(psm_row)
 

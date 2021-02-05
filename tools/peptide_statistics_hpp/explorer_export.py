@@ -162,13 +162,22 @@ def mapping_to_peptides_and_mapping(input_mapping, library_id):
             len(peptide)
         ])
         for protein,(start_aa,end_aa),exact in mapping_obj['mapped_proteins']:
+            if exact:
+                mappings.append([
+                    peptide,
+                    "#peptide_id:" + peptide,
+                    protein,
+                    start_aa,
+                    end_aa,
+                    library_id
+                ])
             mappings.append([
                 peptide,
                 "#peptide_id:" + peptide,
                 protein,
                 start_aa,
                 end_aa,
-                library_id if exact else 0
+                0
             ])
     return peptides, mappings
 
@@ -220,7 +229,6 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
         print("External Provenance File")
         provenance_file = open(input_provenance)
         provenance_lines = DictReader(provenance_file, delimiter = '\t')
-
         get_sequence = lambda l: l['annotation']
         get_charge = lambda l: l['charge']
         get_filename = lambda l: l['filename']
@@ -243,8 +251,9 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
             if (get_sequence(l),get_charge(l)) in input_representatives:
                 precursor_il = "".join([p.replace('I','L') for p in get_sequence(l)])
                 sequence_il = "".join([p.replace('I','L') for p in get_sequence(l) if p.isalpha()])
+                sequence_nomod = "".join([p for p in get_sequence(l) if p.isalpha()])
                 dataset = get_filename(l).split('/')[0]
-                mappings = input_mappings[sequence_il]
+                mappings = input_mappings[sequence_nomod]
                 # for peptide in peptide_il_map[il_peptide]:
                 just_accessions = set([p[0] for p in mappings['mapped_proteins']])
                 exon_unique = 1 if (mappings['exon_junctions_covered'] + mappings['exons_covered_no_junction']) == 1 else 0
@@ -280,16 +289,17 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
                     get_workflow(l,'MSGF_PLUS').upper(),
                     get_search_url(l),
                     get_sequence(l)
-                ]))
+                ]) + '\n')
                 provenance_representatives.append((
                     '#provenance_id:{}.scan={}'.format(get_filename(l),get_scan(l)),
                     '#representative_id:{}.{}.{}'.format(get_sequence(l),get_charge(l),library_id)
                 ))
-
+    if Path(input_provenance).is_file():
+        provenance_file.close()
     return provenance_representatives, dataset_proteins, proteins_stats
 
 
-def output_for_explorer(output_folder, input_mappings, input_representatives, input_provenance, library_id, library_version):
+def output_for_explorer(output_folder, input_mappings, input_representatives, input_provenance, hupo_mapping, unique_mapping, library_id, library_version):
     peptides, mappings = mapping_to_peptides_and_mapping(input_mappings, library_id)
     representatives, variants = representatives_to_representatives_and_variants(input_representatives, library_id, library_version)
     # need to stream provenance
@@ -297,7 +307,7 @@ def output_for_explorer(output_folder, input_mappings, input_representatives, in
     provenance_representatives, dataset_protein_dict, proteins_stats_dict = update_provenance(input_provenance, input_representatives, input_mappings, library_id, output_provenance)
 
     dataset_proteins = table_from_dataset_proteins(dataset_protein_dict)
-    protein_stats = table_from_proteins(proteins_stats_dict, {}, {}, library_id, library_version)
+    protein_stats = table_from_proteins(proteins_stats_dict, hupo_mapping, unique_mapping, library_id, library_version)
 
     table_output(2, 'peptides', output_folder, peptides)
     table_output(3, 'variants', output_folder, variants)

@@ -228,11 +228,11 @@ def read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,pep_
                             accession = 'XXX_{}'.format(accession)
                         else:
                             match_obj['mapped_proteins'].append((accession,(aa_start,aa_end),il_ambiguous))
-                        all_proteins[accession][il_peptide].append((aa_start,aa_end))
+                        all_proteins[accession][il_peptide].append(((aa_start,aa_end),gene_unique and sp_matches_saav == 1))
                         if (aa_end - aa_start >= 9) and gene_unique and sp_matches_saav == 1:
                             added_proteins[accession][il_peptide].append((aa_start,aa_end))
 
-            pep_info[il_peptide] = match_obj
+            pep_info[peptide] = match_obj
 
             exon_str_to_exon = lambda x: [tuple(x.split('/')) for x in x.split('-')]
             # for exon in exons:
@@ -337,6 +337,7 @@ def main():
             with open(input_psm) as f:
                 r = csv.DictReader(f, delimiter='\t')
                 for l in r:
+                    peptide = ''.join([p for p in l['sequence'] if p.isalpha()])
                     il_peptide = ''.join([p.replace('I','L') for p in l['sequence'] if p.isalpha()])
                     protein = peptide_to_protein.get(il_peptide)
                     l['usi'] = correct_usi(l['usi'], msv_mapping)
@@ -349,7 +350,7 @@ def main():
                             'pe': nextprot_pe.get(protein_no_decoy,''),
                             'ms_evidence':ms_existence.get(protein_no_decoy,'no')
                         })
-                        l.update(pep_mapping_info[il_peptide])
+                        l.update(pep_mapping_info[peptide])
                         l.pop('mapped_proteins')
                     else:
                         l.update({
@@ -358,7 +359,7 @@ def main():
                             'ms_evidence':''
                         })
                     if il_peptide in all_proteins.get(protein,{}):
-                        l['aa_start'],l['aa_end'] = all_proteins[protein][il_peptide][0]
+                        l['aa_start'],l['aa_end'] = all_proteins[protein][il_peptide][0][0]
                     else:
                         l['aa_start'],l['aa_end'] = "N/A","N/A"
 
@@ -417,6 +418,7 @@ def main():
         r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
         r.writeheader()
         for (sequence, charge), best_psm in representative_per_precursor.items():
+            sequence_nomod = ''.join([p for p in sequence if p.isalpha()])
             sequence_il = ''.join([p.replace('I','L') for p in sequence if p.isalpha()])
             protein = peptide_to_protein.get(sequence_il)
             if protein:
@@ -427,7 +429,7 @@ def main():
                     'ms_evidence':ms_existence.get(protein_no_decoy,'no'),
                     'aa_total':protein_length.get(protein_no_decoy,0)
                 })
-                best_psm.update(pep_mapping_info[sequence_il])
+                best_psm.update(pep_mapping_info[sequence_nomod])
                 best_psm.pop('mapped_proteins')
             else:
                 best_psm.update({
@@ -437,7 +439,7 @@ def main():
                     'aa_total':''
                 })
             if sequence_il in all_proteins.get(protein,{}):
-                best_psm['aa_start'],best_psm['aa_end'] = all_proteins[protein][sequence_il][0]
+                best_psm['aa_start'],best_psm['aa_end'] = all_proteins[protein][sequence_il][0][0]
             else:
                 best_psm['aa_start'],best_psm['aa_end'] = "N/A","N/A"
             if sequence_il in added_proteins.get(protein,{}):
@@ -499,7 +501,7 @@ def main():
         w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames)
         w.writeheader()
 
-        for protein in set(all_proteins.keys()).union(set(kb_proteins.keys())):
+        for protein in set(all_proteins.keys()):
             protein_no_decoy = protein.replace('XXX_','')
             if (protein_no_decoy in nextprot_pe):
                 protein_dict = {
@@ -520,7 +522,19 @@ def main():
                 w.writerow(protein_dict)
 
     if args.export_explorers and args.export_explorers == 1:
-        explorer_export.output_for_explorer(args.explorers_output, pep_mapping_info, representative_per_precursor, args.external_provenance, args.library_name, args.library_version)
+        hupo_mapping = {}
+        unique_mapping = {}
+        for protein, peptides in added_proteins.items():
+            protein_dict = {
+                'protein': protein,
+                'pe': nextprot_pe.get(protein_no_decoy,0),
+                'ms_evidence':ms_existence.get(protein_no_decoy,'no'),
+                'aa_total':protein_length.get(protein_no_decoy,0)
+            }
+            hupo_mapping[protein] = find_overlap({},peptides,int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0]['new_hpp']
+        for protein, peptides in all_proteins.items():
+            unique_mapping[protein] = len(set([peptide for peptide, mappings in peptides.items() if mappings[0][1]]))
+        explorer_export.output_for_explorer(args.explorers_output, pep_mapping_info, representative_per_precursor, args.external_provenance, hupo_mapping, unique_mapping, args.library_name, args.library_version)
 
 if __name__ == '__main__':
     main()

@@ -161,8 +161,8 @@ def mapping_to_peptides_and_mapping(input_mapping, library_id):
             mapping_obj['total_unique_exons_covered'],
             len(peptide)
         ])
-        for protein,(start_aa,end_aa),exact in mapping_obj['mapped_proteins']:
-            if exact:
+        for protein,(start_aa,end_aa),il_ambiguous in mapping_obj['mapped_proteins']:
+            if not il_ambiguous:
                 mappings.append([
                     peptide,
                     "#peptide_id:" + peptide,

@@ -101,7 +101,7 @@ def main():
             complete_proteins_covered = peptide_to_protein_map[peptide]
 
             proteins_covered_exact = list(set([p.protein for p in complete_proteins_covered if p.mismatches == 0]))
-            proteins_covered_mismatch = list(set([p.protein for p in complete_proteins_covered if p.mismatches == 1]))
+            proteins_covered_mismatch = list(set([p.protein for p in complete_proteins_covered if p.mismatches <= 1]))
             proteins_covered_no_iso_no_tr = set([p.split("|")[1].split("-")[0] for p in proteins_covered_mismatch if "sp" in p])
             proteins_covered_no_tr = set([p for p in proteins_covered_mismatch if "sp" in p])
 

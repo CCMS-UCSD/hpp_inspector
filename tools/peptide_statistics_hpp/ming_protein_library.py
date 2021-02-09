@@ -224,7 +224,7 @@ class Proteome:
                     if aa_protein == aa_peptide:
                         matches += 1
             if il_matches >= len(peptide)-1:
-                overlapping.add(ProteomeMatch(protein,start_pos,end_pos-1,matches!=il_matches,len(peptide)-il_matches))
+                overlapping.add(ProteomeMatch(protein,start_pos,end_pos,matches!=il_matches,len(peptide)-il_matches))
         return overlapping
 
     #This is the fast way to do this

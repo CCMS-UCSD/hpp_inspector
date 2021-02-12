@@ -188,7 +188,7 @@ def representatives_to_representatives_and_variants(representatives_table, libra
         representatives.append([
             library_id,
             representative['charge'],
-            '#provenance_id:{}.scan={}'.format(representative['database_filename'],representative['database_scan']),
+            '#provenance_id:{}.scan={}'.format(representative['database_filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW"),representative['database_scan']),
             "#variant_id:" + sequence,
             "#peptide_id:" + just_sequence,
             library_version,
@@ -203,7 +203,7 @@ def representatives_to_representatives_and_variants(representatives_table, libra
         ])
     return representatives, variants
 
-def update_provenance(input_provenance, input_representatives, input_mappings, library_id, output_provenance):
+def update_provenance(input_provenance, input_representatives, input_mappings, library_id, output_provenance, output_provenance_representatives):
     proteins_stats = defaultdict(
         lambda : {
             'exon_unique':set(),
@@ -220,7 +220,6 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
         }
     )
     dataset_proteins = defaultdict(lambda : {'exon_unique':set(),'splice_junction':set(),'exon_mapped':set(), 'unique_peptides':set(), 'psms_unique':0, 'psms_shared':0})
-    provenance_representatives = []
 
     provenance_file = None
     provenance_generator = None
@@ -231,7 +230,8 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
         provenance_lines = DictReader(provenance_file, delimiter = '\t')
         get_sequence = lambda l: l['annotation']
         get_charge = lambda l: l['charge']
-        get_filename = lambda l: l['filename']
+        # replace is because a symlink was used in construction of KB 2.0.1
+        get_filename = lambda l: l['filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW")
         get_scan = lambda l: l['scan']
         get_proteosafe_task = lambda l: l['proteosafe_task']
         get_workflow = lambda l, a: l.get('workflow',a)
@@ -246,7 +246,7 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
         get_workflow = lambda l, a: l.get('workflow',a)
         get_search_url = lambda l: l.get('search_url','https://proteomics2.ucsd.edu/ProteoSAFe/status.jsp?task={}'.format(get_proteosafe_task(l)))
 
-    with open(output_provenance, 'w') as w:
+    with open(output_provenance, 'w') as w_provenance,  open(output_provenance_representatives, 'w') as w_provenance_representatives:
         for l in provenance_lines:
             if (get_sequence(l),get_charge(l)) in input_representatives:
                 precursor_il = "".join([p.replace('I','L') for p in get_sequence(l)])
@@ -280,7 +280,7 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
                         if int(exon_unique) > 0:
                             dataset_proteins[(dataset,protein)]['exon_unique'].add(sequence_il)
                             proteins_stats[protein]['exon_unique'].add(sequence_il)
-                w.write(','.join([
+                w_provenance.write(','.join(["\"{}\"".format(r) for r in [
                     get_filename(l),
                     'scan={}'.format(get_scan(l)),
                     dataset,
@@ -289,14 +289,14 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
                     get_workflow(l,'MSGF_PLUS').upper(),
                     get_search_url(l),
                     get_sequence(l)
-                ]) + '\n')
-                provenance_representatives.append((
+                ]]) + '\n')
+                w_provenance_representatives.write(','.join(["\"{}\"".format(r) for r in [
                     '#provenance_id:{}.scan={}'.format(get_filename(l),get_scan(l)),
                     '#representative_id:{}.{}.{}'.format(get_sequence(l),get_charge(l),library_id)
-                ))
+                ]]) + '\n')
     if Path(input_provenance).is_file():
         provenance_file.close()
-    return provenance_representatives, dataset_proteins, proteins_stats
+    return dataset_proteins, proteins_stats
 
 
 def output_for_explorer(output_folder, input_mappings, input_representatives, input_provenance, hupo_mapping, unique_mapping, library_id, library_version):
@@ -304,7 +304,9 @@ def output_for_explorer(output_folder, input_mappings, input_representatives, in
     representatives, variants = representatives_to_representatives_and_variants(input_representatives, library_id, library_version)
     # need to stream provenance
     output_provenance = output_folder.joinpath("{}_{}.tsv".format(5,'psm_provenance'))
-    provenance_representatives, dataset_protein_dict, proteins_stats_dict = update_provenance(input_provenance, input_representatives, input_mappings, library_id, output_provenance)
+    output_provenance_representatives = output_folder.joinpath("{}_{}.tsv".format(7,'provenance_representative'))
+
+    dataset_protein_dict, proteins_stats_dict = update_provenance(input_provenance, input_representatives, input_mappings, library_id, output_provenance, output_provenance_representatives)
 
     dataset_proteins = table_from_dataset_proteins(dataset_protein_dict)
     protein_stats = table_from_proteins(proteins_stats_dict, hupo_mapping, unique_mapping, library_id, library_version)
@@ -314,6 +316,6 @@ def output_for_explorer(output_folder, input_mappings, input_representatives, in
     table_output(4, 'peptide_mapping', output_folder, mappings)
     # table_output(5, 'psm_provenance', args.output_folder, provenance)
     table_output(6, 'representatives', output_folder, representatives, 'a')
-    table_output(7, 'provenance_representative', output_folder, provenance_representatives, 'b')
+    # table_output(7, 'provenance_representative', output_folder, provenance_representatives, 'b')
     table_output(8, 'protein_datasets', output_folder, dataset_proteins)
     table_output(9, 'protein_statistics', output_folder, protein_stats)

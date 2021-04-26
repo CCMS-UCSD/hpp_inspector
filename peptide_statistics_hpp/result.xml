@@ -191,6 +191,7 @@
                 <column type="text" field="cosine_usi" label="Best Peptide Spectrum Match (PSM) By Cosine to Synthetic Peptide Spectra" width="20"/>
                 <column type="text" field="synthetic_usi" label="Most-similar Synthetic Peptide Spectrum" width="20"/>
                 <column type="text" field="all_mapped_exons" label="All Mapped Exons" width="10"/>
+                <column type="text" field="all_proteins_w_coords" label="All Mapped Proteins" width="10"/>
                 <!-- <column type="text" field="database_filename" label="Best DB Filename" width="20"/>
                 <column type="integer" field="database_scan" label="Best DB Scan" width="4"/>
                 <column type="text" field="cosine_filename" label="Best Cosine Filename" width="20"/>

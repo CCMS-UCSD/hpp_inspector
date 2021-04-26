@@ -75,9 +75,9 @@
 		<parameter name="library_name" label="Library Name">
 			<options>
 				<option label="MassIVE-KB (combined)" value="1" />
-							<option label="MassIVE-KB (in-vivo)" value="2" />
+							<option label="MassIVE-KB (in vivo)" value="2" />
 							<option label="MassIVE-KB (synthetic)" value="3" />
-							<option label="Blood-KB" value="5" />
+							<option label="Blood-KB" value="6" />
 			</options>
 			<default value="1" />
 			<validator type="set" />

@@ -229,7 +229,7 @@ def read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,pep_
                         else:
                             match_obj['mapped_proteins'].append((accession,(aa_start,aa_end),il_ambiguous))
                         all_proteins[accession][il_peptide].append(((aa_start,aa_end),gene_unique and sp_matches_saav == 1))
-                        if (aa_end - aa_start >= 9) and gene_unique and sp_matches_saav == 1:
+                        if (aa_end - aa_start >= 8) and gene_unique and sp_matches_saav == 1:
                             added_proteins[accession][il_peptide].append((aa_start,aa_end))
 
             pep_info[peptide] = match_obj

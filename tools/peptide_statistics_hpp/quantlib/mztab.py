@@ -16,16 +16,16 @@ def peptide_string(sequence,modifications):
         return sequence
     else:
         new_sequence = sequence.split()
-        # mods = dict([
-        #         (int(mod.split("-")[0]),find_mod(mod.split("-")[1]))
-        #         for mod in modifications.split(",")
-        #         if find_mod(mod.split("-")[1]) != None
-        #     ])
         mods = dict([
-                (int(mod.split("-")[0]),find_mod(''.join(mod.split("-")[1:])))
-                for mod in re.split("/\,(?![^\[]*\])/g", modifications)
-                if find_mod(''.join(mod.split("-")[1:])) != None
+                (int(mod.split("-")[0]),find_mod("-".join(mod.split("-")[1:])))
+                for mod in modifications.split(",")
+                if find_mod("-".join(mod.split("-")[1:])) != None
             ])
+        # mods = dict([
+        #         (int(mod.split("-")[0]),find_mod(''.join(mod.split("-")[1:])))
+        #         for mod in re.split("/\,(?![^\[]*\])/g", modifications)
+        #         if find_mod(''.join(mod.split("-")[1:])) != None
+        #     ])
         new_sequence = []
         new_sequence.append(mods.get(0,""))
         for (i,s) in enumerate(sequence):
@@ -50,19 +50,25 @@ def find_mod(modification):
         'UNIMOD:21':'+79.966331',
         'UNIMOD:28':'-17.026549',
         'UNIMOD:34':'+14.015650',
-        'UNIMOD:35':'+15.994915'
+        'UNIMOD:35':'+15.994915',
+        'UNIMOD:214':'+144.102063',
+        'UNIMOD:259':'+8.014199',
+        'UNIMOD:267':'+10.008269',
+        'UNIMOD:730':'+304.205360',
+        'UNIMOD:731':'+304.199040',
+        'UNIMOD:737':'+229.162932'
     }
     if 'UNIMOD' in modification:
         return convert.get(modification)
     elif 'PSI-MS' in modification:
-        psi_mod_split = modificatiom[1:-1].split(',')
-        if psi_mod_split[1] == 'MS:1001524':
-            return '-{}'.format(psi_mod_split[3])
-        else:
-            print(modification)
-            raise Exception
+        # psi_mod_split = modificatiom[1:-1].split(',')
+        # if psi_mod_split[1] == 'MS:1001524':
+        #     return '-{}'.format(psi_mod_split[3])
+        # else:
+            # print(modification)
+        raise Exception
     else:
-        print(modification)
+        # print(modification)
         return modification.split(":")[1]
 
 def read(mztab_file, ids, mangled_name = None):
@@ -93,11 +99,13 @@ def read(mztab_file, ids, mangled_name = None):
             score = row.get('opt_global_EValue',0)
             if rt:
                 rt = float(rt)
-            if score:
+            if float(score) > 0:
                 score = -math.log10(float(score))
-            search_engine = row.get('search_engine','[,,MZTAB,]')[1:-1].split(',')[2]
-            if (float(row.get('opt_global_ProtQValue',0)) < 0.01 and float(row.get('opt_global_PepQValue',0)) < 0.01 and float(row.get('opt_global_QValue',0)) < 0.01):
-                ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), search_engine, row['modifications'], rt, protein, parent_mass, score, mangled_name)]
+            else:
+                score = 100
+            search_engine = 'MZTAB'
+            # search_engine = row.get('search_engine','[,,MZTAB,]')[1:-1].split(',')[2]
+            ids[(source_file, index)] = [psm.PSM(peptide, int(row['charge']), search_engine, row['modifications'], rt, protein, parent_mass, score, mangled_name, None)]
     return ids
 
 def read_lib(mztab_file, ids):
@@ -105,11 +113,14 @@ def read_lib(mztab_file, ids):
     with open(mztab_file) as f:
         r = csv.DictReader(f, delimiter = '\t')
         for l in r:
-            filename = l['filename']
-            scan = int(l['scan'].replace('scan=',''))
-            peptide = l['annotation']
+            #fall back to old way of naming this file
+            filename = l['filename'] if ('filename' in l) else l['originalfile_filename']
+            scan = int(l['scan'].replace('scan=','')) if ('scan' in l) else int(l['originalfile_scan'])
+            peptide = l['annotation'] if ('annotation' in l) else l['peptide']
             charge = int(l['charge'])
-            parent_mass = float(l['mz'])
+            parent_mass = float(l.get('mz',1))
             score = float(l['score'])
-            ids[(filename, scan)] = [psm.PSM(peptide, charge, 'MSGF_AMB', ' ', None, None, parent_mass, score, filename)]
+            tolerance = float(l['fragment_tolerance']) if l.get('fragment_tolerance') else None
+            fragmentation_method = l.get('fragmentation_method')
+            ids[(filename, scan)] = [psm.PSM(peptide, charge, 'MSGF_AMB', ' ', None, None, parent_mass, score, filename, tolerance)]
     return ids

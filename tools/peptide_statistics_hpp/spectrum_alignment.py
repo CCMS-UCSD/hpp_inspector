@@ -15,6 +15,18 @@ def normalize_spectrum(spectrum):
     intermediate_output_spectrum = []
     acc_norm = 0.0
     for s in spectrum:
+        intermediate_output_spectrum.append(Peak(s.mz,s.intensity))
+        acc_norm += s.intensity**2
+    normed_value = math.sqrt(acc_norm)
+    for s in intermediate_output_spectrum:
+        output_spectrum.append(Peak(s.mz,s.intensity/normed_value))
+    return output_spectrum
+
+def sqrt_normalize_spectrum(spectrum):
+    output_spectrum = []
+    intermediate_output_spectrum = []
+    acc_norm = 0.0
+    for s in spectrum:
         intensity = s.intensity
         intermediate_output_spectrum.append(Peak(s.mz,intensity))
         acc_norm += (s.intensity*s.intensity)
@@ -23,9 +35,15 @@ def normalize_spectrum(spectrum):
         output_spectrum.append(Peak(s.mz,s.intensity/normed_value))
     return output_spectrum
 
+def find_match_peaks_efficient(spec1, spec2, shift, tolerance):
+    try:
+        return find_match_peaks_mz(spec1, spec2, shift, tolerance)
+    except:
+        return find_match_peaks_ions(spec1, spec2)
+
 #reimplementation of find_match_peaks, but much more efficient
 # Assumes that shift is equal to spec1 - spec2
-def find_match_peaks_efficient(spec1, spec2, shift, tolerance):
+def find_match_peaks_mz(spec1, spec2, shift, tolerance):
     adj_tolerance =  tolerance + 0.000001
     spec2_mass_list = []
 
@@ -43,8 +61,23 @@ def find_match_peaks_efficient(spec1, spec2, shift, tolerance):
 
         for j in range(left_bound_index,right_bound_index):
             alignment_mapping.append(Alignment(i,j))
+
     return alignment_mapping
 
+# Assumes that shift is equal to spec1 - spec2
+def find_match_peaks_ions(spec1, spec2):
+
+    alignment_mapping = []
+
+    spec1_dict = {ion:i for i,(ion,intensity) in enumerate(spec1)}
+    spec2_dict = {ion:i for i,(ion,intensity) in enumerate(spec2)}
+
+    for ion, i in spec1_dict.items():
+        if ion in spec2_dict:
+            j = spec2_dict[ion]
+            alignment_mapping.append(Alignment(i,j))
+
+    return alignment_mapping
 
 
 # Assumes that shift is equal to spec1 - spec2
@@ -80,12 +113,12 @@ def alignment_to_match(spec1_n,spec2_n,alignment):
 # then it will align the two spectrum given their parent masses
 # These spectra are expected to be a list of lists (size two mass, intensity) or a list of tuples
 ###
-def score_alignment(spec1,spec2,pm1,pm2,tolerance,max_charge_consideration=1):
-    if len(spec1) == 0 or len(spec2) == 0:
+def score_alignment(spec1_n,spec2_n,pm1,pm2,tolerance,max_charge_consideration=1):
+    if len(spec1_n) == 0 or len(spec2_n) == 0:
         return 0.0, []
 
-    spec1_n = normalize_spectrum(convert_to_peaks(spec1))
-    spec2_n = normalize_spectrum(convert_to_peaks(spec2))
+    # spec1_n = normalize_spectrum(convert_to_peaks(spec1))
+    # spec2_n = normalize_spectrum(convert_to_peaks(spec2))
     # spec1_n = convert_to_peaks(spec1)
     # spec2_n = convert_to_peaks(spec2)
     shift = (pm1 - pm2)

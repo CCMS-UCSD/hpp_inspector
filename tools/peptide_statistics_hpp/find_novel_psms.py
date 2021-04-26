@@ -120,7 +120,7 @@ def main():
 
 
     with open(args.novel_psms, 'w') as fw_psm, open(args.novel_peptides, 'w') as fw_pep:
-        header = ['protein','filename','scan','sequence','charge','score','pass','type','parent_mass','synthetic_filename','synthetic_scan','best_cosine_to_synthetic']
+        header = ['protein','filename','scan','sequence','charge','score','pass','type','parent_mass','synthetic_filename','synthetic_scan','best_cosine_to_synthetic','frag_tol']
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
         w_pep = csv.DictWriter(fw_pep, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
@@ -146,7 +146,8 @@ def main():
                     'type':'Supporting' if peptide in supporting_peptides else 'Novel',
                     'synthetic_filename': synthetic_filename,
                     'synthetic_scan': best_synthetic[1],
-                    'best_cosine_to_synthetic': cosine
+                    'best_cosine_to_synthetic': cosine,
+                    'frag_tol':psm[0].tolerance if psm[0].tolerance else 0
                 }
                 w_psm.writerow(psm_row)
                 if psm[0].score > best_psm_score:

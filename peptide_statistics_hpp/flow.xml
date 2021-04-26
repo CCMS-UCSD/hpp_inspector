@@ -2,11 +2,14 @@
 <flow name="peptide_statistics_hpp">
 	<object name="workflowParameters"/>
 
-    <object name="peptidelist"/>
+    <collection name="peptide_list"/>
+		<collection name="peptide_list_exonmapped"/>
+
     <object name="fastadb"/>
 		<collection name="mztab"/>
 		<collection name="spec_on_server"/>
 		<collection name="library_output"/>
+		<object name="synthetics"/>
 
 		<object name="kb_pep"/>
 
@@ -18,24 +21,34 @@
     <collection name="debug_protein_coverage"/>
 
     <object name="protein_coverage"/>
-		<object name="novel_proteins"/>
 		<object name="novel_psms"/>
 		<object name="novel_peptides"/>
     <object name="unique_peptides_list"/>
 	<object name="library_coverage_summary_statistics"/>
+	<collection name="peptide_coverage"/>
+	<collection name="peptide_coverage_merged_external"/>
+	<collection name="novel_psms_w_cosine_external"/>
+	<object name="external_provenance"/>
+	<collection name="explorer_export"/>
+	<collection name="sqlite"/>
 
     <action name="begin">
         <output port="mztab"       			 collection="mztab"/>
 				<output port="spec_on_server"       collection="spec_on_server"/>
         <output port="fastadb" 		  object="fastadb"/>
+				<output port="synthetics" 		  object="synthetics"/>
         <output port="params" object="workflowParameters"/>
+				<output port="peptide_coverage_merged_external"       			 collection="peptide_coverage_merged_external"/>
+				<output port="novel_psms_w_cosine_external"       collection="novel_psms_w_cosine_external"/>
+				<output  port="dna"             								collection="dna"/>
+				<output  port="gff"             								object="gff"/>
+				<output  port="external_provenance"             object="external_provenance"/>
     </action>
 
-		<action name="extract_peptides">
+		<action name="extract_from_mztab">
 			<input   port="mztab"       			      collection="mztab"/>
-			<input  port="params"             			object="workflowParameters"/>
-			<output  port="peptidelist"             object="peptidelist"/>
-			<output  port="library_output"          collection="library_output"/>
+			<output  port="peptide_list"             object="peptide_list"/>
+			<output  port="novel_psms"          object="novel_psms"/>
 		</action>
 
 		<action name="download_latest_kb">
@@ -43,65 +56,67 @@
 			<output  port="kb_pep"             		object="kb_pep"/>
 		</action>
 
-	<action name="protein_coverage_calculation_paramgeneration">
-        <input  port="peptidelist"             object="peptidelist"/>
-        <input  port="fastadb"             object="fastadb"/>
-        <input  port="params"             object="workflowParameters"/>
-        <output port="parallel_params"       collection="parallel_params"/>
-    </action>
-
-    <action name="protein_coverage_calculation_map" multiplicity="multiple" type="parallel">
-		<input port="parallel_params"       collection="parallel_params"  transformation="unfolding"/>
-        <input  port="peptidelist"             object="peptidelist"/>
-        <input  port="fastadb"             object="fastadb"/>
-        <input  port="params"             object="workflowParameters"/>
-        <output port="intermediate_protein_coverage"       collection="intermediate_protein_coverage"/>
-        <output port="debug_protein_coverage"       collection="debug_protein_coverage"/>
-    </action>
-
-    <action name="unique_peptide_calculation_map" multiplicity="multiple" type="parallel">
-		<input port="parallel_params"       collection="parallel_params"  transformation="unfolding"/>
-        <input  port="peptidelist"             object="peptidelist"/>
-        <input  port="fastadb"             object="fastadb"/>
-        <input  port="params"             object="workflowParameters"/>
-        <output port="intermediate_unique_peptide_coverage"       collection="intermediate_unique_peptide_coverage"/>
-    </action>
-
-	<action name="protein_coverage_calculation_reduce">
-		<input  port="peptidelist"             object="peptidelist"/>
-        <input  port="fastadb"             object="fastadb"/>
-        <input  port="params"             object="workflowParameters"/>
-		<input port="intermediate_protein_coverage"       collection="intermediate_protein_coverage"/>
-        <input port="intermediate_unique_peptide_coverage" collection="intermediate_unique_peptide_coverage"/>
-        <output port="protein_coverage"       object="protein_coverage"/>
-        <output port="unique_peptides_list"       object="unique_peptides_list"/>
-        <output port="library_coverage_summary_statistics"       object="library_coverage_summary_statistics"/>
-    </action>
-
-
 	<collection name="intermediate_peptide_coverage"/>
-	<action name="peptide_stats_coverage_map" multiplicity="multiple" type="parallel">
-		<input port="parallel_params"       collection="parallel_params"  transformation="unfolding"/>
-        <input  port="peptidelist"             object="peptidelist"/>
-        <input  port="fastadb"             object="fastadb"/>
-        <input  port="params"             object="workflowParameters"/>
-        <output port="intermediate_peptide_coverage"       collection="intermediate_peptide_coverage"/>
+	<action name="map_peptides" multiplicity="multiple" type="parallel">
+        <input  port="peptide_list"             collection="peptide_list"  transformation="unfolding"/>
+        <input  port="fastadb"             			object="fastadb"/>
+				<input  port="exon_fasta"             	object="exon_fasta"/>
+        <output port="peptide_coverage"       	collection="peptide_coverage"/>
     </action>
 
-	<object name="peptide_coverage_merged"/>
-		<action name="peptide_stats_coverage_reduce">
-		<input port="input_folder"       collection="intermediate_peptide_coverage"/>
-        <output port="output_file"       object="peptide_coverage_merged"/>
-    </action>
+		<collection name="novel_psms_p"/>
+		<collection name="jobs"/>
 
-		<action name="merge_kb_coverage">
+		<action name="calculate_cosine_p">
+			<input   port="novel_psms"          object="novel_psms"/>
+			<output  port="novel_psms_p"          collection="novel_psms_p"/>
+			<output  port="jobs"          collection="jobs"/>
+
+		</action>
+
+		<collection name="novel_psms_w_cosine"/>
+
+		<action name="calculate_cosine" multiplicity="multiple" type="parallel">
+			<input   port="jobs"          							object="jobs"  transformation="unfolding"/>
+			<input   port="novel_psms_p"          			collection="novel_psms_p"/>
+			<input   port="synthetics"          				object="synthetics"/>
+			<output  port="novel_psms_w_cosine"         collection="novel_psms_w_cosine"/>
+		</action>
+
+		<object name="novel_proteins_w_cosine"/>
+		<object name="novel_peptides_w_cosine"/>
+		<object name="merged_novel_psms_w_cosine"/>
+
+		<action name="peptide_protein_cosine">
 			<input   port="kb_pep"       			    object="kb_pep"/>
-			<input   port="peptide_coverage_merged"         object="peptide_coverage_merged"/>
-			<input   port="spec_on_server"      collection="spec_on_server"/>
-			<input   port="mztab"      					collection="mztab"/>
-			<output   port="novel_proteins"         object="novel_proteins"/>
-			<output  port="novel_psms"          object="novel_psms"/>
-			<output  port="novel_peptides"          object="novel_peptides"/>
+			<input   port="novel_psms_w_cosine"          collection="novel_psms_w_cosine"/>
+			<input   port="peptide_coverage"   collection="peptide_coverage"/>
+			<input   port="novel_psms_w_cosine_external"       collection="novel_psms_w_cosine_external"/>
+			<input   port="peptide_coverage_merged_external"   collection="peptide_coverage_merged_external"/>
+			<input   port="external_provenance"   object="external_provenance"/>
+			<output  port="novel_proteins_w_cosine"      object="novel_proteins_w_cosine"/>
+			<output  port="novel_peptides_w_cosine"      object="novel_peptides_w_cosine"/>
+			<output  port="merged_novel_psms_w_cosine"   object="merged_novel_psms_w_cosine"/>
+			<output  port="explorer_export"   					collection="explorer_export"/>
+		</action>
+
+		<action name="convert_tsv_to_sqlite">
+			<!-- <input  port="novel_proteins_w_cosine"      object="novel_proteins_w_cosine"/> -->
+			<input  port="novel_peptides_w_cosine"      object="novel_peptides_w_cosine"/>
+			<input  port="merged_novel_psms_w_cosine"   object="merged_novel_psms_w_cosine"/>
+			<output port="sqlite" 											collection="sqlite"/>
+		</action>
+
+		<object name="dna"/>
+		<object name="gff"/>
+		<object name="exon_fasta"/>
+
+		<!-- Exon mapping -->
+		<action name="make_fasta_from_gff" >
+			<input  port="dna"             collection="dna"/>
+			<input  port="gff"             object="gff"/>
+			<input  port="params"          object="workflowParameters"/>
+			<output port="exon_fasta"         object="exon_fasta"/>
 		</action>
 
     <action name="end">
@@ -110,9 +125,11 @@
 				<input port="library_coverage_summary_statistics" object="library_coverage_summary_statistics"/>
         <input port="debug_protein_coverage" collection="debug_protein_coverage"/>
 				<input port="library_output" collection="library_output"/>
-				<input port="peptide_coverage_merged" object="peptide_coverage_merged"/>
-				<input port="novel_proteins" object="novel_proteins"/>
-				<input port="novel_psms" object="novel_psms"/>
-				<input port="novel_peptides" object="novel_peptides"/>
+				<input port="peptide_coverage" object="peptide_coverage"/>
+				<input port="novel_proteins_w_cosine" object="novel_proteins_w_cosine"/>
+				<input port="merged_novel_psms_w_cosine" object="merged_novel_psms_w_cosine"/>
+				<input port="novel_peptides_w_cosine" object="novel_peptides_w_cosine"/>
+				<input port="sqlite" collection="sqlite"/>
+				<input port="explorer_export" collection="explorer_export"/>
 		</action>
 </flow>

@@ -5,148 +5,13 @@
         <source type="folder" name="library_coverage_summary_statistics/"/>
     </download>
 
-    <view id="view_peptides" label="View Peptides">
-        <blockRef id="main" type="view_peptides"/>
-    </view>
-
-    <block id="view_peptides" type="table_ss">
-        <data>
-            <source type="file" name="peptide_coverage_merged/"/>
-            <parsers>
-                <parser type="sortedTabular" sortBy="il_peptide" operator="ascending"/>
-                <parser type="SQLite"/>
-            </parsers>
-        </data>
-        <row>
-            <column type="text" field="il_peptide" label="il_peptide" width="12"/>
-            <column type="text" field="peptide" label="peptide" width="12"/>
-            <column type="expandable" field="proteins" label="proteins" width="12"/>
-            <column type="expandable" field="proteins_incl_decoys" label="proteins_incl_decoys" width="12"/>
-
-            <column type="expandable" field="proteins_w_coords" label="proteins_w_coords" width="12"/>
-            <column type="integer" field="num_proteins" label="num_proteins" precision="2"/>
-            <column type="integer" field="num_proteins_incl_decoys" label="num_proteins_incl_decoys" precision="2"/>
-
-            <column type="integer" field="num_proteins_w_mismatch" label="num_proteins_w_mismatch" precision="2"/>
-            <column type="integer" field="num_proteins_all" label="#All Proteins Covered" precision="2"/>
-            <column type="integer" field="num_proteins_no_tr" label="#All Swiss Prot" precision="2"/>
-            <column type="integer" field="num_proteins_no_iso_no_tr" label="#All Swiss Prot No Isoforms" precision="2"/>
-            <column type="integer" field="num_proteinsg_covered" label="#Genes Covered" precision="2"/>
-            <column type="text" field="gene_unique" label="Gene Unique" precision="2"/>
-            <column type="expandable" field="proteins_all" label="All Proteins Covered" precision="2"/>
-            <column type="expandable" field="proteins_no_tr" label="All Swiss Prot" precision="2"/>
-            <column type="expandable" field="proteins_no_iso_no_tr" label="All Swiss Prot No Isoforms" precision="2"/>
-            <column type="expandable" field="proteinsg_covered" label="Genes Covered" precision="2"/>
-            <column type="expandable" field="proteinsg_covered_mismatch" label="Genes Covered (w/ Mismatch)" precision="2"/>
-            <column type="integer" field="num_proteins_w_mismatch" label="num_proteins_w_mismatch" precision="2"/>
-            <column type="text" field="gene" label="gene" precision="2"/>
-            <column type="text" field="protein_name" label="protein_name" width="12"/>
-            <column type="integer" field="glycosylation_covered" label="glycosylation_covered" precision="2"/>
-            <column type="integer" field="disulfide_covered" label="disulfide_covered" precision="2"/>
-            <column type="integer" field="glycosylation_covered" label="glycosylation_covered" precision="2"/>
-            <column type="integer" field="activesites_covered" label="activesites_covered" precision="2"/>
-            <column type="integer" field="metalbinding_covered" label="metalbinding_covered" precision="2"/>
-            <column type="integer" field="mod_covered" label="mod_covered" precision="2"/>
-            <column type="integer" field="pe1" label="PE1" precision="2"/>
-            <column type="integer" field="pe2" label="PE2" precision="2"/>
-            <column type="integer" field="pe3" label="PE3" precision="2"/>
-            <column type="integer" field="pe4" label="PE4" precision="2"/>
-            <column type="integer" field="pe5" label="PE5" precision="2"/>
-            <column type="text" field="genes_incl_decoys" label="genes_incl_decoys" width="2"/>
-            <column type="text" field="decoy" label="decoy" width="2"/>
-        </row>
-    </block>
-
-
-    <!-- View definitions -->
-    <view id="view_proteins" label="View Proteins">
-        <blockRef id="main" type="view_proteins"/>
-    </view>
-
-    <block id="view_proteins" type="table_ss">
-        <data>
-            <source type="file" name="protein_coverage/"/>
-            <parsers>
-                <parser type="sortedTabular" sortBy="protein" operator="ascending"/>
-                <parser type="SQLite"/>
-            </parsers>
-        </data>
-        <row>
-            <column type="text" field="protein" label="Protein" width="12"/>
-            <column type="text" field="protein_name" label="ProteinName" width="20"/>
-            <column type="text" field="gene" label="Gene" width="20"/>
-            <column type="integer" field="pe_number" label="neXtProt PE" width="4"/>
-            <column type="float" field="aminoacid_coverage" label="Coverage" precision="2"/>
-            <column type="integer" field="unique_peptide_count_no_mismatch" label="Isoform Unqiue Mapped Peptides"/>
-            <column type="integer" field="unique_peptide_count" label="Isoform Unqiue HUPO Non-Overlapping Peptides"/>
-            <column type="integer" field="gene_unique_peptide_count_no_mismatch" label="Gene Unqiue Mapped Peptides"/>
-            <column type="integer" field="gene_unique_peptide_count" label="Gene Unique HUPO Non-Overlapping Peptides"/>
-            <column type="integer" field="peptides_on_protein" label="total peptides"/>
-            <column type="integer" field="protein_length" label="protein_length"/>
-            <column type="float" field="mod_percentage" label="ModPercent" precision="2"/>
-            <column type="integer" field="mod_total" label="ModTotal" precision="2"/>
-            <column type="float" field="sites_percentage" label="SitePercent" precision="2"/>
-            <column type="integer" field="sites_total" label="SiteTotal" precision="2"/>
-            <column type="float" field="activesites_percentage" label="ActiveSitePercent" precision="2"/>
-            <column type="integer" field="activesites_total" label="ActiveSiteTotal" precision="2"/>
-            <column type="float" field="bindingsites_percentage" label="BindingSitePercent" precision="2"/>
-            <column type="integer" field="bindingsites_total" label="BindingSiteTotal" precision="2"/>
-            <column type="float" field="disulfide_percentage" label="DisulfideSitePercent" precision="2"/>
-            <column type="integer" field="disulfide_total" label="DisulfideSiteTotal" precision="2"/>
-            <column type="float" field="glycosylation_percentage" label="GlycosylationPercent" precision="2"/>
-            <column type="integer" field="glycosylation_total" label="GlycosylationTotal" precision="2"/>
-            <column type="float" field="metalbinding_percentage" label="MetalBindingPercent" precision="2"/>
-            <column type="integer" field="metalbinding_total" label="MetalBindingTotal" precision="2"/>
-            <column type="float" field="snp_percentage" label="SNPPercent" precision="2"/>
-            <column type="integer" field="snp_total" label="SNPTotal" precision="2"/>
-            <column type="float" field="coverable_percentage" label="coverable_percentage" precision="2"/>
-            <column type="float" field="coverage_of_coverable" label="coverage_of_coverable" precision="2"/>
-            <column type="float" field="coverage_of_uncoverable" label="coverage_of_uncoverable" precision="2"/>
-        </row>
-    </block>
-<!--
-    <view id="view_all_peptide_mappings" label="View All Peptide Mappings">
-        <blockRef id="main" type="view_all_peptide_mappings"/>
-    </view>
-    <block id="view_all_peptide_mappings" type="table_ss">
-        <data>
-            <source type="file" name="unique_peptides_list/"/>
-            <parsers>
-                <parser type="sortedTabular" sortBy="peptide" operator="ascending"/>
-                <parser type="SQLite"/>
-            </parsers>
-        </data>
-        <row>
-            <column type="text" field="peptide" label="peptide" width="20"/>
-            <column type="integer" field="protein_count" label="protein_count" width="20"/>
-            <column type="text" field="proteins" label="Proteins" width="12"/>
-        </row>
-    </block> -->
-
-    <view id="view_stats" label="View Stats">
-        <blockRef id="main" type="view_stats"/>
-    </view>
-    <block id="view_stats" type="table_ss">
-        <data>
-            <source type="file" name="library_coverage_summary_statistics/"/>
-            <parsers>
-                <parser type="sortedTabular" sortBy="category" operator="ascending"/>
-                <parser type="SQLite"/>
-            </parsers>
-        </data>
-        <row>
-            <column type="text" field="category" label="category" width="20"/>
-            <column type="text" field="value" label="value" width="20"/>
-        </row>
-    </block>
-
-    <view id="view_added" label="View New Protein Evidence">
+    <view id="view_added" label="View Protein Evidence">
         <blockRef id="main" type="view_added"/>
     </view>
 
     <block id="view_added" type="table_ss">
         <data>
-            <source type="file" name="novel_proteins/"/>
+            <source type="file" name="novel_proteins_w_cosine/"/>
             <parsers>
                 <parser type="SQLite"/>
             </parsers>
@@ -154,58 +19,92 @@
         <row>
           <!-- <column type="float" field="kb_coverage" label="Coverage (KB Only)" width="2"/>
           <column type="float" field="new_coverage" label="Coverage (Added Only)" width="2"/> -->
-            <column type="text" field="protein" label="Protein" width="5"/>
+          <column type="text" field="protein" label="Protein" width="4"/>
+            <column label="View Peptides" type="genericurlgenerator" width="5">
+                <parameter name="URLBASE" value="result.jsp"/>
+                <parameter name="USETASK" value="True"/>
+                <parameter name="REQUESTPARAMETER=view" value="view_added_peptides"/>
+                <parameter name="HASHPARAMTER=protein_input" value="[protein]"/>
+                <parameter name="HASHPARAMTER=hpp_match_input" value="True"/>
+                <!-- <parameter name="HASHPARAMTER=cosine_lowerinput" value="[cosine_cutoff]"/> -->
+                <parameter name="LABEL" value="View HPP Compliant Peptides"/>
+                <parameter name="PASS_URL" value="True"/>
+            </column>
             <column type="integer" field="aa_total" label="Protein Length" width="3"/>
-
-            <column type="integer" field="pe" label="PE" width="2"/>
-            <column type="text" field="ms_evidence" label="Proteomics Evidence" width="2"/>
-            <column type="text" field="supporting_peptides" label="Previously-known Peptides" width="20"/>
-            <column type="text" field="novel_peptides" label="Novel Peptides" width="20"/>
+            <column type="integer" field="pe" label="PE" width="1"/>
+            <!-- <column type="text" field="ms_evidence" label="Proteomics Evidence" width="2"/> -->
+            <column type="expandable" field="supporting_peptides" label="Previously-known Peptides" width="20"/>
+            <column type="expandable" field="novel_peptides" label="Novel Peptides" width="20"/>
             <column type="integer" field="combined_hpp" label="#HPP Peptides (Combined)" width="5"/>
             <column type="integer" field="kb_hpp" label="#HPP Peptides (KB Only)" width="2"/>
             <column type="integer" field="new_hpp" label="#HPP Peptides (Added Only)" width="2"/>
             <column type="float" field="added_kb_coverage" label="Coverage (Added)" width="2"/>
-            <column type="text" field="promoted" label="Evidence to Promote" width="2"/>
-            <column type="text" field="supporting_peptides_w_synthetic" label="Previously-known Peptides (Synthetic)" width="20"/>
-            <column type="text" field="novel_peptides_w_synthetic" label="Novel Peptides (Synthetic)" width="20"/>
+            <column type="float" field="total_coverage" label="Coverage (Total)" width="2"/>
+            <column type="float" field="coverage_increase" label="Coverage Increase (All)" width="2"/>
+            <!-- <column type="text" field="promoted" label="Evidence to Promote" width="2"/> -->
+            <column type="expandable" field="supporting_peptides_w_synthetic" label="Previously-known Peptides (Synthetic)" width="20"/>
+            <column type="expandable" field="novel_peptides_w_synthetic" label="Novel Peptides (Synthetic)" width="20"/>
             <column type="integer" field="combined_hpp_w_synthetic" label="#HPP Peptides (Combined) (Synthetic)" width="5"/>
             <column type="integer" field="kb_hpp_w_synthetic" label="#HPP Peptides (KB Only) (Synthetic)" width="2"/>
             <column type="integer" field="new_hpp_w_synthetic" label="#HPP Peptides (Added Only) (Synthetic)" width="2"/>
             <column type="float" field="added_kb_coverage_w_synthetic" label="Coverage (Added) (Synthetic)" width="2"/>
-            <column type="text" field="promoted_w_synthetic" label="Evidence to Promote (Synthetic)" width="2"/>
+            <column type="float" field="total_coverage_w_synthetic" label="Coverage (Total) (Synthetic)" width="2"/>
+            <column type="float" field="coverage_increase_w_synthetic" label="Coverage Increase (Synthetic)" width="2"/>
+            <!-- <column type="text" field="promoted_w_synthetic" label="Evidence to Promote (Synthetic)" width="2"/> -->
+            <!-- <column type="expandable" field="supporting_peptides_w_synthetic_cosine" label="Previously-known Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
+            <column type="expandable" field="novel_peptides_w_synthetic_cosine" label="Novel Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
+            <column type="integer" field="combined_hpp_w_synthetic_cosine" label="#HPP Peptides (Combined) (Synthetic + Pass Cosine Threshold)" width="5"/>
+            <column type="integer" field="kb_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
+            <column type="integer" field="new_hpp_w_synthetic_cosine" label="#HPP Peptides (Added Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
+            <column type="float" field="added_kb_coverage_w_synthetic_cosine" label="Coverage (Added) (Synthetic + Pass Cosine Threshold)" width="2"/>
+            <column type="expandable" field="supporting_peptides_w_synthetic_cosine" label="Previously-known Peptides (Synthetic + Pass Cosine Threshold)" width="20"/> -->
+            <column type="expandable" field="novel_peptides_without_kb" label="All Novel Peptides" width="20"/>
+            <column type="integer" field="combined_hpp_without_kb" label="#HPP Peptides (Novel)" width="5"/>
+            <!-- <column type="integer" field="kb_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
+            <column type="integer" field="new_hpp_w_synthetic_cosine" label="#HPP Peptides (Added Only) (Synthetic + Pass Cosine Threshold)" width="2"/> -->
+            <column type="float" field="total_coverage_without_kb" label="Coverage (Novel)" width="2"/>
+            <!-- <column type="text" field="promoted_w_synthetic_cosine" label="Evidence to Promote (Synthetic + Pass Cosine Threshold)" width="2"/> -->
         </row>
     </block>
 
-    <view id="view_added_psm" label="View New PSM Evidence">
+    <view id="view_added_psm" label="View PSM Evidence">
         <blockRef id="main" type="view_added_psm"/>
     </view>
 
-    <view id="view_added_peptides" label="View New Peptide Evidence">
+    <view id="view_added_peptides" label="View Peptide Evidence">
         <blockRef id="main" type="view_added_peptides"/>
     </view>
 
     <block id="view_added_psm" type="table_ss">
         <data>
-            <source type="file" name="novel_psms/"/>
+            <source type="file" name="merged_novel_psms_w_cosine/"/>
             <parsers>
                 <parser type="SQLite"/>
             </parsers>
         </data>
         <row>
             <column type="text" field="protein" label="Protein" width="4"/>
+            <column type="integer" field="aa_start" label="AA Start" width="1"/>
+            <column type="integer" field="aa_end" label="AA End" width="1"/>
             <column type="integer" field="pe" label="PE" width="5"/>
-            <column type="text" field="ms_evidence" label="Proteomics Evidence" width="2"/>
-            <column type="text" field="filename" label="Filename" width="20"/>
-            <column type="integer" field="scan" label="Scan" width="4"/>
-            <column type="text" field="sequence" label="Sequence" width="20"/>
+            <column type="text" field="hpp_match" label="HPP Compliant" width="2"/>
+            <column type="text" field="usi" label="USI" width="20"/>
+            <!-- <column type="text" field="filename" label="Filename" width="20"/>
+            <column type="integer" field="scan" label="Scan" width="4"/> -->
             <column type="float" field="score" label="-log10(EValue)" width="6"/>
+            <column type="float" field="explained_intensity" label="Explained Intensity" width="6"/>
             <column type="text" field="pass" label="Above Library Threshold" width="6"/>
-            <column type="text" field="parent_mass" label="Parent Mass" width="20"/>
-            <column type="integer" field="charge" label="Charge" width="4"/>
+            <column type="text" field="parent_mass" label="Precursor Mass" width="20"/>
+            <column type="text" field="synthetic_usi" label="Synthetic Match" width="20"/>
+            <!-- <column type="text" field="synthetic_filename" label="Synthetic Filename" width="20"/>
+            <column type="integer" field="synthetic_scan" label="Synthetic Scan" width="4"/> -->
+            <column type="integer" field="canonical_matches" label="Canonical Protein Matches" width="1"/>
+            <column type="text" field="gene_unique" label="Gene Unique" width="2"/>
+            <column type="integer" field="exon_junctions_covered" label="Exon Junctions Covered" width="1"/>
+            <column type="integer" field="exons_covered_no_junction" label="Complete Exons Covered" width="1"/>
+            <column type="integer" field="total_unique_exons_covered" label="Total Exons Covered" width="1"/>
+            <column type="text" field="exons_mapped" label="All Mapped Exons" width="10"/>
             <column type="text" field="type" label="Evidence Type" width="6"/>
-            <column type="text" field="synthetic_filename" label="Synthetic Filename" width="20"/>
-            <column type="integer" field="synthetic_scan" label="Synthetic Scan" width="4"/>
-            <column type="float" field="best_cosine_to_synthetic" label="Best Cosine to Synthetic" width="6"/>
             <column label="Add to Library" type="genericurlgenerator" width="12">
                 <parameter name="URLBASE" value="/ProteoSAFe/addToLibrary.jsp"/>
                 <parameter name="REQUESTPARAMETER=file" value="[filename]"/>
@@ -219,15 +118,17 @@
                 <parameter name="USETASK" value="True"/>\
                 <parameter name="PASS_URL" value="True"/>\
             </column>
+            <column type="text" field="sequence" label="Sequence" width="20"/>
+            <column type="integer" field="charge" label="Charge" width="4"/>
         </row>
         <row expander="image">
-            <column type="jscolumnspectrumviewer" colspan="6">
+            <column type="jscolumnspectrumviewer" label="Input PSM" colspan="6">
                 <parameter name="file"          file="[filename]"/>
                 <parameter name="scan"          value="[scan]"/>
                 <parameter name="peptide"       value="[sequence]"/>
                 <parameter name="modformat"     value="inspect"/>
             </column>
-            <column type="jscolumnspectrumviewer" colspan="6">
+            <column type="jscolumnspectrumviewer"  label="Best Matching Synthetic PSM" colspan="6">
                 <parameter name="file"          file="[synthetic_filename]"/>
                 <parameter name="scan"          value="[synthetic_scan]"/>
                 <parameter name="peptide"       value="[sequence]"/>
@@ -238,26 +139,41 @@
 
         <block id="view_added_peptides" type="table_ss">
             <data>
-                <source type="file" name="novel_peptides/"/>
+                <source type="file" name="novel_peptides_w_cosine/"/>
                 <parsers>
                     <parser type="SQLite"/>
                 </parsers>
             </data>
             <row>
-                <column type="text" field="protein" label="Protein" width="4"/>
-                <column type="integer" field="pe" label="PE" width="5"/>
-                <column type="text" field="ms_evidence" label="Proteomics Evidence" width="2"/>
-                <!-- <column type="text" field="filename" label="Filename" width="20"/>
-                <column type="integer" field="scan" label="Scan" width="4"/> -->
+                <column type="text" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+                <column type="integer" field="aa_start" label="AA Start" width="1" tooltip="Start location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
+                <column type="integer" field="aa_end" label="AA End" width="1" tooltip="End location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
+                <column type="integer" field="pe" label="Protein Existence (PE) Level" width="5" tooltip="Protein Existence (PE) Level from neXtProt 2020 release."/>
                 <column type="text" field="sequence" label="Sequence" width="20"/>
-                <column type="text" field="parent_mass" label="Parent Mass" width="20"/>
                 <column type="integer" field="charge" label="Charge" width="4"/>
-                <column type="text" field="type" label="Evidence Type" width="6"/>
-                <column type="float" field="score" label="-log10(EValue)" width="6"/>
-                <column type="text" field="pass" label="Above Library Threshold" width="6"/>
-                <!-- <column type="text" field="synthetic_filename" label="Synthetic Filename" width="20"/>
-                <column type="integer" field="synthetic_scan" label="Synthetic Scan" width="4"/> -->
-                <column type="float" field="best_cosine_to_synthetic" label="Best Cosine to Synthetic" width="6"/>
+                <column type="text" field="hpp_match" label="Compliant with HPP Data Interpretation Guidelines" width="2" tooltip="Peptide follows HPP Data Interpretation Guidelines (2019-10-15) for use in detecting missing proteins (1/0)."/>
+                <column label="Link to all PSMs" type="genericurlgenerator" width="5" tooltip="Link to all PSMs for this sequence and charge.">
+                    <parameter name="URLBASE" value="result.jsp"/>
+                    <parameter name="USETASK" value="True"/>
+                    <parameter name="REQUESTPARAMETER=view" value="view_added_psm"/>
+                    <parameter name="HASHPARAMTER=sequence_input" value="[sequence]"/>
+                    <parameter name="HASHPARAMTER=charge_lowerinput" value="[charge]"/>
+                    <parameter name="HASHPARAMTER=charge_upperinput" value="[charge]"/>
+                    <!-- <parameter name="HASHPARAMTER=cosine_lowerinput" value="[cosine_cutoff]"/> -->
+                    <parameter name="LABEL" value="All PSMs"/>
+                    <parameter name="PASS_URL" value="True"/>
+                </column>
+                <column type="text" field="parent_mass" label="Precursor Mass" width="20"/>
+                <!-- <column type="text" field="type" label="Evidence Type" width="6"/> -->
+                <column type="float" field="score" label="Peptide Spectrum Match (PSM) Identification Score" width="6" tooltip="Score for Peptide Spectrum Match (PSM) indicates the quality of this spectrum for this particular peptide."/>
+                <!-- <column type="text" field="pass" label="Above Library Threshold" width="6"/> -->
+                <column type="float" field="cosine" label="Best Annotated Cosine to Synthetic Spectrum Match" width="6" tooltip="Spectrum cosine using only annotated peaks from the input spectrum and closest matching synthetic."/>
+                <column type="integer" field="canonical_matches" label="#Protein Matches" width="1" tooltip = "Number of proteins the peptide matches to with a single amino acid variant."/>
+                <column type="text" field="gene_unique" label="Gene Unique" width="2" tooltip = "Peptide matches uniquely to a single gene with a single amino acid variant (True/False)."/>
+                <column type="integer" field="exon_junctions_covered" label="Exon Junctions Covered" width="1"/>
+                <column type="integer" field="exons_covered_no_junction" label="Complete Exons Covered" width="1"/>
+                <column type="integer" field="total_unique_exons_covered" label="Total Exons Covered" width="1"/>
+                <column type="text" field="type" label="Evidence Type" width="6" tooltip = "Novelty of sequence compared to MassIVE-KB.  If the sequence is not uniquely mapping, the value N/A is used."/>
                 <column label="Add to Library" type="genericurlgenerator" width="12">
                     <parameter name="URLBASE" value="/ProteoSAFe/addToLibrary.jsp"/>
                     <parameter name="REQUESTPARAMETER=file" value="[filename]"/>
@@ -271,15 +187,32 @@
                     <parameter name="USETASK" value="True"/>\
                     <parameter name="PASS_URL" value="True"/>\
                 </column>
+                <column type="text" field="database_usi" label="Best Peptide Spectrum Match (PSM) By PSM Identification Score" width="20"/>
+                <column type="text" field="cosine_usi" label="Best Peptide Spectrum Match (PSM) By Cosine to Synthetic Peptide Spectra" width="20"/>
+                <column type="text" field="synthetic_usi" label="Most-similar Synthetic Peptide Spectrum" width="20"/>
+                <column type="text" field="all_mapped_exons" label="All Mapped Exons" width="10"/>
+                <column type="text" field="all_proteins_w_coords" label="All Mapped Proteins" width="10"/>
+                <!-- <column type="text" field="database_filename" label="Best DB Filename" width="20"/>
+                <column type="integer" field="database_scan" label="Best DB Scan" width="4"/>
+                <column type="text" field="cosine_filename" label="Best Cosine Filename" width="20"/>
+                <column type="integer" field="cosine_scan" label="Best Cosine Scan" width="4"/>
+                <column type="text" field="synthetic_filename" label="Synthetic Filename" width="20"/>
+                <column type="integer" field="synthetic_scan" label="Synthetic Scan" width="4"/> -->
             </row>
             <row expander="image">
-                <column type="jscolumnspectrumviewer" colspan="6">
-                    <parameter name="file"          file="[filename]"/>
-                    <parameter name="scan"          value="[scan]"/>
+                <column type="jscolumnspectrumviewer"  label="Best PSM By Database Score" colspan="6">
+                    <parameter name="file"          file="[database_filename]"/>
+                    <parameter name="scan"          value="[database_scan]"/>
                     <parameter name="peptide"       value="[sequence]"/>
                     <parameter name="modformat"     value="inspect"/>
                 </column>
-                <column type="jscolumnspectrumviewer" colspan="6">
+                <column type="jscolumnspectrumviewer" label="Best PSM By Cosine to Synthetic" colspan="4">
+                    <parameter name="file"          file="[cosine_filename]"/>
+                    <parameter name="scan"          value="[cosine_scan]"/>
+                    <parameter name="peptide"       value="[sequence]"/>
+                    <parameter name="modformat"     value="inspect"/>
+                </column>
+                <column type="jscolumnspectrumviewer" label="Best Matched Synthetic" colspan="2">
                     <parameter name="file"          file="[synthetic_filename]"/>
                     <parameter name="scan"          value="[synthetic_scan]"/>
                     <parameter name="peptide"       value="[sequence]"/>

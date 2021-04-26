@@ -1,39 +1,39 @@
-#!/usr/bin/python
-
-
+import argparse
 import sys
-import getopt
-import os
-import ming_fileio_library
-from collections import defaultdict
+from pathlib import Path
+from csv import DictReader, DictWriter
 
-def usage():
-    print("<input folder> <output file>")
+def arguments():
+    parser = argparse.ArgumentParser(description='mzTab to list of peptides')
+    parser.add_argument('-i','--input_folder', type = Path, required=True, help='Input folder')
+    parser.add_argument('-o','--output_file', type = Path, required=True, help='Output file')
+    parser.add_argument('-d','--delimiter', type = str, help='Delimiter for file reading', default = '\t')
 
-
+    if len(sys.argv) < 2:
+        parser.print_help()
+        sys.exit(1)
+    return parser.parse_args()
 
 def main():
-    input_files_list = ming_fileio_library.list_files_in_dir(sys.argv[1])
 
-    output_dict = defaultdict(list)
-    output_file = open(sys.argv[2], "w")
+    args = arguments()
 
-    file_count = 0
-    for input_file in input_files_list:
-        row_count = 0
-        for line in open(input_file):
-            if file_count == 0 and row_count == 0:
-                output_file.write(line)
-            elif row_count != 0:
-                output_file.write(line)
+    all_fieldnames = set()
 
-            row_count += 1
+    for input_file in args.input_folder.glob('*'):
+        with open(input_file) as input:
+            r = DictReader(input, delimiter = args.delimiter)
+            if r.fieldnames:
+                all_fieldnames = all_fieldnames.union(set(r.fieldnames))
 
-        file_count += 1
-
-    output_file.close()
-
-
+    with open(args.output_file, 'w') as output:
+        w = DictWriter(output, delimiter = args.delimiter, fieldnames = list(all_fieldnames))
+        w.writeheader()
+        for input_file in args.input_folder.glob('*'):
+            with open(input_file) as input:
+                r = DictReader(input, delimiter = args.delimiter)
+                for l in r:
+                    w.writerow(l)
 
 
 if __name__ == "__main__":

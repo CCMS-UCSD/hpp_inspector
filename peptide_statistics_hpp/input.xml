@@ -18,6 +18,10 @@
 			<fileGenerator type="upload" purpose="mztab" target="mztab"/>
 		</parameter>
 
+		<parameter name="synthetics" label="Synthetics">
+			<fileGenerator type="upload" purpose="synthetics" target="synthetics"/>
+		</parameter>
+
 		<parameter name="spec_on_server" label="Spectrum Files (if not public)">
 			<fileGenerator type="upload" purpose="spec_on_server" target="spec_on_server"/>
 		</parameter>
@@ -25,6 +29,66 @@
 		<parameter name="peak_tolerance" label="Peak Tolerance (Da) for Cosine to Synthetics">
 			<default value="0.05"/>
 			<validator type="float" minimum="0"/>
+		</parameter>
+
+		<parameter name="cosine_threshold" label="Cosine Threshold (Set to 0 to skip cosine calculations)">
+			<default value="0.5"/>
+			<validator type="float" minimum="0"/>
+		</parameter>
+
+		<parameter name="explained_intensity_threshold" label="Explained Intensity Threshold">
+			<default value="0.5"/>
+			<validator type="float" minimum="0"/>
+		</parameter>
+
+		<parameter name="parallel_cosine.parallel_cosine" label="Parallelism (For Cosine Calculations)">
+			<default value="10"/>
+			<validator type="integer"/>
+		</parameter>
+
+		<parameter name="peptide_coverage_merged_external" label="Coverage (External)">
+			<fileGenerator type="upload" purpose="peptide_coverage_merged_external" target="peptide_coverage_merged_external"/>
+		</parameter>
+
+		<parameter name="novel_psms_w_cosine_external" label="PSMs (External)">
+			<fileGenerator type="upload" purpose="novel_psms_w_cosine_external" target="novel_psms_w_cosine_external"/>
+		</parameter>
+
+		<parameter name="dna" label="DNA Folder">
+			<fileGenerator type="upload" purpose="dna" target="dna"/>
+		</parameter>
+
+		<parameter name="gff" label="GFF File">
+			<fileGenerator type="upload" purpose="gff" target="gff"/>
+		</parameter>
+
+
+		<parameter name="export_explorers" label="Export Explorer Tables">
+			<options>
+				<option label="Yes" value="1" />
+				<option label="No" value="0" />
+			</options>
+			<default value="0" />
+			<validator type="set" />
+		</parameter>
+
+		<parameter name="library_name" label="Library Name">
+			<options>
+				<option label="MassIVE-KB (combined)" value="1" />
+							<option label="MassIVE-KB (in vivo)" value="2" />
+							<option label="MassIVE-KB (synthetic)" value="3" />
+							<option label="Blood-KB" value="6" />
+			</options>
+			<default value="1" />
+			<validator type="set" />
+		</parameter>
+
+		<parameter name="library_version" label="Library Version">
+			<validator type="integer"/>
+		</parameter>
+
+		<parameter name="external_provenance" label="Unprocessed Provenance">
+			<fileGenerator type="upload" purpose="external_provenance" target="external_provenance"/>
 		</parameter>
 
 </parameters>
@@ -69,6 +133,18 @@
             </cell>
         </row>
 				<row>
+								<cell>
+										<label>
+												<content parameter="synthetics"/>
+										</label>
+								</cell>
+								<cell colspan="3">
+										<module id="synthetics" type="fileSelector">
+												<property name="label">Synthetics (MUST be from Extract Peaks PyPKL Workflow)</property>
+										</module>
+								</cell>
+						</row>
+				<row>
 		            <cell>
 		                <label>
 		                    <content parameter="peak_tolerance"/>
@@ -77,7 +153,124 @@
 		            <cell colspan="3">
 		                <input type="text" parameter="peak_tolerance"/>
 		            </cell>
+								<cell>
+										<label>
+												<content parameter="cosine_threshold"/>
+										</label>
+								</cell>
+								<cell colspan="3">
+										<input type="text" parameter="cosine_threshold"/>
+								</cell>
+								<cell>
+										<label>
+												<content parameter="explained_intensity_threshold"/>
+										</label>
+								</cell>
+								<cell colspan="3">
+										<input type="text" parameter="explained_intensity_threshold"/>
+								</cell>
 		        </row>
 	</block>
-
+	<block label="Advanced Exon Mapping Options">
+		<row>
+			<cell>
+						<label>
+								<content parameter="dna"/>
+						</label>
+				</cell>
+				<cell colspan="3">
+						<module id="dna" type="fileSelector">
+								<property name="label">DNA Folder</property>
+						</module>
+				</cell>
+		<cell>
+						<label>
+								<content parameter="gff"/>
+						</label>
+				</cell>
+				<cell colspan="3">
+						<module id="gff" type="fileSelector">
+								<property name="label">GFF File</property>
+						</module>
+				</cell>
+		</row>
+	</block>
+	<block label="Advanced Parallelization Options">
+    <row>
+      <cell>
+        <label>
+          <content parameter="parallel_cosine.parallel_cosine"/>
+        </label>
+      </cell>
+      <cell colspan="2">
+        <input type="text" parameter="parallel_cosine.parallel_cosine"/>
+      </cell>
+    </row>
+  </block>
+	<block label="Advanced Combine Jobs">
+		<row>
+						<cell>
+								<label>
+										<content parameter="peptide_coverage_merged_external"/>
+								</label>
+						</cell>
+						<cell colspan="3">
+								<module id="peptide_coverage_merged_external" type="fileSelector">
+										<property name="label">peptide_coverage_merged</property>
+								</module>
+						</cell>
+						<cell>
+								<label>
+										<content parameter="novel_psms_w_cosine_external"/>
+								</label>
+						</cell>
+						<cell colspan="3">
+								<module id="novel_psms_w_cosine_external" type="fileSelector">
+										<property name="label">merged_novel_psms_w_cosine</property>
+								</module>
+						</cell>
+				</row>
+	</block>
+	<block label="Advanced Explorer Outputs">
+		<row>
+			<cell>
+				<label>
+					<content parameter="export_explorers"/>
+				</label>
+			</cell>
+			<cell colspan="2">
+				<input type="select" parameter="export_explorers"/>
+			</cell>
+		</row>
+		<row>
+				<cell>
+					<label>
+						<content parameter="library_name"/>
+					</label>
+				</cell>
+				<cell colspan="2">
+					<input type="select" parameter="library_name"/>
+				</cell>
+				<cell>
+					<label>
+						<content parameter="library_version"/>
+					</label>
+				</cell>
+				<cell colspan="2">
+					<input type="text" parameter="library_version"/>
+				</cell>
+			</row>
+			<row>
+						<cell>
+								<label>
+										<content parameter="external_provenance"/>
+								</label>
+						</cell>
+						<cell colspan="3">
+								<module id="external_provenance" type="fileSelector">
+										<property name="label">external_provenance</property>
+								</module>
+						</cell>
+				</row>
+	</block>
 </interface>

@@ -54,6 +54,10 @@
 			<fileGenerator type="upload" purpose="novel_psms_w_cosine_external" target="novel_psms_w_cosine_external"/>
 		</parameter>
 
+		<parameter name="peptide_coverage_comparisons" label="Comparison">
+			<fileGenerator type="upload" purpose="peptide_coverage_comparisons" target="peptide_coverage_comparisons"/>
+		</parameter>
+
 		<parameter name="dna" label="DNA Folder">
 			<fileGenerator type="upload" purpose="dna" target="dna"/>
 		</parameter>
@@ -170,6 +174,20 @@
 										<input type="text" parameter="explained_intensity_threshold"/>
 								</cell>
 		        </row>
+	</block>
+	<block label="Comparison">
+		<row>
+						<cell>
+								<label>
+										<content parameter="peptide_coverage_comparisons"/>
+								</label>
+						</cell>
+						<cell colspan="3">
+								<module id="peptide_coverage_comparisons" type="fileSelector">
+										<property name="label">peptide_coverage_comparisons</property>
+								</module>
+						</cell>
+				</row>
 	</block>
 	<block label="Advanced Exon Mapping Options">
 		<row>

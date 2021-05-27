@@ -20,12 +20,16 @@
 
     <collection name="debug_protein_coverage"/>
 
+	<collection name="peptide_coverage_comparisons"/>
+
     <object name="protein_coverage"/>
 		<object name="novel_psms"/>
 		<object name="novel_peptides"/>
     <object name="unique_peptides_list"/>
 	<object name="library_coverage_summary_statistics"/>
 	<collection name="peptide_coverage"/>
+	<object name="novel_exons"/>
+
 	<collection name="peptide_coverage_merged_external"/>
 	<collection name="novel_psms_w_cosine_external"/>
 	<object name="external_provenance"/>
@@ -40,6 +44,7 @@
         <output port="params" object="workflowParameters"/>
 				<output port="peptide_coverage_merged_external"       			 collection="peptide_coverage_merged_external"/>
 				<output port="novel_psms_w_cosine_external"       collection="novel_psms_w_cosine_external"/>
+				<output port="peptide_coverage_comparisons" collection="peptide_coverage_comparisons"/>
 				<output  port="dna"             								collection="dna"/>
 				<output  port="gff"             								object="gff"/>
 				<output  port="external_provenance"             object="external_provenance"/>
@@ -53,6 +58,7 @@
 
 		<action name="download_latest_kb">
 			<input   port="params"       			    object="workflowParameters"/>
+			<input port="peptide_coverage_comparisons" collection="peptide_coverage_comparisons"/>
 			<output  port="kb_pep"             		object="kb_pep"/>
 		</action>
 
@@ -90,6 +96,7 @@
 		<action name="peptide_protein_cosine">
 			<input   port="kb_pep"       			    object="kb_pep"/>
 			<input   port="novel_psms_w_cosine"          collection="novel_psms_w_cosine"/>
+			<input  port="fastadb"             			object="fastadb"/>
 			<input   port="peptide_coverage"   collection="peptide_coverage"/>
 			<input   port="novel_psms_w_cosine_external"       collection="novel_psms_w_cosine_external"/>
 			<input   port="peptide_coverage_merged_external"   collection="peptide_coverage_merged_external"/>
@@ -97,6 +104,7 @@
 			<output  port="novel_proteins_w_cosine"      object="novel_proteins_w_cosine"/>
 			<output  port="novel_peptides_w_cosine"      object="novel_peptides_w_cosine"/>
 			<output  port="merged_novel_psms_w_cosine"   object="merged_novel_psms_w_cosine"/>
+			<output  port="novel_exons"   				 object="novel_exons"/>
 			<output  port="explorer_export"   					collection="explorer_export"/>
 		</action>
 
@@ -122,14 +130,15 @@
     <action name="end">
         <input port="unique_peptides_list"       object="unique_peptides_list"/>
         <input port="protein_coverage" object="protein_coverage"/>
-				<input port="library_coverage_summary_statistics" object="library_coverage_summary_statistics"/>
-        <input port="debug_protein_coverage" collection="debug_protein_coverage"/>
-				<input port="library_output" collection="library_output"/>
-				<input port="peptide_coverage" object="peptide_coverage"/>
-				<input port="novel_proteins_w_cosine" object="novel_proteins_w_cosine"/>
-				<input port="merged_novel_psms_w_cosine" object="merged_novel_psms_w_cosine"/>
-				<input port="novel_peptides_w_cosine" object="novel_peptides_w_cosine"/>
-				<input port="sqlite" collection="sqlite"/>
-				<input port="explorer_export" collection="explorer_export"/>
-		</action>
+		<input port="library_coverage_summary_statistics" object="library_coverage_summary_statistics"/>
+		<input port="debug_protein_coverage" collection="debug_protein_coverage"/>
+		<input port="library_output" collection="library_output"/>
+		<input port="peptide_coverage_merged" object="peptide_coverage"/>
+		<input port="novel_proteins_w_cosine" object="novel_proteins_w_cosine"/>
+		<input port="merged_novel_psms_w_cosine" object="merged_novel_psms_w_cosine"/>
+		<input port="novel_peptides_w_cosine" object="novel_peptides_w_cosine"/>
+		<input port="novel_exons" object="novel_exons"/>
+		<input port="sqlite" collection="sqlite"/>
+		<input port="explorer_export" collection="explorer_export"/>
+	</action>
 </flow>

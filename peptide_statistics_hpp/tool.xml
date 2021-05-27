@@ -47,11 +47,13 @@
 
     <tool name="download_latest_kb">
       <require name="params"    type="file"/>
+      <require name="peptide_coverage_comparisons"    type="folder"/>
       <produce name="kb_pep" type="file" naming="explicit"  extension="out"/>
 
         <execution env="binary" argConvention="adhoc">
             <arg pathRef="download_latest_kb.script"/>
             <arg option="-params"  valueRef="params"/>
+            <arg option="-comparisons"  valueRef="peptide_coverage_comparisons"/>
             <arg option="-backup_kb_pep"  pathRef="predownloaded_pep"/>
             <arg option="-kb_pep"  valueRef="kb_pep"/>
         </execution>
@@ -106,6 +108,7 @@
 
   <tool name="peptide_protein_cosine">
       <require name="kb_pep"    type="file"/>
+      <require name="fastadb"            type="file"/>
       <require name="novel_psms_w_cosine"             type="folder"/>
       <require name="peptide_coverage"                type="folder"/>
       <require name="novel_psms_w_cosine_external"     type="folder"/>
@@ -114,21 +117,23 @@
       <produce name="merged_novel_psms_w_cosine"      type="file" naming="explicit"  extension="tsv"/>
       <produce name="novel_peptides_w_cosine"         type="file" naming="explicit"  extension="tsv"/>
       <produce name="novel_proteins_w_cosine"         type="file" naming="explicit"  extension="tsv"/>
+    <produce name="novel_exons"         type="file" naming="explicit"  extension="tsv"/>
       <produce name="explorer_export"                type="folder"/>
 
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="peptide_protein_cosine.script"/>
-          <arg option="-kb_pep"               valueRef="kb_pep"/>
+          <arg option="-comparison_pep"               valueRef="kb_pep"/>
           <arg option="-input_psms"           valueRef="novel_psms_w_cosine"/>
+          <arg option="-fasta"                      valueRef="fastadb"/>
           <arg option="-input_psms_external"           valueRef="novel_psms_w_cosine_external"/>
           <arg option="-protein_coverage"     valueRef="peptide_coverage"/>
           <arg option="-protein_coverage_external"     valueRef="peptide_coverage_merged_external"/>
           <arg option="-output_psms"          valueRef="merged_novel_psms_w_cosine"/>
           <arg option="-output_peptides"      valueRef="novel_peptides_w_cosine"/>
           <arg option="-output_proteins"      valueRef="novel_proteins_w_cosine"/>
+          <arg option="-output_exons"      valueRef="novel_exons"/>
           <arg option="-cosine_cutoff"        valueRef="@cosine_threshold"/>
           <arg option="-explained_intensity_cutoff"        valueRef="@explained_intensity_threshold"/>
-          <arg option="-nextprot_pe" pathRef="next_prot_pe"/>
           <arg option="-nextprot_releases" pathRef="nextprot_releases"/>
           <arg option="-msv_to_pxd_mapping" pathRef="msv_to_pxd_mapping"/>
           <arg option="-external_provenance"  valueRef="external_provenance"/>

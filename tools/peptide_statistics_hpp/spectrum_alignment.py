@@ -3,12 +3,8 @@ import bisect
 from collections import namedtuple
 
 Match = namedtuple('Match', ['peak1', 'peak2', 'score'])
-Peak = namedtuple('Peak',['mz','intensity'])
 Alignment = namedtuple('Alignment', ['peak1', 'peak2'])
-
-def convert_to_peaks(peak_tuples):
-    #using the splat we can handle both size 2 lists and tuples
-    return [Peak(*p) for p in peak_tuples]
+Peak = namedtuple('Peak',['mz','intensity'])
 
 def normalize_spectrum(spectrum):
     output_spectrum = []
@@ -27,9 +23,9 @@ def sqrt_normalize_spectrum(spectrum):
     intermediate_output_spectrum = []
     acc_norm = 0.0
     for s in spectrum:
-        intensity = s.intensity
+        intensity = math.sqrt(s.intensity)
         intermediate_output_spectrum.append(Peak(s.mz,intensity))
-        acc_norm += (s.intensity*s.intensity)
+        acc_norm += s.intensity
     normed_value = math.sqrt(acc_norm)
     for s in intermediate_output_spectrum:
         output_spectrum.append(Peak(s.mz,s.intensity/normed_value))
@@ -113,18 +109,19 @@ def alignment_to_match(spec1_n,spec2_n,alignment):
 # then it will align the two spectrum given their parent masses
 # These spectra are expected to be a list of lists (size two mass, intensity) or a list of tuples
 ###
-def score_alignment(spec1_n,spec2_n,pm1,pm2,tolerance,max_charge_consideration=1):
+def score_alignment(spec1_n, spec2_n, pm1, pm2, tolerance, max_charge_consideration=1, normalize=False, sqrt=False):
     if len(spec1_n) == 0 or len(spec2_n) == 0:
         return 0.0, []
 
-    # spec1_n = normalize_spectrum(convert_to_peaks(spec1))
-    # spec2_n = normalize_spectrum(convert_to_peaks(spec2))
-    # spec1_n = convert_to_peaks(spec1)
-    # spec2_n = convert_to_peaks(spec2)
-    shift = (pm1 - pm2)
+    if normalize:
+        if sqrt:
+            spec1_n = normalize_spectrum(convert_to_peaks(spec1))
+            spec2_n = normalize_spectrum(convert_to_peaks(spec2))
+        else:
+            spec1_n = normalize_spectrum(convert_to_peaks(spec1))
+            spec2_n = normalize_spectrum(convert_to_peaks(spec2))
 
-    #zero_shift_alignments = find_match_peaks(spec1_n,spec2_n,0,tolerance)
-    #real_shift_alignments = find_match_peaks(spec1_n,spec2_n,shift,tolerance)
+    shift = (pm1 - pm2)
 
     zero_shift_alignments = find_match_peaks_efficient(spec1_n,spec2_n,0,tolerance)
     real_shift_alignments = []

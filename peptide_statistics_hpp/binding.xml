@@ -23,6 +23,9 @@
         <download port="synthetics" type="file">
                 <query name="resource" value="synthetics"/>
         </download>
+        <download port="peptide_coverage_comparisons" type="folder">
+                <query name="resource" value="peptide_coverage_comparisons"/>
+        </download>
         <download port="fastadb" type="folder">
             <query name="resource" value="fastadb"/>
         </download>
@@ -49,6 +52,7 @@
 
     <bind action="download_latest_kb" tool="download_latest_kb">
         <inputAsRequirement port="params"    requirement="params"/>
+        <inputAsRequirement port="peptide_coverage_comparisons" requirement="peptide_coverage_comparisons"/>
         <productionToOutput port="kb_pep"    production="kb_pep"/>
     </bind>
 
@@ -74,6 +78,7 @@
 
     <bind action="peptide_protein_cosine" tool="peptide_protein_cosine">
         <inputAsRequirement port="kb_pep"                         requirement="kb_pep"/>
+        <inputAsRequirement port="fastadb"                  requirement="fastadb"/>
         <inputAsRequirement port="novel_psms_w_cosine"       requirement="novel_psms_w_cosine"/>
         <inputAsRequirement port="peptide_coverage"        requirement="peptide_coverage"/>
         <inputAsRequirement port="novel_psms_w_cosine_external"       requirement="novel_psms_w_cosine_external"/>
@@ -82,6 +87,7 @@
         <productionToOutput port="novel_proteins_w_cosine"     production="novel_proteins_w_cosine"/>
         <productionToOutput port="novel_peptides_w_cosine"     production="novel_peptides_w_cosine"/>
         <productionToOutput port="merged_novel_psms_w_cosine"     production="merged_novel_psms_w_cosine"/>
+        <productionToOutput port="novel_exons"     production="novel_exons"/>
         <productionToOutput port="explorer_export"     production="explorer_export"/>
     </bind>
 
@@ -126,6 +132,9 @@
         </upload>
         <upload port="merged_novel_psms_w_cosine" type="file">
             <query name="resource" value="merged_novel_psms_w_cosine"/>
+        </upload>
+        <upload port="novel_exons" type="file">
+            <query name="resource" value="novel_exons"/>
         </upload>
         <upload port="library_output" type="folder">
             <query name="resource" value="library_output"/>

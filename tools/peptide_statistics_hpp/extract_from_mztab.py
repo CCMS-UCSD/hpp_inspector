@@ -4,7 +4,7 @@ import csv
 import glob
 import requests
 from collections import defaultdict
-from quantlib import mztab
+from python_ms_utilities import mztab
 import urllib
 import requests
 import json

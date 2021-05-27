@@ -17,7 +17,7 @@
             </parsers>
         </data>
         <row>
-          <!-- <column type="float" field="kb_coverage" label="Coverage (KB Only)" width="2"/>
+          <!-- <column type="float" field="comparison_coverage" label="Coverage (KB Only)" width="2"/>
           <column type="float" field="new_coverage" label="Coverage (Added Only)" width="2"/> -->
           <column type="text" field="protein" label="Protein" width="4"/>
             <column label="View Peptides" type="genericurlgenerator" width="5">
@@ -30,39 +30,40 @@
                 <parameter name="LABEL" value="View HPP Compliant Peptides"/>
                 <parameter name="PASS_URL" value="True"/>
             </column>
-            <column type="integer" field="aa_total" label="Protein Length" width="3"/>
+            <column type="text" field="gene" label="Gene" width="4"/>
             <column type="integer" field="pe" label="PE" width="1"/>
+            <column type="integer" field="aa_total" label="Protein Length" width="3"/>
+            <column type="integer" field="combined_hpp_without_kb" label="#HPP Peptides" width="5"/>
+            <!-- <column type="integer" field="comparison_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
+            <column type="integer" field="new_hpp_w_synthetic_cosine" label="#HPP Peptides (Added Only) (Synthetic + Pass Cosine Threshold)" width="2"/> -->
+            <column type="float" field="total_coverage_without_kb" label="Coverage" width="2"/>
             <!-- <column type="text" field="ms_evidence" label="Proteomics Evidence" width="2"/> -->
             <column type="expandable" field="supporting_peptides" label="Previously-known Peptides" width="20"/>
             <column type="expandable" field="novel_peptides" label="Novel Peptides" width="20"/>
             <column type="integer" field="combined_hpp" label="#HPP Peptides (Combined)" width="5"/>
-            <column type="integer" field="kb_hpp" label="#HPP Peptides (KB Only)" width="2"/>
+            <column type="integer" field="comparison_hpp" label="#HPP Peptides (KB Only)" width="2"/>
             <column type="integer" field="new_hpp" label="#HPP Peptides (Added Only)" width="2"/>
-            <column type="float" field="added_kb_coverage" label="Coverage (Added)" width="2"/>
+            <column type="float" field="added_comparison_coverage" label="Coverage (Added)" width="2"/>
             <column type="float" field="total_coverage" label="Coverage (Total)" width="2"/>
             <column type="float" field="coverage_increase" label="Coverage Increase (All)" width="2"/>
             <!-- <column type="text" field="promoted" label="Evidence to Promote" width="2"/> -->
             <column type="expandable" field="supporting_peptides_w_synthetic" label="Previously-known Peptides (Synthetic)" width="20"/>
             <column type="expandable" field="novel_peptides_w_synthetic" label="Novel Peptides (Synthetic)" width="20"/>
             <column type="integer" field="combined_hpp_w_synthetic" label="#HPP Peptides (Combined) (Synthetic)" width="5"/>
-            <column type="integer" field="kb_hpp_w_synthetic" label="#HPP Peptides (KB Only) (Synthetic)" width="2"/>
+            <column type="integer" field="comparison_hpp_w_synthetic" label="#HPP Peptides (KB Only) (Synthetic)" width="2"/>
             <column type="integer" field="new_hpp_w_synthetic" label="#HPP Peptides (Added Only) (Synthetic)" width="2"/>
-            <column type="float" field="added_kb_coverage_w_synthetic" label="Coverage (Added) (Synthetic)" width="2"/>
+            <column type="float" field="added_comparison_coverage_w_synthetic" label="Coverage (Added) (Synthetic)" width="2"/>
             <column type="float" field="total_coverage_w_synthetic" label="Coverage (Total) (Synthetic)" width="2"/>
             <column type="float" field="coverage_increase_w_synthetic" label="Coverage Increase (Synthetic)" width="2"/>
+            <column type="expandable" field="novel_peptides_without_kb" label="All Input Peptides" width="20"/>
             <!-- <column type="text" field="promoted_w_synthetic" label="Evidence to Promote (Synthetic)" width="2"/> -->
             <!-- <column type="expandable" field="supporting_peptides_w_synthetic_cosine" label="Previously-known Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
             <column type="expandable" field="novel_peptides_w_synthetic_cosine" label="Novel Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
             <column type="integer" field="combined_hpp_w_synthetic_cosine" label="#HPP Peptides (Combined) (Synthetic + Pass Cosine Threshold)" width="5"/>
-            <column type="integer" field="kb_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
+            <column type="integer" field="comparison_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="integer" field="new_hpp_w_synthetic_cosine" label="#HPP Peptides (Added Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
-            <column type="float" field="added_kb_coverage_w_synthetic_cosine" label="Coverage (Added) (Synthetic + Pass Cosine Threshold)" width="2"/>
+            <column type="float" field="added_comparison_coverage_w_synthetic_cosine" label="Coverage (Added) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="expandable" field="supporting_peptides_w_synthetic_cosine" label="Previously-known Peptides (Synthetic + Pass Cosine Threshold)" width="20"/> -->
-            <column type="expandable" field="novel_peptides_without_kb" label="All Novel Peptides" width="20"/>
-            <column type="integer" field="combined_hpp_without_kb" label="#HPP Peptides (Novel)" width="5"/>
-            <!-- <column type="integer" field="kb_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
-            <column type="integer" field="new_hpp_w_synthetic_cosine" label="#HPP Peptides (Added Only) (Synthetic + Pass Cosine Threshold)" width="2"/> -->
-            <column type="float" field="total_coverage_without_kb" label="Coverage (Novel)" width="2"/>
             <!-- <column type="text" field="promoted_w_synthetic_cosine" label="Evidence to Promote (Synthetic + Pass Cosine Threshold)" width="2"/> -->
         </row>
     </block>
@@ -125,12 +126,16 @@
             <column type="jscolumnspectrumviewer" label="Input PSM" colspan="6">
                 <parameter name="file"          file="[filename]"/>
                 <parameter name="scan"          value="[scan]"/>
+                <parameter name="charge"        value="[charge]"/>
+                <parameter name="tolerance"     value="[frag_tol]"/>
                 <parameter name="peptide"       value="[sequence]"/>
                 <parameter name="modformat"     value="inspect"/>
+
             </column>
             <column type="jscolumnspectrumviewer"  label="Best Matching Synthetic PSM" colspan="6">
                 <parameter name="file"          file="[synthetic_filename]"/>
                 <parameter name="scan"          value="[synthetic_scan]"/>
+                <parameter name="charge"        value="[charge]"/>
                 <parameter name="peptide"       value="[sequence]"/>
                 <parameter name="modformat"     value="inspect"/>
             </column>
@@ -203,18 +208,23 @@
                 <column type="jscolumnspectrumviewer"  label="Best PSM By Database Score" colspan="6">
                     <parameter name="file"          file="[database_filename]"/>
                     <parameter name="scan"          value="[database_scan]"/>
+                    <parameter name="charge"        value="[charge]"/>
+                    <parameter name="tolerance"     value="[frag_tol]"/>
                     <parameter name="peptide"       value="[sequence]"/>
                     <parameter name="modformat"     value="inspect"/>
                 </column>
                 <column type="jscolumnspectrumviewer" label="Best PSM By Cosine to Synthetic" colspan="4">
                     <parameter name="file"          file="[cosine_filename]"/>
                     <parameter name="scan"          value="[cosine_scan]"/>
+                    <parameter name="charge"        value="[charge]"/>
+                    <parameter name="tolerance"     value="[frag_tol]"/>
                     <parameter name="peptide"       value="[sequence]"/>
                     <parameter name="modformat"     value="inspect"/>
                 </column>
                 <column type="jscolumnspectrumviewer" label="Best Matched Synthetic" colspan="2">
                     <parameter name="file"          file="[synthetic_filename]"/>
                     <parameter name="scan"          value="[synthetic_scan]"/>
+                    <parameter name="charge"        value="[charge]"/>
                     <parameter name="peptide"       value="[sequence]"/>
                     <parameter name="modformat"     value="inspect"/>
                 </column>

@@ -6,9 +6,7 @@ from pyteomics import mzml, mzxml
 from pathlib import Path
 import pickle
 from datetime import datetime
-import spectrum_alignment as sa
 from python_ms_utilities import processing
-
 
 CUTOFF = {"6": 2.12167006027, "7": 2.32154253572, "8": 2.53031824698, "9": 2.7717776307, "10": 3.0419577266, "11": 3.20404758311, "12": 3.4028353721, "13": 3.14854063781, "14": 3.47053358426, "15": 3.35416414915, "16": 3.34418455532, "17": 3.24904542906, "18": 3.18426919317, "19": 3.01362943461, "20": 3.12316407632, "21": 3.08160158158, "22": 2.59466460406, "23": 2.96230440256, "24": 3.11610830789, "25": 2.93990420679, "26": 2.6947192629, "27": 2.43042157531, "28": 2.5287628139300002, "29": 2.26034401643, "30": 2.60979068254, "31": 2.70004841417, "32": 2.69919517925, "33": 2.18110553715, "34": 1.90115111418, "35": 1.5402648112000001, "36": 1.74919562203, "37": 1.88066887473, "38": 1.58471929702, "39": 1.73377627878, "40": 3.10312899149}
 
@@ -39,32 +37,6 @@ def arguments():
         parser.print_help()
         sys.exit(1)
     return parser.parse_args()
-
-def prepare_spectrum(peaks, tol, precursor, charge, sequence, process = False):
-
-    #filter TMT
-    msl.filter_isobaric_label_peaks(peaks,tol)
-
-    charge_set = range(1, int(charge)+1)
-
-    theoretical_peaks = mpl.create_theoretical_peak_map(sequence, ["b",  "b-iso", "y", "y-iso", "b-H2O", "b-NH3", "y-H2O", "y-NH3", "a"], charge_set=charge_set)
-
-    if process:
-        peaks = msl.filter_precursor_peaks(peaks,2,precursor)
-        peaks = msl.window_filter_peaks(peaks, 50, 10)
-
-    annotated_peaks, unannotated_peaks, ion_vector = mpl.extract_annotated_peaks(theoretical_peaks, peaks, tol)
-
-    peaks = sa.normalize_spectrum(sa.convert_to_peaks(peaks))
-
-    explained_intensity = sum(p[1] for p in annotated_peaks)/sum(p[1] for p in annotated_peaks+unannotated_peaks)
-
-    annotated_peaks = sa.normalize_spectrum(sa.convert_to_peaks(annotated_peaks))
-    ion_vector = sa.normalize_spectrum(sa.convert_to_peaks(ion_vector))
-    # print("Peaks ", peaks)
-    # print("Annotated Peaks ", annotated_peaks)
-
-    return peaks, annotated_peaks, ion_vector, explained_intensity
 
 def get_mzml_spectrum(mzml_object, scan):
     #thermo only for now

@@ -162,6 +162,7 @@ def main():
     has_synthetic = set()
 
     added_proteins_matching_synthetic = defaultdict(lambda: defaultdict(list))
+    added_proteins_matching_synthetic_cosine = defaultdict(lambda: defaultdict(list))
     added_proteins_explained_intensity = defaultdict(lambda: defaultdict(list))
 
     with open(args.msv_to_pxd_mapping) as json_file:
@@ -293,8 +294,11 @@ def main():
             if len(cannonical_proteins) == 1:
                 protein = cannonical_proteins[0]
                 if sequence_il in added_proteins[protein] and best_psm['explained_intensity'] >= args.explained_intensity_cutoff:
-                    if best_psm['cosine'] >= args.cosine_cutoff:
+                    if best_psm['cosine'] >= 0:
                         added_proteins_matching_synthetic[protein][sequence_il] = added_proteins[protein][sequence_il]
+                        if best_psm['cosine'] >= args.cosine_cutoff:
+                            added_proteins_matching_synthetic_cosine[protein][sequence_il] = added_proteins[protein][sequence_il]
+
                     added_proteins_explained_intensity[protein][sequence_il] = added_proteins[protein][sequence_il]
 
     with open(args.output_proteins, 'w') as fo:
@@ -350,7 +354,8 @@ def main():
                     'gene':proteome.proteins.get(protein_no_decoy).gene,
                 }
                 protein_dict.update(find_overlap(comparison_proteins[protein],added_proteins_explained_intensity[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
-                protein_dict.update(find_overlap(comparison_proteins_w_synthetic[protein],added_proteins_matching_synthetic[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
+                protein_dict.update(find_overlap(comparison_proteins[protein],added_proteins_matching_synthetic[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
+                protein_dict.update(find_overlap(comparison_proteins[protein],added_proteins_matching_synthetic_cosine[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine')[0])
                 protein_dict.update(find_overlap({},added_proteins_explained_intensity[protein],int(protein_dict['aa_total']),int(protein_dict['pe']),'_without_kb')[0])
                 protein_dict.update({
                     'cosine_cutoff':args.cosine_cutoff,

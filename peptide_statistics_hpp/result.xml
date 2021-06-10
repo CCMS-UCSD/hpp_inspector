@@ -20,6 +20,8 @@
           <!-- <column type="float" field="comparison_coverage" label="Coverage (KB Only)" width="2"/>
           <column type="float" field="new_coverage" label="Coverage (Added Only)" width="2"/> -->
           <column type="text" field="protein" label="Protein" width="4"/>
+        <column type="text" field="protein_type" label="Protein Type" width="4"/>
+
             <column label="View Peptides" type="genericurlgenerator" width="5">
                 <parameter name="URLBASE" value="result.jsp"/>
                 <parameter name="USETASK" value="True"/>
@@ -33,17 +35,17 @@
             <column type="text" field="gene" label="Gene" width="4"/>
             <column type="integer" field="pe" label="PE" width="1"/>
             <column type="integer" field="aa_total" label="Protein Length" width="3"/>
-            <column type="integer" field="combined_hpp_without_kb" label="#HPP Peptides" width="5"/>
+            <column type="integer" field="combined_hpp_just_current" label="#HPP Peptides (Canonical-unique)" width="5"/>
+            <column type="integer" field="combined_hpp_just_current_iso_unique" label="#HPP Peptides (Isoform-unique)" width="5"/>
             <!-- <column type="integer" field="comparison_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="integer" field="new_hpp_w_synthetic_cosine" label="#HPP Peptides (Added Only) (Synthetic + Pass Cosine Threshold)" width="2"/> -->
-            <column type="float" field="total_coverage_without_kb" label="Coverage" width="2"/>
+            <column type="float" field="total_coverage_just_current" label="Coverage" width="2"/>
             <!-- <column type="text" field="ms_evidence" label="Proteomics Evidence" width="2"/> -->
             <column type="expandable" field="supporting_peptides" label="Previously-known Peptides" width="20"/>
             <column type="expandable" field="novel_peptides" label="Novel Peptides" width="20"/>
             <column type="integer" field="combined_hpp" label="#HPP Peptides (Combined)" width="5"/>
             <column type="integer" field="comparison_hpp" label="#HPP Peptides (KB Only)" width="2"/>
             <column type="integer" field="new_hpp" label="#HPP Peptides (Added Only)" width="2"/>
-            <column type="float" field="added_comparison_coverage" label="Coverage (Added)" width="2"/>
             <column type="float" field="total_coverage" label="Coverage (Total)" width="2"/>
             <column type="float" field="coverage_increase" label="Coverage Increase (All)" width="2"/>
             <!-- <column type="text" field="promoted" label="Evidence to Promote" width="2"/> -->
@@ -52,10 +54,9 @@
             <column type="integer" field="combined_hpp_w_synthetic" label="#HPP Peptides (Combined) (Synthetic)" width="5"/>
             <column type="integer" field="comparison_hpp_w_synthetic" label="#HPP Peptides (KB Only) (Synthetic)" width="2"/>
             <column type="integer" field="new_hpp_w_synthetic" label="#HPP Peptides (Added Only) (Synthetic)" width="2"/>
-            <column type="float" field="added_comparison_coverage_w_synthetic" label="Coverage (Added) (Synthetic)" width="2"/>
             <column type="float" field="total_coverage_w_synthetic" label="Coverage (Total) (Synthetic)" width="2"/>
             <column type="float" field="coverage_increase_w_synthetic" label="Coverage Increase (Synthetic)" width="2"/>
-            <column type="expandable" field="novel_peptides_without_kb" label="All Input Peptides" width="20"/>
+            <!-- <column type="expandable" field="novel_peptides_just_current" label="All Input Peptides" width="20"/> -->
             <!-- <column type="text" field="promoted_w_synthetic" label="Evidence to Promote (Synthetic)" width="2"/> -->
             <!-- <column type="expandable" field="supporting_peptides_w_synthetic_cosine" label="Previously-known Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
             <column type="expandable" field="novel_peptides_w_synthetic_cosine" label="Novel Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
@@ -84,7 +85,9 @@
             </parsers>
         </data>
         <row>
-            <column type="text" field="protein" label="Protein" width="4"/>
+            <column type="slideExpandable" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+            <column type="text" field="gene" label="Gene" width="4"/>
+            <column type="text" field="protein_type" label="Protein Type" width="4"/>
             <column type="integer" field="aa_start" label="AA Start" width="1"/>
             <column type="integer" field="aa_end" label="AA End" width="1"/>
             <column type="integer" field="pe" label="PE" width="5"/>
@@ -150,7 +153,9 @@
                 </parsers>
             </data>
             <row>
-                <column type="text" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+                <column type="slideExpandable" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+                <column type="text" field="gene" label="Gene" width="4" tooltip="Gene for the protein"/>
+                <column type="text" field="protein_type" label="Protein Type" width="4"/>
                 <column type="integer" field="aa_start" label="AA Start" width="1" tooltip="Start location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
                 <column type="integer" field="aa_end" label="AA End" width="1" tooltip="End location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
                 <column type="integer" field="pe" label="Protein Existence (PE) Level" width="5" tooltip="Protein Existence (PE) Level from neXtProt 2020 release."/>
@@ -195,8 +200,8 @@
                 <column type="text" field="database_usi" label="Best Peptide Spectrum Match (PSM) By PSM Identification Score" width="20"/>
                 <column type="text" field="cosine_usi" label="Best Peptide Spectrum Match (PSM) By Cosine to Synthetic Peptide Spectra" width="20"/>
                 <column type="text" field="synthetic_usi" label="Most-similar Synthetic Peptide Spectrum" width="20"/>
-                <column type="text" field="all_mapped_exons" label="All Mapped Exons" width="10"/>
-                <column type="text" field="all_proteins_w_coords" label="All Mapped Proteins" width="10"/>
+                <column type="expandable" field="all_mapped_exons" label="All Mapped Exons" width="10"/>
+                <column type="expandable" field="all_proteins_w_coords" label="All Mapped Proteins" width="10"/>
                 <!-- <column type="text" field="database_filename" label="Best DB Filename" width="20"/>
                 <column type="integer" field="database_scan" label="Best DB Scan" width="4"/>
                 <column type="text" field="cosine_filename" label="Best Cosine Filename" width="20"/>

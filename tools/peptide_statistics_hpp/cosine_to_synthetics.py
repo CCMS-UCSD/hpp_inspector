@@ -145,19 +145,20 @@ def main():
     cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
     explained_intensity_per_spectrum = {}
 
-    if threshold > 0 or explained_intensity > 0:
-        for filename in psms_to_consider:
-            print("{}: Looking at {}".format(datetime.now().strftime("%H:%M:%S"),filename))
-            exts = Path(filename).suffixes
-            if 'MSV' in filename:
-                filepath = filename.replace('f.','/data/massive/')
-                if filepath[0] == 'M':
-                    filepath = '/data/massive/' + filepath
-            else:
-                filepath = filename
+    for filename in psms_to_consider:
+        print("{}: Looking at {}".format(datetime.now().strftime("%H:%M:%S"),filename))
+        exts = Path(filename).suffixes
+        if 'MSV' in filename:
+            filepath = filename.replace('f.','/data/massive/')
+            if filepath[0] == 'M':
+                filepath = '/data/massive/' + filepath
+        else:
+            filepath = filename
+
+        if threshold > 0 or explained_intensity > 0:
             if not Path(filepath).exists():
                 print("File {} likely moved or doesn't exist.".format(filepath))
-            elif threshold > 0 or explained_intensity > 0:
+            else:
                 print("{}: About to read {}".format(datetime.now().strftime("%H:%M:%S"),filename))
 
                 file = None
@@ -181,13 +182,13 @@ def main():
                         cosine_to_synthetic.update(file_cosine_to_synthetic)
                         explained_intensity_per_spectrum.update(file_explained_intensity_per_spectrum)
                     file.close()
-            else:
-                for scan in psms_to_consider[filename].keys():
-                    sequence = psms_to_consider[filename][scan]['sequence']
-                    charge = psms_to_consider[filename][scan]['charge']
-                    matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
-                    for synthetic_filescan, _ in matching_synthetics:
-                        cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
+        else:
+            for scan in psms_to_consider[filename].keys():
+                sequence = psms_to_consider[filename][scan]['sequence']
+                charge = psms_to_consider[filename][scan]['charge']
+                matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
+                for synthetic_filescan, _ in matching_synthetics:
+                    cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
 
     print("{}: About to write out PSMs".format(datetime.now().strftime("%H:%M:%S")))
 

@@ -2,7 +2,6 @@
 
 <pathSet base="$base">
     <pathVar name="map_peptides.script" path="map_peptides.py" />
-    <pathVar name="merge_tsv_efficient.script" path="merge_tsv_files_efficient.py" />
     <pathVar name="next_prot_pe" path="NextProt_PEs.txt" />
     <pathVar name="nextprot_releases" path="nextprot_releases" />
     <pathVar name="predownloaded_pep" path="kb_pep_massive.tsv" />
@@ -10,7 +9,6 @@
     <pathVar name="extract_from_mztab.script" path="extract_from_mztab.py" />
     <pathVar name="download_latest_kb.script" path="download_latest_kb.py" />
     <pathVar name="merge_kb_coverage.script" path="merge_kb_coverage.py" />
-    <pathVar name="find_novel_psms.script" path="find_novel_psms.py" />
     <pathVar name="cosine_to_synthetic.script" path="cosine_to_synthetics.py" />
     <pathVar name="peptide_protein_cosine.script" path="peptide_protein_cosine.py" />
 </pathSet>
@@ -21,10 +19,8 @@
 
 <pathSet base="anaconda3">
     <toolPath tool="map_peptides" path="bin/python3.5" />
-    <toolPath tool="merge_tsv_efficient" path="bin/python3.7" />
     <toolPath tool="download_latest_kb" path="bin/python3.5" />
     <toolPath tool="extract_from_mztab" path="bin/python3.5" />
-    <toolPath tool="find_novel_psms" path="bin/python3.5" />
     <toolPath tool="peptide_protein_cosine" path="bin/python3.5" />
     <toolPath tool="calculate_cosine" path="bin/python3.5" />
     <toolPath tool="split_identifications" path="bin/python3.5" />
@@ -154,19 +150,17 @@
   <!-- <pathSet base="anaconda3">
     <toolPath tool="convert_tsv_to_sqlite" path="bin/python3.5" />
   </pathSet> -->
-  <tool name="convert_tsv_to_sqlite">
+  <!-- <tool name="convert_tsv_to_sqlite">
       <require name="merged_novel_psms_w_cosine"      type="file"/>
       <require name="novel_peptides_w_cosine"         type="file"/>
-      <!-- <require name="novel_proteins_w_cosine"         type="file"/> -->
       <produce name="sqlite"                          type="folder"/>
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="convert_tsv_to_sqlite.script"/>
           <arg valueRef="sqlite"/>
           <arg option="view_added_psm" valueRef="merged_novel_psms_w_cosine"/>
           <arg option="view_added_peptides" valueRef="novel_peptides_w_cosine"/>
-          <!-- <arg option="view_added" valueRef="novel_proteins_w_cosine"/> -->
       </execution>
-  </tool>
+  </tool> -->
 
   <!-- Exon Mappings -->
 

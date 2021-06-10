@@ -34,7 +34,7 @@
 	<collection name="novel_psms_w_cosine_external"/>
 	<object name="external_provenance"/>
 	<collection name="explorer_export"/>
-	<collection name="sqlite"/>
+	<!-- <collection name="sqlite"/> -->
 
     <action name="begin">
         <output port="mztab"       			 collection="mztab"/>
@@ -108,12 +108,11 @@
 			<output  port="explorer_export"   					collection="explorer_export"/>
 		</action>
 
-		<action name="convert_tsv_to_sqlite">
-			<!-- <input  port="novel_proteins_w_cosine"      object="novel_proteins_w_cosine"/> -->
+		<!-- <action name="convert_tsv_to_sqlite">
 			<input  port="novel_peptides_w_cosine"      object="novel_peptides_w_cosine"/>
 			<input  port="merged_novel_psms_w_cosine"   object="merged_novel_psms_w_cosine"/>
 			<output port="sqlite" 											collection="sqlite"/>
-		</action>
+		</action> -->
 
 		<object name="dna"/>
 		<object name="gff"/>
@@ -138,7 +137,7 @@
 		<input port="merged_novel_psms_w_cosine" object="merged_novel_psms_w_cosine"/>
 		<input port="novel_peptides_w_cosine" object="novel_peptides_w_cosine"/>
 		<input port="novel_exons" object="novel_exons"/>
-		<input port="sqlite" collection="sqlite"/>
+		<!-- <input port="sqlite" collection="sqlite"/> -->
 		<input port="explorer_export" collection="explorer_export"/>
 	</action>
 </flow>

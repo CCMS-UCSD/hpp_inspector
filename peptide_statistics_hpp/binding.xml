@@ -91,12 +91,11 @@
         <productionToOutput port="explorer_export"     production="explorer_export"/>
     </bind>
 
-    <bind action="convert_tsv_to_sqlite" tool="convert_tsv_to_sqlite">
-        <!-- <inputAsRequirement port="novel_proteins_w_cosine"     requirement="novel_proteins_w_cosine"/> -->
+    <!-- <bind action="convert_tsv_to_sqlite" tool="convert_tsv_to_sqlite">
         <inputAsRequirement port="novel_peptides_w_cosine"     requirement="novel_peptides_w_cosine"/>
         <inputAsRequirement port="merged_novel_psms_w_cosine"  requirement="merged_novel_psms_w_cosine"/>
         <productionToOutput port="sqlite"                      production="sqlite"/>
-    </bind>
+    </bind> -->
 
     <!-- Exon mapping -->
 
@@ -139,9 +138,9 @@
         <upload port="library_output" type="folder">
             <query name="resource" value="library_output"/>
         </upload>
-        <upload port="sqlite" type="folder">
+        <!-- <upload port="sqlite" type="folder">
             <query name="resource" value="sqlite"/>
-        </upload>
+        </upload> -->
       <upload port="explorer_export" type="folder">
           <query name="resource" value="explorer_export"/>
       </upload>

@@ -215,7 +215,7 @@ def main():
 
     for protein_coverage_file in chain(args.protein_coverage.glob('*'),args.protein_coverage_external.glob('*')):
         if(protein_coverage_file.is_file()):
-            all_proteins,added_proteins,pep_mapping_info,peptide_to_exon_map = read_mappings.read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,pep_mapping_info,peptide_to_exon_map,nextprot_pe)
+            all_proteins,added_proteins,pep_mapping_info,peptide_to_exon_map = read_mappings.read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,pep_mapping_info,peptide_to_exon_map,proteome)
 
     for protein in all_proteins:
         for peptide in all_proteins[protein].keys():
@@ -231,7 +231,7 @@ def main():
     with open(args.output_psms,'w') as w:
         header = ['protein','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
 
-        o = csv.DictWriter(w, delimiter='\t',fieldnames = header)
+        o = csv.DictWriter(w, delimiter='\t',fieldnames = header, restval='N/A')
         o.writeheader()
         for input_psm in chain(args.input_psms.glob('*'),args.input_psms_external.glob('*')):
             with open(input_psm) as f:
@@ -241,55 +241,54 @@ def main():
                     il_peptide = ''.join([p.replace('I','L') for p in l['sequence'] if p.isalpha()])
 
                     l['usi'] = correct_usi(l['usi'], msv_mapping)
-                    l['synthetic_usi'] = correct_usi(l['synthetic_usi'], msv_mapping) if l['synthetic_usi'] != '' else l['synthetic_usi']
+                    l['synthetic_usi'] = correct_usi(l['synthetic_usi'], msv_mapping) if (l['synthetic_usi'] != 'N/A' and l['synthetic_usi'] != '') else 'N/A'
                     # l['sequence'] = l['sequence'] if '[' in l['sequence'] else add_brackets(l['sequence'])
                     l.update(pep_mapping_info.get(peptide,{}))
                     l.update(protein_info(il_peptide, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe))
                     l.pop('mapped_proteins')
                     o.writerow(l)
                     sequence, charge = l['sequence'],l['charge']
-                    if (sequence, charge) in representative_per_precursor:
+                    if not (sequence, charge) in representative_per_precursor:
+                        representative_per_precursor[(sequence, charge)] = l.copy()
                         precursor_representative = representative_per_precursor[(sequence, charge)]
-                        best_cosine = float(l['cosine']) > precursor_representative['cosine']
-                        best_score = float(l['score']) > precursor_representative['score']
-                        if best_cosine:
-                            precursor_representative['cosine_filename'] = l['filename']
-                            precursor_representative['cosine_scan'] = l['scan']
-                            precursor_representative['cosine_usi'] = l['usi']
-                            precursor_representative['synthetic_filename'] = l['synthetic_filename']
-                            precursor_representative['synthetic_scan'] = l['synthetic_scan']
-                            precursor_representative['synthetic_usi'] = l['synthetic_usi']
-                            precursor_representative['cosine'] = float(l['cosine'])
-                            precursor_representative['explained_intensity'] = float(l['explained_intensity'])
-                        if best_score:
-                            precursor_representative['database_filename'] = l['filename']
-                            precursor_representative['database_scan'] = l['scan']
-                            precursor_representative['database_usi'] = l['usi']
-                            precursor_representative['score'] = float(l['score'])
-                            precursor_representative['explained_intensity'] = float(l['explained_intensity'])
-                        if (best_score and best_cosine):
-                            precursor_representative['cosine_score_match'] = 'Yes'
-                        else:
-                            precursor_representative['cosine_score_match'] = 'No'
+                        precursor_representative['database_filename'] = l['filename']
+                        precursor_representative['database_scan'] = l['scan']
+                        precursor_representative['database_usi'] = l['usi']
+                        precursor_representative['explained_intensity'] = float(l['explained_intensity'])
+                        precursor_representative['cosine'] = float(l['cosine'])
+                        precursor_representative['score'] = float(l['score'])
+                        precursor_representative.pop('filename')
+                        precursor_representative.pop('scan')
+                        precursor_representative.pop('usi')
 
+                    precursor_representative = representative_per_precursor[(sequence, charge)]
+
+                    best_cosine = float(l['cosine']) >= precursor_representative['cosine']
+                    best_score = float(l['score']) >= precursor_representative['score']
+                    if best_score:
+                        precursor_representative['database_filename'] = l['filename']
+                        precursor_representative['database_scan'] = l['scan']
+                        precursor_representative['database_usi'] = l['usi']
+                        precursor_representative['score'] = float(l['score'])
+                        precursor_representative['explained_intensity'] = float(l['explained_intensity'])
+                    if best_cosine and float(l['cosine']) >= 0 and l['synthetic_usi'] != 'N/A':
+                        precursor_representative['cosine_filename'] = l['filename']
+                        precursor_representative['cosine_scan'] = l['scan']
+                        precursor_representative['cosine_usi'] = l['usi']
+                        precursor_representative['synthetic_filename'] = l['synthetic_filename']
+                        precursor_representative['synthetic_scan'] = l['synthetic_scan']
+                        precursor_representative['synthetic_usi'] = l['synthetic_usi']
+                        precursor_representative['cosine'] = float(l['cosine'])
+                        precursor_representative['explained_intensity'] = float(l['explained_intensity'])
+                    if (best_score and best_cosine):
+                        precursor_representative['cosine_score_match'] = 'Yes'
                     else:
-                        l['database_filename'] = l['filename']
-                        l['database_scan'] = l['scan']
-                        l['database_usi'] = l['usi']
-                        l['cosine_filename'] = l['filename']
-                        l['cosine_scan'] = l['scan']
-                        l['cosine_usi'] = l['usi']
-                        l['explained_intensity'] = float(l['explained_intensity'])
-                        l['cosine'] = float(l['cosine'])
-                        l['score'] = float(l['score'])
-                        l.pop('filename')
-                        l.pop('scan')
-                        l.pop('usi')
-                        representative_per_precursor[(sequence, charge)] = l
+                        precursor_representative['cosine_score_match'] = 'No'
+
 
     with open(args.output_peptides,'w') as w:
         header = ['protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
-        r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
+        r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
         r.writeheader()
         for (sequence, charge), best_psm in representative_per_precursor.items():
             sequence_nomod = ''.join([p for p in sequence if p.isalpha()])
@@ -332,7 +331,7 @@ def main():
             'explained_intensity_cutoff'
         ] + ['_dyn_#neXtProt Release {}'.format(release) for release in sorted(nextprot_releases_pe.keys())]
 
-        for overlap_suffix in ['','_iso_unique','_w_synthetic','_w_synthetic_cosine','_just_current','_just_current_iso_unique']:
+        for overlap_suffix in ['','_w_synthetic','_w_synthetic_cosine','_just_current','_just_current_iso_unique']:
             fieldnames.extend(['{}{}'.format(k,overlap_suffix) for k in overlap_keys])
 
         w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames)
@@ -349,17 +348,16 @@ def main():
                 'aa_total':protein_entry.length,
                 'gene':protein_entry.gene,
             }
-            
-            protein_dict.update(find_overlap(comparison_proteins.get(protein,{}),added_proteins_explained_intensity.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
-            protein_dict.update(find_overlap(comparison_proteins.get(protein,{}),added_proteins_isoform_unique.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'_iso_unique')[0])
+
+            if is_canonical:
+                protein_dict.update(find_overlap(comparison_proteins.get(protein,{}),added_proteins_explained_intensity.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
+            else:
+                protein_dict.update(find_overlap(comparison_proteins.get(protein,{}),added_proteins_isoform_unique.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
+
             protein_dict.update(find_overlap(comparison_proteins.get(protein,{}),added_proteins_matching_synthetic.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
             protein_dict.update(find_overlap(comparison_proteins.get(protein,{}),added_proteins_matching_synthetic_cosine.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine')[0])
             protein_dict.update(find_overlap({},added_proteins_explained_intensity.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current')[0])
             protein_dict.update(find_overlap({},added_proteins_isoform_unique.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current_iso_unique')[0])
-
-            if not is_canonical: 
-                protein_dict['supporting_peptides'] = protein_dict['supporting_peptides_iso_unique']
-                protein_dict['novel_peptides'] = protein_dict['novel_peptides_iso_unique']
 
             protein_dict.update({
                 'cosine_cutoff':args.cosine_cutoff,
@@ -418,14 +416,16 @@ def main():
         hupo_mapping = {}
         unique_mapping = {}
         for protein, peptides in added_proteins.items():
-            protein_dict = {
-                'protein': protein,
-                'pe': nextprot_pe.get(protein_no_decoy,0),
-                'aa_total':proteome.proteins.get(protein_no_decoy).length
-            }
-            hupo_mapping[protein] = find_overlap({},peptides,int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0]['new_hpp']
+            if 'XXX_' not in protein:
+                protein_dict = {
+                    'protein': protein,
+                    'pe': nextprot_pe.get(protein,0),
+                    'aa_total':proteome.proteins.get(protein).length
+                }
+                hupo_mapping[protein] = find_overlap({},peptides,int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0]['new_hpp']
         for protein, peptides in all_proteins.items():
-            unique_mapping[protein] = len(set([peptide for peptide, mappings in peptides.items() if mappings[0][1]]))
+            if 'XXX_' not in protein:
+                unique_mapping[protein] = len(set([peptide for peptide, mappings in peptides.items() if mappings[0][1]]))
         explorer_export.output_for_explorer(args.explorers_output, pep_mapping_info, representative_per_precursor, args.external_provenance, hupo_mapping, unique_mapping, args.library_name, args.library_version)
 
 if __name__ == '__main__':

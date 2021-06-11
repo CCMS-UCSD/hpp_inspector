@@ -52,6 +52,7 @@
 
     <bind action="download_latest_kb" tool="download_latest_kb">
         <inputAsRequirement port="params"    requirement="params"/>
+        <inputAsRequirement port="fastadb"                  requirement="fastadb"/>
         <inputAsRequirement port="peptide_coverage_comparisons" requirement="peptide_coverage_comparisons"/>
         <productionToOutput port="kb_pep"    production="kb_pep"/>
     </bind>

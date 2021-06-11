@@ -43,12 +43,14 @@
 
     <tool name="download_latest_kb">
       <require name="params"    type="file"/>
+            <require name="fastadb"            type="file"/>
       <require name="peptide_coverage_comparisons"    type="folder"/>
       <produce name="kb_pep" type="file" naming="explicit"  extension="out"/>
 
         <execution env="binary" argConvention="adhoc">
             <arg pathRef="download_latest_kb.script"/>
             <arg option="-params"  valueRef="params"/>
+            <arg option="-proteome_fasta"          valueRef="fastadb"/>
             <arg option="-comparisons"  valueRef="peptide_coverage_comparisons"/>
             <arg option="-backup_kb_pep"  pathRef="predownloaded_pep"/>
             <arg option="-kb_pep"  valueRef="kb_pep"/>

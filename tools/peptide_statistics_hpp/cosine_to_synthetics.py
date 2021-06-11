@@ -17,7 +17,7 @@ def make_usi(filename, scan, sequence, charge):
     if 'MSV' in dataset or 'PXD' in dataset:
         usi = 'mzspec:{}:{}:scan:{}:{}/{}'.format(dataset, file, scan, sequence, charge)
     else:
-        usi = None
+        usi = 'N/A'
 
     return usi
 

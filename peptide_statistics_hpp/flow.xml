@@ -58,6 +58,7 @@
 
 		<action name="download_latest_kb">
 			<input   port="params"       			    object="workflowParameters"/>
+			<input  port="fastadb"             			object="fastadb"/>
 			<input port="peptide_coverage_comparisons" collection="peptide_coverage_comparisons"/>
 			<output  port="kb_pep"             		object="kb_pep"/>
 		</action>

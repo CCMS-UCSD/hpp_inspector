@@ -148,7 +148,7 @@ def protein_info(il_peptide, peptide_to_protein, all_proteins, added_proteins, p
     else:
         outdict['aa_start'],outdict['aa_end'] = "N/A","N/A"
 
-    if len([g for g in output_genes if g != 'N/A']) <= 1 and len(cannonical_proteins) <= 1 and il_peptide in added_proteins[output_proteins[0]]:
+    if len(output_proteins) > 0 and len([g for g in output_genes if g != 'N/A']) <= 1 and len(cannonical_proteins) <= 1 and il_peptide in added_proteins[output_proteins[0]]:
         if il_peptide in comparison_seq:
             outdict['type'] = 'Matches existing evidence'
         else:
@@ -187,11 +187,8 @@ def main():
     with open(args.comparison_pep) as f:
         r = csv.DictReader(f, delimiter='\t')
         for l in r:
-            if int(l['library']) == 2:
-                comparison_seq.add(l['demodified'].replace('I','L'))
-                comparison_proteins[l['protein']][l['demodified'].replace('I','L')].append((int(l['aa_start']),int(l['aa_end'])))
-            if int(l['library']) == 3 or int(l['library']) == 4:
-                has_synthetic.add(l['demodified'].replace('I','L'))
+            comparison_seq.add(l['demodified'].replace('I','L'))
+            comparison_proteins[l['protein']][l['demodified'].replace('I','L')].append((int(l['aa_start']),int(l['aa_end'])))
 
     for protein in comparison_proteins:
         for seq in comparison_proteins[protein].keys():
@@ -229,7 +226,7 @@ def main():
                     added_proteins_w_synthetic[protein][peptide] = added_proteins[protein][peptide]
 
     with open(args.output_psms,'w') as w:
-        header = ['protein','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
+        header = ['protein','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
 
         o = csv.DictWriter(w, delimiter='\t',fieldnames = header, restval='N/A')
         o.writeheader()
@@ -243,6 +240,8 @@ def main():
                     l['usi'] = correct_usi(l['usi'], msv_mapping)
                     l['synthetic_usi'] = correct_usi(l['synthetic_usi'], msv_mapping) if (l['synthetic_usi'] != 'N/A' and l['synthetic_usi'] != '') else 'N/A'
                     # l['sequence'] = l['sequence'] if '[' in l['sequence'] else add_brackets(l['sequence'])
+                    l['sequence_unmodified'] = peptide
+                    l['sequence_unmodified_il'] = il_peptide
                     l.update(pep_mapping_info.get(peptide,{}))
                     l.update(protein_info(il_peptide, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe))
                     l.pop('mapped_proteins')
@@ -287,7 +286,7 @@ def main():
 
 
     with open(args.output_peptides,'w') as w:
-        header = ['protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
+        header = ['protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
         r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
         r.writeheader()
         for (sequence, charge), best_psm in representative_per_precursor.items():
@@ -338,7 +337,7 @@ def main():
         w.writeheader()
 
         for i,(protein,protein_entry) in enumerate(proteome.proteins.items()):
-            
+
             is_canonical = protein_entry.db == 'sp' and not protein_entry.iso
 
             protein_dict = {

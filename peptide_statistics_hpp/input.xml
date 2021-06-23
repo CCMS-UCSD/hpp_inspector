@@ -46,6 +46,20 @@
 			<validator type="integer"/>
 		</parameter>
 
+		<parameter name="parallel_mapping.parallel_mapping" label="Parallelism (For Mapping)">
+			<default value="10"/>
+			<validator type="integer"/>
+		</parameter>
+
+		<parameter name="export_psms" label="Export PSMs">
+			<options>
+				<option label="Yes" value="1" />
+				<option label="No" value="0" />
+			</options>
+			<default value="0" />
+			<validator type="set" />
+		</parameter>
+
 		<parameter name="peptide_coverage_merged_external" label="Coverage (External)">
 			<fileGenerator type="upload" purpose="peptide_coverage_merged_external" target="peptide_coverage_merged_external"/>
 		</parameter>
@@ -224,6 +238,16 @@
         <input type="text" parameter="parallel_cosine.parallel_cosine"/>
       </cell>
     </row>
+		<row>
+      <cell>
+        <label>
+          <content parameter="parallel_mapping.parallel_mapping"/>
+        </label>
+      </cell>
+      <cell colspan="2">
+        <input type="text" parameter="parallel_mapping.parallel_mapping"/>
+      </cell>
+    </row>
   </block>
 	<block label="Advanced Combine Jobs">
 		<row>
@@ -247,6 +271,16 @@
 										<property name="label">merged_novel_psms_w_cosine</property>
 								</module>
 						</cell>
+				</row>
+				<row>
+					<cell>
+						<label>
+							<content parameter="export_psms"/>
+						</label>
+					</cell>
+					<cell colspan="2">
+						<input type="select" parameter="export_psms"/>
+					</cell>
 				</row>
 	</block>
 	<block label="Advanced Explorer Outputs">

@@ -37,7 +37,7 @@
             <arg option="-novel_psms"       valueRef="novel_psms"/>
             <arg option="-peak_tolerance"  valueRef="@peak_tolerance"/>
             <arg option="-peptide_folder"  valueRef="peptide_list"/>
-            <arg option="-mapping_parallelism"  value="10"/>
+            <arg option="-mapping_parallelism"  valueRef="@parallel_mapping.parallel_mapping"/>
         </execution>
     </tool>
 
@@ -116,6 +116,7 @@
       <produce name="novel_peptides_w_cosine"         type="file" naming="explicit"  extension="tsv"/>
       <produce name="novel_proteins_w_cosine"         type="file" naming="explicit"  extension="tsv"/>
     <produce name="novel_exons"         type="file" naming="explicit"  extension="tsv"/>
+    <produce name="all_mappings"         type="file" naming="explicit"  extension="tsv"/>
       <produce name="explorer_export"                type="folder"/>
 
       <execution env="binary" argConvention="adhoc">
@@ -126,10 +127,12 @@
           <arg option="-input_psms_external"           valueRef="novel_psms_w_cosine_external"/>
           <arg option="-protein_coverage"     valueRef="peptide_coverage"/>
           <arg option="-protein_coverage_external"     valueRef="peptide_coverage_merged_external"/>
+          <arg option="-output_psms_flag"          valueRef="@export_psms"/>
           <arg option="-output_psms"          valueRef="merged_novel_psms_w_cosine"/>
           <arg option="-output_peptides"      valueRef="novel_peptides_w_cosine"/>
           <arg option="-output_proteins"      valueRef="novel_proteins_w_cosine"/>
           <arg option="-output_exons"      valueRef="novel_exons"/>
+          <arg option="-output_mappings"      valueRef="all_mappings"/>
           <arg option="-cosine_cutoff"        valueRef="@cosine_threshold"/>
           <arg option="-explained_intensity_cutoff"        valueRef="@explained_intensity_threshold"/>
           <arg option="-nextprot_releases" pathRef="nextprot_releases"/>

@@ -77,6 +77,10 @@
         <blockRef id="main" type="view_added_peptides"/>
     </view>
 
+    <view id="view_mappings" label="View All Mappings">
+        <blockRef id="main" type="view_mappings"/>
+    </view>
+
     <block id="view_added_psm" type="table_ss">
         <data>
             <source type="file" name="merged_novel_psms_w_cosine/"/>
@@ -146,7 +150,6 @@
             </column>
         </row>
     </block>
-
         <block id="view_added_peptides" type="table_ss">
             <data>
                 <source type="file" name="novel_peptides_w_cosine/"/>
@@ -214,6 +217,14 @@
                     <parameter name="REQUESTPARAMETER=end" value="[aa_end]"/>
                     <parameter name="LABEL" value="Link"/>\
                 </column>
+                <column label="View Detailed Mappings" type="genericurlgenerator" width="5">
+                    <parameter name="URLBASE" value="result.jsp"/>
+                    <parameter name="USETASK" value="True"/>
+                    <parameter name="REQUESTPARAMETER=view" value="view_mappings"/>
+                    <parameter name="HASHPARAMTER=sequence_input" value="[sequence_unmodified]"/>
+                    <parameter name="LABEL" value="All PSMs"/>
+                    <parameter name="PASS_URL" value="True"/>
+                </column>
                 <!-- <column type="text" field="database_filename" label="Best DB Filename" width="20"/>
                 <column type="integer" field="database_scan" label="Best DB Scan" width="4"/>
                 <column type="text" field="cosine_filename" label="Best Cosine Filename" width="20"/>
@@ -247,4 +258,69 @@
                 </column>
             </row>
         </block>
+
+        <!-- header = ['sequence','protein','protein_type','gene','start_aa','end_aa','mismatch_position','protein_aa','peptide_aa','delta_mass','precursor_count','psm_count','best_precursor_usi'] -->
+
+                <block id="view_mappings" type="table_ss">
+                    <data>
+                        <source type="file" name="all_mappings/"/>
+                        <parsers>
+                            <parser type="SQLite"/>
+                        </parsers>
+                    </data>
+                    <row>
+                      <column type="text" field="sequence" label="Demodified Sequence" width="4"/>
+                        <column type="text" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+                        <column type="text" field="gene" label="Gene" width="4" tooltip="Gene for the protein"/>
+                        <column type="text" field="protein_type" label="Protein Type" width="4"/>
+                        <column type="integer" field="start_aa" label="AA Start" width="1" tooltip="Start location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
+                        <column type="integer" field="end_aa" label="AA End" width="1" tooltip="End location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
+                        <column type="integer" field="mismatch_position" label="Mismatch Position" width="5"/>
+                        <column type="text" field="protein_aa" label="Protein AA" width="4"/>
+                        <column type="text" field="peptide_aa" label="Peptide AA" width="4"/>
+                        <column type="integer" field="delta_mass" label="Delta Mass" width="4"/>
+                        <column type="integer" field="precursor_count" label="Precursor Count" width="4"/>
+                        <column type="integer" field="psm_count" label="PSM Count" width="4"/>
+                        <column type="text" field="best_precursor_usi" label="Best Precorsor USI" width="20"/>
+                        <column label="COSMIC Linkout" type="genericurlgenerator" width="12">
+                            <parameter name="URLBASE" value="https://cancer.sanger.ac.uk/cosmic/gene/analysis"/>
+                            <parameter name="REQUESTPARAMETER=coords" value="AA%3AAA"/>
+                            <parameter name="REQUESTPARAMETER=ln" value="[gene]"/>
+                            <parameter name="REQUESTPARAMETER=start" value="[start_aa]"/>
+                            <parameter name="REQUESTPARAMETER=end" value="[end_aa]"/>
+                            <parameter name="LABEL" value="Link"/>\
+                        </column>
+                        <!-- <column type="text" field="database_filename" label="Best DB Filename" width="20"/>
+                        <column type="integer" field="database_scan" label="Best DB Scan" width="4"/>
+                        <column type="text" field="cosine_filename" label="Best Cosine Filename" width="20"/>
+                        <column type="integer" field="cosine_scan" label="Best Cosine Scan" width="4"/>
+                        <column type="text" field="synthetic_filename" label="Synthetic Filename" width="20"/>
+                        <column type="integer" field="synthetic_scan" label="Synthetic Scan" width="4"/> -->
+                    </row>
+                    <row expander="image">
+                        <column type="jscolumnspectrumviewer"  label="Best PSM" colspan="6">
+                            <parameter name="file"          file="[best_precursor_filename]"/>
+                            <parameter name="scan"          value="[best_precursor_scan]"/>
+                            <parameter name="charge"        value="[best_precursor_charge]"/>
+                            <parameter name="peptide"       value="[best_precursor_sequence]"/>
+                            <parameter name="modformat"     value="inspect"/>
+                        </column>
+                      </row>
+                    <!--    <column type="jscolumnspectrumviewer" label="Best PSM By Cosine to Synthetic" colspan="4">
+                            <parameter name="file"          file="[cosine_filename]"/>
+                            <parameter name="scan"          value="[cosine_scan]"/>
+                            <parameter name="charge"        value="[charge]"/>
+                            <parameter name="tolerance"     value="[frag_tol]"/>
+                            <parameter name="peptide"       value="[sequence]"/>
+                            <parameter name="modformat"     value="inspect"/>
+                        </column>
+                        <column type="jscolumnspectrumviewer" label="Best Matched Synthetic" colspan="2">
+                            <parameter name="file"          file="[synthetic_filename]"/>
+                            <parameter name="scan"          value="[synthetic_scan]"/>
+                            <parameter name="charge"        value="[charge]"/>
+                            <parameter name="peptide"       value="[sequence]"/>
+                            <parameter name="modformat"     value="inspect"/>
+                        </column>
+                    </row> -->
+                </block>
 </interface>

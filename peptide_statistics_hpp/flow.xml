@@ -93,6 +93,7 @@
 		<object name="novel_proteins_w_cosine"/>
 		<object name="novel_peptides_w_cosine"/>
 		<object name="merged_novel_psms_w_cosine"/>
+		<object name="all_mappings"/>
 
 		<action name="peptide_protein_cosine">
 			<input   port="kb_pep"       			    object="kb_pep"/>
@@ -106,6 +107,7 @@
 			<output  port="novel_peptides_w_cosine"      object="novel_peptides_w_cosine"/>
 			<output  port="merged_novel_psms_w_cosine"   object="merged_novel_psms_w_cosine"/>
 			<output  port="novel_exons"   				 object="novel_exons"/>
+			<output  port="all_mappings"   				 object="all_mappings"/>
 			<output  port="explorer_export"   					collection="explorer_export"/>
 		</action>
 
@@ -138,6 +140,8 @@
 		<input port="merged_novel_psms_w_cosine" object="merged_novel_psms_w_cosine"/>
 		<input port="novel_peptides_w_cosine" object="novel_peptides_w_cosine"/>
 		<input port="novel_exons" object="novel_exons"/>
+		<input port="all_mappings" object="all_mappings"/>
+
 		<!-- <input port="sqlite" collection="sqlite"/> -->
 		<input port="explorer_export" collection="explorer_export"/>
 	</action>

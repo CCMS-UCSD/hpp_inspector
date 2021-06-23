@@ -93,7 +93,7 @@ def process_spectrum(psms_to_consider, filename, synthetic_scans, tol, threshold
             cosine = 0
             for synthetic_filescan,synthetic_spectrum in matching_synthetics:
                 # needs updating, mz of synthetic isn't the same as mz of spectrum
-                synthetic_spectrum = synthetic_spectrum._replace(precursor_z = int(synthetic_spectrum.precursor_z), annotation = processing.Annotation(sequence, None))
+                synthetic_spectrum = synthetic_spectrum._replace(precursor_z = int(synthetic_spectrum.precursor_z), annotation = processing.Annotation(sequence.replace('+229.163','').replace('+229.162932',''), None))
                 _, synthetic_ion_vector = extract_annotated_peaks(synthetic_spectrum, tolerance)
                 cosine = processing.match_peaks(spectrum_ion_vector, synthetic_ion_vector, tolerance)
                 if cosine > cosine_to_synthetic[(filename,scan)][0]:

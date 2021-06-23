@@ -89,6 +89,7 @@
         <productionToOutput port="novel_peptides_w_cosine"     production="novel_peptides_w_cosine"/>
         <productionToOutput port="merged_novel_psms_w_cosine"     production="merged_novel_psms_w_cosine"/>
         <productionToOutput port="novel_exons"     production="novel_exons"/>
+        <productionToOutput port="all_mappings"     production="all_mappings"/>
         <productionToOutput port="explorer_export"     production="explorer_export"/>
     </bind>
 
@@ -138,6 +139,9 @@
         </upload>
         <upload port="library_output" type="folder">
             <query name="resource" value="library_output"/>
+        </upload>
+        <upload port="all_mappings" type="file">
+            <query name="resource" value="all_mappings"/>
         </upload>
         <!-- <upload port="sqlite" type="folder">
             <query name="resource" value="sqlite"/>

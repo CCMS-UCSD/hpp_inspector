@@ -15,10 +15,12 @@ def arguments():
     parser.add_argument('-f','--fasta', type = Path, help='Input FASTA')
     parser.add_argument('-a','--input_psms', type = Path, help='Input PSMs')
     parser.add_argument('-y','--input_psms_external', type = Path, help='Input PSMs (External)')
+    parser.add_argument('-i','--output_psms_flag', type = int, help='Output PSMs Flag')
     parser.add_argument('-o','--output_psms', type = Path, help='Output PSMs')
     parser.add_argument('-p','--output_peptides', type = Path, help='Output Peptides')
     parser.add_argument('-r','--output_proteins', type = Path, help='Output Proteins')
     parser.add_argument('-b','--output_exons', type = Path, help='Output Exons')
+    parser.add_argument('-z','--output_mappings', type = Path, help='Output Mappings')
     parser.add_argument('-c','--protein_coverage', type = Path, help='Added Protein Coverage')
     parser.add_argument('-d','--protein_coverage_external', type = Path, help='Added Protein Coverage (External)')
     parser.add_argument('-t','--cosine_cutoff', type = float, help='Cosine Cutoff')
@@ -35,6 +37,14 @@ def arguments():
         parser.print_help()
         sys.exit(1)
     return parser.parse_args()
+
+aa_weights = [71, 156, 114, 115, 103, 129, 128, 57, 137, 113, 113, 128, 131, 147, 97, 87, 101, 186, 163, 99]
+aa_characters = ['A', 'R', 'N', 'D', 'C', 'E', 'K', 'G', 'H', 'L', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V']
+
+aa_dict = dict(zip(aa_characters,aa_weights))
+
+def unit_delta(aa1, aa2):
+    return aa_dict.get(aa2,0) - aa_dict.get(aa1,0)
 
 def add_brackets(pep):
     aa_breakpoints = []
@@ -99,7 +109,7 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
         'promoted'+name:'Yes' if (nonoverlapping_all_previous < 2 and nonoverlapping_intersection >= 2) else 'No'
     }, [s.split(' ')[0] for s in supporting_peptides]
 
-def protein_info(il_peptide, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe):
+def protein_info(sequence_charge, il_peptide, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe, frequency_dict = None):
     outdict = {}
 
     proteins = peptide_to_protein.get(il_peptide)
@@ -155,9 +165,9 @@ def protein_info(il_peptide, peptide_to_protein, all_proteins, added_proteins, p
             outdict['type'] = 'New protein evidence'
         outdict['hpp_match'] = 'True'
     else:
-        outdict['type'] = 'N/A'
+        outdict['type'] = 'Not HPP compliant'
         outdict['hpp_match'] = 'False'
-    return outdict
+    return outdict, output_proteins
 
 def main():
     args = arguments()
@@ -178,6 +188,8 @@ def main():
     added_proteins_matching_synthetic_cosine = defaultdict(lambda: defaultdict(list))
     added_proteins_explained_intensity = defaultdict(lambda: defaultdict(list))
     added_proteins_isoform_unique = defaultdict(lambda: defaultdict(list))
+
+    frequency = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
     with open(args.msv_to_pxd_mapping) as json_file:
         msv_mapping = json.load(json_file)
@@ -243,9 +255,14 @@ def main():
                     l['sequence_unmodified'] = peptide
                     l['sequence_unmodified_il'] = il_peptide
                     l.update(pep_mapping_info.get(peptide,{}))
-                    l.update(protein_info(il_peptide, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe))
+                    protein_info_dict, output_proteins = protein_info((l['sequence'],l['charge']), il_peptide, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe)
+                    for protein in output_proteins:
+                        aa_start,aa_end = all_proteins[protein][il_peptide][0][0]
+                        frequency[protein][(aa_start,aa_end)][(l['sequence'],l['charge'])] += 1
+                    l.update(protein_info_dict)
                     l.pop('mapped_proteins')
-                    o.writerow(l)
+                    if args.output_psms_flag == 1:
+                        o.writerow(l)
                     sequence, charge = l['sequence'],l['charge']
                     if not (sequence, charge) in representative_per_precursor:
                         representative_per_precursor[(sequence, charge)] = l.copy()
@@ -284,16 +301,16 @@ def main():
                     else:
                         precursor_representative['cosine_score_match'] = 'No'
 
-
     with open(args.output_peptides,'w') as w:
         header = ['protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
         r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
         r.writeheader()
+
         for (sequence, charge), best_psm in representative_per_precursor.items():
             sequence_nomod = ''.join([p for p in sequence if p.isalpha()])
             sequence_il = ''.join([p.replace('I','L') for p in sequence if p.isalpha()])
             best_psm.update(pep_mapping_info.get(sequence_nomod,{}))
-            best_psm.update(protein_info(sequence_il, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe))
+            best_psm.update(protein_info((sequence,charge), sequence_il, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe)[0])
             best_psm.pop('mapped_proteins')
             r.writerow(best_psm)
 
@@ -313,6 +330,61 @@ def main():
                 for protein in proteins:
                     if sequence_il in added_proteins[protein] and best_psm['explained_intensity'] >= args.explained_intensity_cutoff:
                         added_proteins_isoform_unique[protein][sequence_il] = added_proteins[protein][sequence_il]
+
+    with open(args.output_mappings, 'w') as w:
+        header = ['sequence','protein','protein_type','gene','start_aa','end_aa','mismatch_position','protein_aa','peptide_aa','delta_mass','precursor_count','psm_count','best_precursor_usi','best_precursor_filename','best_precursor_scan','best_precursor_charge','best_precursor_sequence']
+        r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
+        r.writeheader()
+        # ProteinMapping = namedtuple('ProteinMapping','protein_accession, start_pos, end_pos, il_ambiguous, mismatches')
+        for sequence, mapping_info in pep_mapping_info.items():
+            protein_mappings = mapping.string_to_protein_mappings(mapping_info['all_proteins_w_coords'])
+            for protein_mapping in protein_mappings:
+                precursor_count = sum([len(position.keys()) for position in frequency[protein_mapping.protein_accession].values()])
+                psm_count = sum([sum(list(position.values())) for position in frequency[protein_mapping.protein_accession].values()])
+
+                mapped_precursors_at_pos = []
+                mapped_psms_at_pos = 0
+                best_precursor = None
+
+                if (protein_mapping.start_pos, protein_mapping.end_pos) in frequency[protein_mapping.protein_accession]:
+                    for precursor, count in frequency[protein_mapping.protein_accession][(protein_mapping.start_pos, protein_mapping.end_pos)].items():
+                        mapped_precursors_at_pos.append(precursor)
+                        mapped_psms_at_pos += count
+
+                if len(mapped_precursors_at_pos) > 0:
+                    best_precursor = representative_per_precursor[mapped_precursors_at_pos[0]]
+                    for precursor_sequence_charge in mapped_precursors_at_pos[1:]:
+                        precursor = representative_per_precursor[precursor_sequence_charge]
+                        if precursor['score'] > best_precursor['score']:
+                            best_precursor = precursor
+
+                delta_mass = 0
+                mismatch_string = ''
+
+                if len(protein_mapping.mismatches) > 0:
+                    mismatch = protein_mapping.mismatches[0]
+                else:
+                    mismatch = mapping.Mismatch(None,'N/A','N/A')
+
+                r.writerow({
+                    'sequence':sequence,
+                    'protein':protein_mapping.protein_accession,
+                    'protein_type':protein_type(protein_mapping.protein_accession, proteome),
+                    'gene':proteome.proteins[protein_mapping.protein_accession].gene,
+                    'start_aa':protein_mapping.start_pos,
+                    'end_aa': protein_mapping.end_pos,
+                    'mismatch_position':int(mismatch.position)+int(protein_mapping.start_pos) if mismatch.position else 'N/A',
+                    'protein_aa':mismatch.protein_aa,
+                    'peptide_aa':mismatch.peptide_aa,
+                    'delta_mass':unit_delta(mismatch.peptide_aa,mismatch.protein_aa),
+                    'precursor_count':len(mapped_precursors_at_pos),
+                    'psm_count':mapped_psms_at_pos,
+                    'best_precursor_usi':best_precursor['database_usi'] if best_precursor else 'N/A',
+                    'best_precursor_filename':best_precursor['database_filename'] if best_precursor else 'N/A',
+                    'best_precursor_scan':best_precursor['database_scan'] if best_precursor else 'N/A',
+                    'best_precursor_charge':best_precursor['charge'] if best_precursor else 'N/A',
+                    'best_precursor_sequence':best_precursor['sequence'] if best_precursor else 'N/A'
+                })
 
     with open(args.output_proteins, 'w') as fo:
 
@@ -364,7 +436,6 @@ def main():
             })
 
             for release, pe_dict in nextprot_releases_pe.items():
-                print(release)
                 protein_dict['_dyn_#neXtProt Release {}'.format(release)] = pe_dict.get(protein_entry.id,0) if is_canonical else 0
             w.writerow(protein_dict)
 

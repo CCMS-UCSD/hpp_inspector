@@ -44,7 +44,7 @@ aa_characters = ['A', 'R', 'N', 'D', 'C', 'E', 'K', 'G', 'H', 'L', 'L', 'K', 'M'
 aa_dict = dict(zip(aa_characters,aa_weights))
 
 def unit_delta(aa1, aa2):
-    return aa_dict.get(aa2,0) - aa_dict.get(aa1,0)
+    return (aa_dict.get(aa2,0) - aa_dict.get(aa1,0))
 
 def add_brackets(pep):
     aa_breakpoints = []

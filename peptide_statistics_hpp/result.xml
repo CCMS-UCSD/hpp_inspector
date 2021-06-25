@@ -20,6 +20,8 @@
           <!-- <column type="float" field="comparison_coverage" label="Coverage (KB Only)" width="2"/>
           <column type="float" field="new_coverage" label="Coverage (Added Only)" width="2"/> -->
           <column type="text" field="protein" label="Protein" width="4"/>
+          <column type="float" field="fdr" label="FDR" width="4" tooltip=""/>
+          <column type="float" field="score" label="Score" width="4" tooltip=""/>
         <column type="text" field="protein_type" label="Protein Type" width="4"/>
 
             <column label="View Peptides" type="genericurlgenerator" width="5">
@@ -159,6 +161,7 @@
             </data>
             <row>
                 <column type="slideExpandable" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+                <column type="float" field="precursor_fdr" label="Precursor FDR" width="4" tooltip=""/>
                 <column type="text" field="gene" label="Gene" width="4" tooltip="Gene for the protein"/>
                 <column type="text" field="protein_type" label="Protein Type" width="4"/>
                 <column type="integer" field="aa_start" label="AA Start" width="1" tooltip="Start location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
@@ -205,6 +208,7 @@
                     <parameter name="PASS_URL" value="True"/>\
                 </column>
                 <column type="text" field="database_usi" label="Best Peptide Spectrum Match (PSM) By PSM Identification Score" width="20"/>
+                <column type="float" field="psm_fdr" label="PSM FDR" width="4" tooltip=""/>
                 <column autoHideSentinel="true" type="text" field="cosine_usi" label="Best Peptide Spectrum Match (PSM) By Cosine to Synthetic Peptide Spectra" width="20"/>
                 <column autoHideSentinel="true" type="text" field="synthetic_usi" label="Most-similar Synthetic Peptide Spectrum" width="20"/>
                 <column type="expandable" field="all_mapped_exons" label="All Mapped Exons" width="10"/>

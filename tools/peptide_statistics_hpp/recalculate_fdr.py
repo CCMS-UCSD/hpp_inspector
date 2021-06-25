@@ -2,6 +2,7 @@ import sys
 import csv
 from csv import DictReader, DictWriter
 from collections import defaultdict
+from python_ms_utilities import fdr
 
 csv.field_size_limit(sys.maxsize)
 
@@ -83,35 +84,19 @@ with open(input) as f:
 
 protein_w_scores = []
 
-targets = 0
-decoys = 0
-
 for protein, precursors in precursors_per_protein.items():
-    score, count = non_nested_score([(*k,v) for k,v in precursors.items()])
-    protein_w_scores.append((protein,score,count))
-    if 'XXX_' in protein:
-        decoys += 1
-    else:
-        targets += 1
+    score, count = mapping.non_nested_score([(*k,v) for k,v in precursors.items()])
+    protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
 
-print("Total FDR: {}".format(decoys/(decoys + targets)))
-
-protein_w_scores_sorted = sorted(protein_w_scores, key = lambda x: x[1])
-
-min_fdr = decoys/(decoys + targets)
+fdr_dict = fdr.calculate_fdr(protein_w_scores)
 
 with open(output, 'w') as f:
     w = DictWriter(f, delimiter = '\t', fieldnames = ['Protein','Score','NumPeptides','FDR'])
     w.writeheader()
-    for protein,score,num_peptides in protein_w_scores_sorted:
-        min_fdr = min(decoys/(decoys + targets),min_fdr)
+    for protein,decoy,score in protein_w_scores:
         w.writerow({
             'Protein':protein,
             'Score':score,
-            'NumPeptides':num_peptides,
-            'FDR':min_fdr
+            'NumPeptides':0,
+            'FDR':fdr_dict[protein]
         })
-        if 'XXX_' in protein:
-            decoys -= 1
-        else:
-            targets -= 1

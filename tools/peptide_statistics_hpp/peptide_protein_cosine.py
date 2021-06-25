@@ -7,7 +7,7 @@ from pathlib import Path
 from itertools import chain
 import explorer_export
 import read_mappings
-from python_ms_utilities import mapping, resources
+from python_ms_utilities import mapping, resources, fdr
 
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
@@ -237,6 +237,8 @@ def main():
                 if peptide.replace('I','L') in has_synthetic:
                     added_proteins_w_synthetic[protein][peptide] = added_proteins[protein][peptide]
 
+    all_psms_with_score = []
+
     with open(args.output_psms,'w') as w:
         header = ['protein','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
 
@@ -259,7 +261,10 @@ def main():
                     for protein in output_proteins:
                         aa_start,aa_end = all_proteins[protein][il_peptide][0][0]
                         frequency[protein][(aa_start,aa_end)][(l['sequence'],l['charge'])] += 1
+                    proteins = l['protein'].split(' ###')[0].split(';')
                     l.update(protein_info_dict)
+                    if 'Canonical' in l.get('protein_type','') and len(proteins) == 1 and l.get('hpp_match','') == 'True':
+                        all_psms_with_score.append(fdr.ScoredElement(l['usi'],'XXX_' in proteins[0],l['score']))
                     l.pop('mapped_proteins')
                     if args.output_psms_flag == 1:
                         o.writerow(l)
@@ -301,8 +306,20 @@ def main():
                     else:
                         precursor_representative['cosine_score_match'] = 'No'
 
+    psm_fdr = fdr.calculate_fdr(all_psms_with_score)
+
+    all_hpp_precursors = []
+
+    for (sequence, charge), best_psm in representative_per_precursor.items():
+        if psm_fdr.get(best_psm['database_usi'],1) < 0.01:
+            all_hpp_precursors.append(fdr.ScoredElement((sequence, charge),'XXX_' in proteins[0],best_psm['score']))
+
+    precursor_fdr = fdr.calculate_fdr(all_hpp_precursors)
+
+    precursors_per_protein = defaultdict(lambda: defaultdict(float))
+
     with open(args.output_peptides,'w') as w:
-        header = ['protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
+        header = ['precursor_fdr','psm_fdr','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
         r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
         r.writeheader()
 
@@ -312,7 +329,15 @@ def main():
             best_psm.update(pep_mapping_info.get(sequence_nomod,{}))
             best_psm.update(protein_info((sequence,charge), sequence_il, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe)[0])
             best_psm.pop('mapped_proteins')
+            best_psm['precursor_fdr'] = precursor_fdr.get((sequence, charge),1)
+            best_psm['psm_fdr'] = psm_fdr.get(best_psm['database_usi'],1)
             r.writerow(best_psm)
+
+            proteins = best_psm['protein'].split(' ###')[0].split(';')
+            if best_psm['psm_fdr'] <= 0.01 and best_psm['precursor_fdr'] <= 0.01:
+                pos = (int(best_psm['aa_start']),int(best_psm['aa_end']))
+                prev_score = precursors_per_protein[proteins[0]][pos]
+                precursors_per_protein[proteins[0]][pos] = max(float(best_psm['score']),prev_score)
 
             proteins = peptide_to_protein.get(sequence_il,[])
             cannonical_proteins = [protein for protein in proteins if proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso]
@@ -330,6 +355,17 @@ def main():
                 for protein in proteins:
                     if sequence_il in added_proteins[protein] and best_psm['explained_intensity'] >= args.explained_intensity_cutoff:
                         added_proteins_isoform_unique[protein][sequence_il] = added_proteins[protein][sequence_il]
+
+
+    protein_w_scores = []
+    score_dict = {}
+
+    for protein, precursors in precursors_per_protein.items():
+        score, count = mapping.non_nested_score([(*k,v) for k,v in precursors.items()])
+        protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
+        score_dict[protein] = score
+
+    fdr_dict = fdr.calculate_fdr(protein_w_scores)
 
     with open(args.output_mappings, 'w') as w:
         header = ['sequence','protein','protein_type','gene','start_aa','end_aa','mismatch_position','protein_aa','peptide_aa','delta_mass','precursor_count','psm_count','best_precursor_usi','best_precursor_filename','best_precursor_scan','best_precursor_charge','best_precursor_sequence']
@@ -396,7 +432,7 @@ def main():
             'gene',
             'pe',
             'aa_total',
-            'ms_evidence',
+            'score',
             'fdr',
             'cosine_cutoff',
             'explained_intensity_cutoff'
@@ -418,6 +454,8 @@ def main():
                 'pe': nextprot_pe.get(protein_entry.id,0) if is_canonical else 0,
                 'aa_total':protein_entry.length,
                 'gene':protein_entry.gene,
+                'score':score_dict.get(protein,0),
+                'fdr':fdr_dict.get(protein,1)
             }
 
             if is_canonical:

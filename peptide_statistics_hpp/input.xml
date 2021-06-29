@@ -37,7 +37,7 @@
 		</parameter>
 
 		<parameter name="explained_intensity_threshold" label="Explained Intensity Threshold">
-			<default value="0.5"/>
+			<default value="0.4"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
 

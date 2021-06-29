@@ -90,6 +90,7 @@
         <productionToOutput port="merged_novel_psms_w_cosine"     production="merged_novel_psms_w_cosine"/>
         <productionToOutput port="novel_exons"     production="novel_exons"/>
         <productionToOutput port="all_mappings"     production="all_mappings"/>
+        <productionToOutput port="dataset_proteins"     production="dataset_proteins"/>
         <productionToOutput port="explorer_export"     production="explorer_export"/>
     </bind>
 
@@ -107,6 +108,11 @@
         <inputAsRequirement port="params"          requirement="params"/>
         <productionToOutput port="exon_fasta"      production="fastadb"/>
     </bind>
+
+    <!-- <bind action="build_results" tool="buildResults">
+        <inputAsRequirement port="novel_proteins_w_cosine"             requirement="novel_proteins_w_cosine"/>
+        <productionToOutput port="log"      production="log"/>
+    </bind> -->
 
     <bind action="end" type="upload">
         <url value="{livesearch.upload}"/>
@@ -143,11 +149,18 @@
         <upload port="all_mappings" type="file">
             <query name="resource" value="all_mappings"/>
         </upload>
+        <upload port="dataset_proteins" type="file">
+            <query name="resource" value="dataset_proteins"/>
+        </upload>
         <!-- <upload port="sqlite" type="folder">
             <query name="resource" value="sqlite"/>
         </upload> -->
       <upload port="explorer_export" type="folder">
           <query name="resource" value="explorer_export"/>
       </upload>
+
+      <!-- <upload port="log" type="file">
+          <query name="resource" value="log"/>
+      </upload> -->
     </bind>
 </binding>

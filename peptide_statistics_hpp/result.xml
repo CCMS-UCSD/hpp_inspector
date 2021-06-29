@@ -30,7 +30,7 @@
                 <parameter name="REQUESTPARAMETER=view" value="view_added_peptides"/>
                 <parameter name="HASHPARAMTER=protein_input" value="[protein]"/>
                 <parameter name="HASHPARAMTER=hpp_match_input" value="True"/>
-                <!-- <parameter name="HASHPARAMTER=cosine_lowerinput" value="[cosine_cutoff]"/> -->
+                <parameter name="HASHPARAMTER=explained_intensity_lowerinput" value="[explained_intensity_cutoff]"/>
                 <parameter name="LABEL" value="View HPP Compliant Peptides"/>
                 <parameter name="PASS_URL" value="True"/>
             </column>
@@ -81,6 +81,10 @@
 
     <view id="view_mappings" label="View All Mappings">
         <blockRef id="main" type="view_mappings"/>
+    </view>
+
+    <view id="view_dataset_proteins" label="View Proteins Per Dataset">
+        <blockRef id="main" type="view_dataset_proteins"/>
     </view>
 
     <block id="view_added_psm" type="table_ss">
@@ -161,6 +165,7 @@
             </data>
             <row>
                 <column type="slideExpandable" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+                <column type="float" field="fdr" label="Precursor FDR" width="4" tooltip=""/>
                 <column type="float" field="precursor_fdr" label="Precursor FDR" width="4" tooltip=""/>
                 <column type="text" field="gene" label="Gene" width="4" tooltip="Gene for the protein"/>
                 <column type="text" field="protein_type" label="Protein Type" width="4"/>
@@ -186,6 +191,7 @@
                 <column type="text" field="parent_mass" label="Precursor Mass" width="20"/>
                 <!-- <column type="text" field="type" label="Evidence Type" width="6"/> -->
                 <column type="float" field="score" label="Peptide Spectrum Match (PSM) Identification Score" width="6" tooltip="Score for Peptide Spectrum Match (PSM) indicates the quality of this spectrum for this particular peptide."/>
+                <column type="float" field="explained_intensity" label="Explained Intensity" width="6"/>
                 <!-- <column type="text" field="pass" label="Above Library Threshold" width="6"/> -->
                 <column type="float" field="cosine" label="Best Annotated Cosine to Synthetic Spectrum Match" width="6" tooltip="Spectrum cosine using only annotated peaks from the input spectrum and closest matching synthetic."/>
                 <column type="integer" field="canonical_matches" label="#SAAP protein matches" width="1" tooltip = "Number of proteins the peptide matches to with a single amino acid variant."/>
@@ -282,7 +288,6 @@
                         <column type="integer" field="mismatch_position" label="Mismatch Position" width="5"/>
                         <column type="text" field="protein_aa" label="Protein AA" width="4"/>
                         <column type="text" field="peptide_aa" label="Peptide AA" width="4"/>
-                        <column type="integer" field="delta_mass" label="Delta Mass" width="4"/>
                         <column type="integer" field="precursor_count" label="Precursor Count" width="4"/>
                         <column type="integer" field="psm_count" label="PSM Count" width="4"/>
                         <column type="text" field="best_precursor_usi" label="Best Precorsor USI" width="20"/>
@@ -327,4 +332,24 @@
                         </column>
                     </row> -->
                 </block>
+
+
+
+      <block id="view_dataset_proteins" type="table_ss">
+          <data>
+              <source type="file" name="dataset_proteins/"/>
+              <parsers>
+                  <parser type="SQLite"/>
+              </parsers>
+          </data>
+          <row>
+            <column type="text" field="protein" label="Protein" width="4"/>
+            <column type="float" field="fdr" label="FDR" width="4" tooltip=""/>
+            <column type="float" field="score" label="Score" width="4" tooltip=""/>
+            <column type="text" field="protein_type" label="Protein Type" width="4"/>
+            <column type="text" field="gene" label="Gene" width="4"/>
+            <column type="integer" field="pe" label="PE" width="1"/>
+            <column type="integer" field="aa_total" label="Protein Length" width="3"/>
+          </row>
+      </block>
 </interface>

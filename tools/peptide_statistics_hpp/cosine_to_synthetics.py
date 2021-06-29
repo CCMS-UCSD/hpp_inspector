@@ -91,10 +91,7 @@ def process_spectrum(psms_to_consider, filename, synthetic_scans, tol, threshold
                 cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
         else:
             cosine = 0
-            for synthetic_filescan,synthetic_spectrum in matching_synthetics:
-                # needs updating, mz of synthetic isn't the same as mz of spectrum
-                synthetic_spectrum = synthetic_spectrum._replace(precursor_z = int(synthetic_spectrum.precursor_z), annotation = processing.Annotation(sequence.replace('+229.163','').replace('+229.162932',''), None))
-                _, synthetic_ion_vector = extract_annotated_peaks(synthetic_spectrum, tolerance)
+            for synthetic_filescan,synthetic_ion_vector in matching_synthetics:
                 cosine = processing.match_peaks(spectrum_ion_vector, synthetic_ion_vector, tolerance)
                 if cosine > cosine_to_synthetic[(filename,scan)][0]:
                     cosine_to_synthetic[(filename,scan)] = (cosine,synthetic_filescan)
@@ -133,11 +130,22 @@ def main():
     if len(synthetic_keys) > 0:
         print("{}: Loading synthetics".format(datetime.now().strftime("%H:%M:%S")))
         with open(args.synthetics,'rb') as f:
-            for _ in range(pickle.load(f)):
+            total_subbuckets = pickle.load(f)
+            print("Total buckets: {}:".format(total_subbuckets))
+            for _ in range(total_subbuckets):
                 partial_loaded_synthetics = pickle.load(f)
+                print("Bucket size: {}:".format(len(partial_loaded_synthetics.keys())))
                 for key in synthetic_keys:
                     if key in partial_loaded_synthetics:
-                        synthetic_scans[key].extend(partial_loaded_synthetics[key])
+                        for synthetic_filescan,synthetic_spectrum in partial_loaded_synthetics[key]:
+                            _, synthetic_ion_vector = extract_annotated_peaks(
+                                synthetic_spectrum._replace(
+                                    precursor_z = int(key[1]),
+                                    annotation = processing.Annotation(key[0], None)
+                                ), tolerance
+                            )
+                            synthetic_scans[key].append((synthetic_filescan,synthetic_ion_vector))
+                print("Cumulative total: {}:".format(len(synthetic_scans.keys())))
         print("{}: Loaded {} synthetics".format(datetime.now().strftime("%H:%M:%S"),len(synthetic_scans)))
     else:
         print("Not loading synthetics, nothing to match")

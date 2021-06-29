@@ -117,6 +117,7 @@
       <produce name="novel_proteins_w_cosine"         type="file" naming="explicit"  extension="tsv"/>
     <produce name="novel_exons"         type="file" naming="explicit"  extension="tsv"/>
     <produce name="all_mappings"         type="file" naming="explicit"  extension="tsv"/>
+    <produce name="dataset_proteins"         type="file" naming="explicit"  extension="tsv"/>
       <produce name="explorer_export"                type="folder"/>
 
       <execution env="binary" argConvention="adhoc">
@@ -133,6 +134,7 @@
           <arg option="-output_proteins"      valueRef="novel_proteins_w_cosine"/>
           <arg option="-output_exons"      valueRef="novel_exons"/>
           <arg option="-output_mappings"      valueRef="all_mappings"/>
+          <arg option="-output_dataset_proteins"      valueRef="dataset_proteins"/>
           <arg option="-cosine_cutoff"        valueRef="@cosine_threshold"/>
           <arg option="-explained_intensity_cutoff"        valueRef="@explained_intensity_threshold"/>
           <arg option="-nextprot_releases" pathRef="nextprot_releases"/>
@@ -192,5 +194,20 @@
       </execution>
   </tool>
 
+  <!-- <pathSet base="ProteoSAFe-core/0.2">
+    <toolPath tool="buildResults" path="ProteoSAFe-core.jar"/>
+  </pathSet>
+  <tool name="buildResults">
+      <require name="novel_proteins_w_cosine" type="file"/>
+      <produce name="log" type="file" naming="explicit"/>
+      <execution env="java" argConvention="gnu">
+  		<mainClass name="edu.ucsd.ccms.ui.BuildResults"/>
+  		<envArg option="Xmx8G"/>
+  		<arg option="task"   valueRef="@task"/>
+  		<arg option="result" value=".workflow/result.xml"/>
+  		<arg option="log"    valueRef="log"/>
+  	</execution>
+  </tool>
+ -->
 
 </toolset>

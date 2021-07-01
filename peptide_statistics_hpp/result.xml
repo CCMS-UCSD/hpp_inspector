@@ -95,7 +95,7 @@
             </parsers>
         </data>
         <row>
-            <column type="slideExpandable" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+            <column type="slideExpandableHidden" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
             <column type="text" field="gene" label="Gene" width="4"/>
             <column type="text" field="protein_type" label="Protein Type" width="4"/>
             <column type="integer" field="aa_start" label="AA Start" width="1"/>
@@ -164,7 +164,7 @@
                 </parsers>
             </data>
             <row>
-                <column type="slideExpandable" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+                <column type="slideExpandableHidden" characterhidelimit="18" buttontext="Show all proteins" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
                 <column type="float" field="fdr" label="Precursor FDR" width="4" tooltip=""/>
                 <column type="float" field="precursor_fdr" label="Precursor FDR" width="4" tooltip=""/>
                 <column type="text" field="gene" label="Gene" width="4" tooltip="Gene for the protein"/>

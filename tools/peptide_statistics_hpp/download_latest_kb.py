@@ -37,37 +37,55 @@ def main():
             proteome = mapping.read_uniprot(args.proteome_fasta)
             proteome = mapping.add_decoys(proteome)
 
-            header = ['library','protein','aa_start','aa_end','demodified']
+            header = ['protein','aa_start','aa_end','demodified','synthetic_cosine']
             with open(args.kb_pep, 'w') as w:
                 r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
                 r.writeheader()
                 for protein, peptide_mappings in read_coverage_folder(args.comparisons, proteome).items():
-                    print(protein)
-                    print(peptide_mappings)
                     for peptide, mappings in peptide_mappings.items():
-                        for (start, end) in mappings:
+                        for (start, end, cosine) in mappings:
                             r.writerow({
                                 'protein':protein,
                                 'aa_start':start,
                                 'aa_end':end,
-                                'demodified':peptide
+                                'demodified':peptide,
+                                'synthetic_cosine':cosine
                             })
         except:
-            header = ['library','protein','aa_start','aa_end','demodified']
+            header = ['protein','aa_start','aa_end','demodified','synthetic_cosine']
             with open(args.kb_pep, 'w') as w:
                 r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
                 r.writeheader()
+
+                in_vivo = set()
+                synthetic = set()
+
                 for kb_input in args.comparisons.glob('*'):
                     with open(kb_input) as f:
-                        kb_rs = csv.DictReader(f)
+                        kb_rs = csv.DictReader(f, delimiter = '\t')
                         for kb_row in kb_rs:
                             if kb_row['library'] == '2':
-                                r.writerow({
-                                    'protein':kb_row['protein'],
-                                    'aa_start':kb_row['aa_start'],
-                                    'aa_end':kb_row['aa_end'],
-                                    'demodified':kb_row['demodified']
-                                })
+                                in_vivo.add((
+                                    kb_row['protein'],
+                                    kb_row['aa_start'],
+                                    kb_row['aa_end'],
+                                    kb_row['demodified']
+                                ))
+                            else:
+                                synthetic.add((
+                                    kb_row['protein'],
+                                    kb_row['aa_start'],
+                                    kb_row['aa_end'],
+                                    kb_row['demodified']
+                                ))
+                for in_vivo_seq in in_vivo:
+                    r.writerow({
+                        'protein':in_vivo_seq[0],
+                        'aa_start':in_vivo_seq[1],
+                        'aa_end':in_vivo_seq[2],
+                        'demodified':in_vivo_seq[3],
+                        'synthetic_cosine': '0' if in_vivo_seq in synthetic else '-1'
+                    })
 
     else:
         args.kb_pep.write_text(args.backup_kb_pep.read_text())

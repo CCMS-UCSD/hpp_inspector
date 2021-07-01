@@ -137,6 +137,7 @@
           <arg option="-output_dataset_proteins"      valueRef="dataset_proteins"/>
           <arg option="-cosine_cutoff"        valueRef="@cosine_threshold"/>
           <arg option="-explained_intensity_cutoff"        valueRef="@explained_intensity_threshold"/>
+          <arg option="-precursor_fdr"        valueRef="@precursor_fdr"/>
           <arg option="-nextprot_releases" pathRef="nextprot_releases"/>
           <arg option="-msv_to_pxd_mapping" pathRef="msv_to_pxd_mapping"/>
           <arg option="-external_provenance"  valueRef="external_provenance"/>

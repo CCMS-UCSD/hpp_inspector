@@ -75,13 +75,12 @@ def extract_annotated_peaks(spectrum, fragment_tolerance):
     _, ion_vector = processing.calculate_explained_intensity(spectrum,fragment_tolerance)
     ion_vector = spectrum._replace(peaks = ion_vector)
     ion_vector = processing.normalize_spectrum(ion_vector)
-    spectrum = processing.filter_all_isobaric_tag_peaks(spectrum,fragment_tolerance)
     spectrum = processing.filter_precursor_peaks(spectrum,fragment_tolerance)
-    spectrum = processing.apply_low_mass_filter(spectrum,200)
+    spectrum = processing.apply_low_mass_filter(spectrum,230)
     spectrum = processing.window_filter_peaks(spectrum,50,10)
     spectrum = processing.normalize_spectrum(spectrum)
     explained_intensity, ion_vector_after_filter = processing.calculate_explained_intensity(spectrum,fragment_tolerance)
-    return (explained_intensity,len(ion_vector_after_filter)), spectrum._replace(peaks = ion_vector)
+    return (explained_intensity,len(ion_vector_after_filter)), ion_vector
 
 def find_ei_and_intensity(spectrum, psm, synthetic_scans):
     best_cosine = None
@@ -91,7 +90,7 @@ def find_ei_and_intensity(spectrum, psm, synthetic_scans):
     spectrum = spectrum._replace(precursor_z = int(charge), annotation = processing.Annotation(sequence, None))
     matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
     spectrum_ei, spectrum_ion_vector = extract_annotated_peaks(spectrum, tolerance)
-    for synthetic_filescan,synthetic_ion_vector in matching_synthetics:
+    for synthetic_filescan, synthetic_ion_vector in matching_synthetics:
         cosine = processing.match_peaks(spectrum_ion_vector, synthetic_ion_vector, tolerance)
         if not best_cosine or cosine > best_cosine[0]:
             best_cosine = (cosine,synthetic_filescan)
@@ -109,16 +108,33 @@ def process_spectrum(psms_to_consider, filename, synthetic_scans, tol, threshold
     return cosine_to_synthetic, explained_intensity_per_spectrum
 
 def process_spectrum_read_file(psms_to_consider, filename, synthetic_scans, tol, threshold, reader, spectrum_select_func,read_scan):
+    start_time = datetime.now()
     cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
     explained_intensity_per_spectrum = {}
-    for s in reader:
+    all_spectra = []
+    for i,s in enumerate(reader):
+        if (i != 0 and i%10000 == 0):
+            elapsed_time = (datetime.now()-start_time).seconds
+            rate = int(i/elapsed_time) if elapsed_time != 0 else int(i)
+            print("{}: Read {} scans ({}/second)".format(datetime.now().strftime("%H:%M:%S"),i,rate))
+        all_spectra.append(s)
+
+    start_time = datetime.now()
+    spectra_to_process = 0
+    for s in all_spectra:
         scan = read_scan(s)
         if scan in psms_to_consider[filename]:
+            if (spectra_to_process != 0 and spectra_to_process%100 == 0):
+                elapsed_time = (datetime.now()-start_time).seconds
+                rate = int(spectra_to_process/elapsed_time) if elapsed_time != 0 else int(spectra_to_process)
+                print("{}: Processed {} scans ({}/second)".format(datetime.now().strftime("%H:%M:%S"),spectra_to_process,rate))
             spectrum = spectrum_select_func(s)
             spectrum_ei, cosine_w_file = find_ei_and_intensity(spectrum,psms_to_consider[filename][scan],synthetic_scans)
             explained_intensity_per_spectrum[(filename,scan)] = spectrum_ei
             if cosine_w_file:
                 cosine_to_synthetic[(filename,scan)] = cosine_w_file
+            spectra_to_process += 1
+
     return cosine_to_synthetic, explained_intensity_per_spectrum
 
 def main():
@@ -177,11 +193,12 @@ def main():
     # print(synthetic_keys)
 
     if len(synthetic_keys) > 0 and args.synthetics:
-        print("{}: Loading synthetics".format(datetime.now().strftime("%H:%M:%S")))
+        start_synthetic_read = datetime.now()
+        print("{}: Loading synthetics".format(start_synthetic_read.strftime("%H:%M:%S")))
         synthetics_loaded = 0
         with open(args.synthetics) as synthetics_file:
             with mgf.read(synthetics_file) as reader:
-                for s in reader:
+                for i,s in enumerate(reader):
                     peptide = s['params'].get('seq')
                     charge = int(s['params'].get('charge')[0])
                     # print(peptide, str(charge))
@@ -201,7 +218,7 @@ def main():
                             processing.Annotation(peptide, None)
                         )
                         _, synthetic_ion_vector = extract_annotated_peaks(spectrum, 0.05)
-                        synthetic_scans[(peptide, charge)].append(((filename,scan),synthetic_ion_vector))
+                        synthetic_scans[(peptide, str(charge))].append(((filename,scan),synthetic_ion_vector))
         print("{}: Loaded {} synthetics".format(datetime.now().strftime("%H:%M:%S"),synthetics_loaded))
     else:
         print("Not loading synthetics")
@@ -225,7 +242,7 @@ def main():
             if not Path(filepath).exists():
                 print("File {} likely moved or doesn't exist.".format(filepath))
             else:
-                print("{}: About to read {}".format(datetime.now().strftime("%H:%M:%S"),filename))
+                print("{}: About to read {} ({} PSMs)".format(datetime.now().strftime("%H:%M:%S"),filename,len(psms_to_consider[filename])))
 
                 file = None
                 file_object = None

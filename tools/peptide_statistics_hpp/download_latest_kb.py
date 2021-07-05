@@ -5,6 +5,7 @@ from pathlib import Path
 from collections import defaultdict
 import read_mappings
 from python_ms_utilities import mapping, resources
+import pandas as pd 
 
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
@@ -19,13 +20,11 @@ def arguments():
     return parser.parse_args()
 
 def read_coverage_folder(input_folder,proteome):
-    added_proteins = defaultdict(lambda: defaultdict(list))
-    all_proteins = defaultdict(lambda: defaultdict(list))
-    pep_mapping_info = {}
-    peptide_to_exon_map = defaultdict(list)
+    all_protein_mappings = []
     for protein_coverage_file in input_folder.glob('*'):
-        all_proteins,added_proteins,pep_mapping_info,peptide_to_exon_map = read_mappings.read_protein_coverage(protein_coverage_file, all_proteins,added_proteins,pep_mapping_info,peptide_to_exon_map,proteome)
-    return added_proteins
+        _,protein_mappings_out,_ = read_mappings.read_protein_coverage(protein_coverage_file, proteome)
+        all_protein_mappings.extend(protein_mappings_out)
+    return pd.DataFrame(all_protein_mappings)
 
 def main():
     args = arguments()
@@ -41,16 +40,14 @@ def main():
             with open(args.kb_pep, 'w') as w:
                 r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
                 r.writeheader()
-                for protein, peptide_mappings in read_coverage_folder(args.comparisons, proteome).items():
-                    for peptide, mappings in peptide_mappings.items():
-                        for (start, end, cosine) in mappings:
-                            r.writerow({
-                                'protein':protein,
-                                'aa_start':start,
-                                'aa_end':end,
-                                'demodified':peptide,
-                                'synthetic_cosine':cosine
-                            })
+                for protein_mapping_obj in read_coverage_folder(args.comparisons, proteome).items():
+                    r.writerow({
+                        'protein':protein_mapping_obj['protein_accession'],
+                        'aa_start':protein_mapping_obj['start_pos'],
+                        'aa_end':protein_mapping_obj['end_pos'],
+                        'demodified':protein_mapping_obj['peptide'],
+                        'synthetic_cosine':protein_mapping_obj['synthetic_cosine'],
+                    })
         except:
             header = ['protein','aa_start','aa_end','demodified','synthetic_cosine']
             with open(args.kb_pep, 'w') as w:

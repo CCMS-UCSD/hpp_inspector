@@ -29,7 +29,7 @@ def arguments():
     parser.add_argument('-d','--protein_coverage_external', type = Path, help='Added Protein Coverage (External)')
     parser.add_argument('-t','--cosine_cutoff', type = float, help='Cosine Cutoff')
     parser.add_argument('-l','--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
-    parser.add_argument('-l','--annotated_ion_cutoff', type = float, help='Annotated Ion Cutoff')
+    parser.add_argument('-l','--annotated_ions_cutoff', type = float, help='Annotated Ion Cutoff')
     parser.add_argument('--precursor_fdr', type = float, help='Precursor FDR')
     parser.add_argument('-w','--nextprot_releases', type = Path, help='NextProt Releases')
     parser.add_argument('-m','--msv_to_pxd_mapping', type = Path, help='MSV to PXD Mapping')
@@ -362,14 +362,14 @@ def main():
             has_synthetic_cosine = False
             is_isoform_unique = False
             if len(cannonical_proteins) == 1 and len(proteins) == 1:
-                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff and int(best_psm['matched_ions']) >= 6:
+                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff:
                     if float(best_psm['cosine']) >= 0:
                         has_synthetic = True
                         if float(best_psm['cosine']) >= args.cosine_cutoff:
                             has_synthetic_cosine = True
                     match = True
             if len(proteins) == 1:
-                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff and int(best_psm['matched_ions']) >= 6:
+                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff:
                     is_isoform_unique = True
             added = sequences_found[sequence_il].added
             sequences_found[sequence_il] = sequences_found[sequence_il]._replace(
@@ -483,7 +483,8 @@ def main():
             'score',
             'fdr',
             'cosine_cutoff',
-            'explained_intensity_cutoff'
+            'explained_intensity_cutoff',
+            'annotated_ions_cutoff'
         ] + ['_dyn_#neXtProt Release {}'.format(release) for release in sorted(nextprot_releases_pe.keys())]
 
         for overlap_suffix in ['','_w_synthetic','_w_synthetic_cosine','_just_current','_just_current_iso_unique']:
@@ -542,7 +543,8 @@ def main():
 
             protein_dict.update({
                 'cosine_cutoff':args.cosine_cutoff,
-                'explained_intensity_cutoff':args.explained_intensity_cutoff
+                'explained_intensity_cutoff':args.explained_intensity_cutoff,
+                'annotated_ions_cutoff':args.annotated_ions_cutoff
             })
 
             for release, pe_dict in nextprot_releases_pe.items():

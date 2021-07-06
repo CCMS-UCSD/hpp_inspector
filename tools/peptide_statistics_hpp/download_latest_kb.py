@@ -44,15 +44,14 @@ def main():
                 protein_mapping_out,pep_info = read_coverage_folder(args.comparisons, proteome)
                 for protein, peptide_mappings in protein_mapping_out.items():
                     for peptide, mappings in peptide_mappings.items():
-                        if pep_info[peptide]['hpp']:
-                            for (start, end, cosine) in mappings:
-                                r.writerow({
-                                    'protein':protein,
-                                    'aa_start':start,
-                                    'aa_end':end,
-                                    'demodified':peptide,
-                                    'synthetic_cosine':cosine
-                                })
+                        for (start, end, cosine) in mappings:
+                            r.writerow({
+                                'protein':protein,
+                                'aa_start':start,
+                                'aa_end':end,
+                                'demodified':peptide,
+                                'synthetic_cosine':cosine
+                            })
         except:
             header = ['protein','aa_start','aa_end','demodified','synthetic_cosine']
             with open(args.kb_pep, 'w') as w:

@@ -44,7 +44,7 @@ def main():
                 protein_mapping_out,pep_info = read_coverage_folder(args.comparisons, proteome)
                 for protein, peptide_mappings in protein_mapping_out.items():
                     for peptide, mappings in peptide_mappings.items():
-                        if pep_info[peptide].hpp:
+                        if pep_info[peptide]['hpp']:
                             for (start, end, cosine) in mappings:
                                 r.writerow({
                                     'protein':protein,

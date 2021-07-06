@@ -29,6 +29,7 @@ def arguments():
     parser.add_argument('-d','--protein_coverage_external', type = Path, help='Added Protein Coverage (External)')
     parser.add_argument('-t','--cosine_cutoff', type = float, help='Cosine Cutoff')
     parser.add_argument('-l','--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
+    parser.add_argument('-l','--annotated_ion_cutoff', type = float, help='Annotated Ion Cutoff')
     parser.add_argument('--precursor_fdr', type = float, help='Precursor FDR')
     parser.add_argument('-w','--nextprot_releases', type = Path, help='NextProt Releases')
     parser.add_argument('-m','--msv_to_pxd_mapping', type = Path, help='MSV to PXD Mapping')
@@ -360,15 +361,15 @@ def main():
             has_synthetic = False
             has_synthetic_cosine = False
             is_isoform_unique = False
-            if len(cannonical_proteins) == 1:
-                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
+            if len(cannonical_proteins) == 1 and len(proteins) == 1:
+                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff and int(best_psm['matched_ions']) >= 6:
                     if float(best_psm['cosine']) >= 0:
                         has_synthetic = True
                         if float(best_psm['cosine']) >= args.cosine_cutoff:
                             has_synthetic_cosine = True
                     match = True
             if len(proteins) == 1:
-                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
+                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff and int(best_psm['matched_ions']) >= 6:
                     is_isoform_unique = True
             added = sequences_found[sequence_il].added
             sequences_found[sequence_il] = sequences_found[sequence_il]._replace(

@@ -1,7 +1,7 @@
 import argparse
 import sys
 import csv
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 import json
 from pathlib import Path
 from itertools import chain
@@ -9,6 +9,7 @@ import explorer_export
 import read_mappings
 from python_ms_utilities import mapping, resources, fdr
 import pandas as pd
+from datetime import datetime
 
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
@@ -93,7 +94,6 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
     novel_peptides = added_peptides.difference(comparison_peptides)
     supporting_peptides = added_peptides.intersection(comparison_peptides)
 
-    nonoverlapping_comparison_peptides = mapping.count_non_nested(comparison_pos.difference(added_pos))
     nonoverlapping_added_peptides = mapping.count_non_nested(added_pos.difference(comparison_pos))
     nonoverlapping_intersection = mapping.count_non_nested(comparison_pos.union(added_pos))
     nonoverlapping_all_previous = mapping.count_non_nested(comparison_pos)
@@ -113,9 +113,10 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
         'promoted'+name:'Yes' if (nonoverlapping_all_previous < 2 and nonoverlapping_intersection >= 2) else 'No'
     }, [s.split(' ')[0] for s in supporting_peptides]
 
-def protein_info(sequence_charge, il_peptide, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe, frequency_dict = None):
+def protein_info(peptide, peptide_to_protein, protein_mappings, sequences_found, proteome, nextprot_pe):
     outdict = {}
 
+    il_peptide = peptide.replace('I','L')
     proteins = peptide_to_protein.get(il_peptide)
 
     if proteins:
@@ -155,15 +156,15 @@ def protein_info(sequence_charge, il_peptide, peptide_to_protein, all_proteins, 
             'protein': '',
             'pe': '',
         })
-    if len(cannonical_proteins) == 1 and il_peptide in all_proteins.get(cannonical_proteins[0],{}):
-        outdict['aa_start'],outdict['aa_end'] = all_proteins[cannonical_proteins[0]][il_peptide][0][0]
-    elif len(output_proteins) == 1 and il_peptide in all_proteins.get(output_proteins[0],{}):
-        outdict['aa_start'],outdict['aa_end'] = all_proteins[output_proteins[0]][il_peptide][0][0]
+    if len(cannonical_proteins) == 1 and il_peptide in protein_mappings.get(cannonical_proteins[0],{}):
+        outdict['aa_start'],outdict['aa_end'],_ = next(iter(protein_mappings[cannonical_proteins[0]][il_peptide]))
+    elif len(output_proteins) == 1 and il_peptide in protein_mappings.get(output_proteins[0],{}):
+        outdict['aa_start'],outdict['aa_end'],_ = next(iter(protein_mappings[output_proteins[0]][il_peptide]))
     else:
         outdict['aa_start'],outdict['aa_end'] = "N/A","N/A"
 
-    if len(output_proteins) > 0 and len([g for g in output_genes if g != 'N/A']) <= 1 and len(cannonical_proteins) <= 1 and il_peptide in added_proteins[output_proteins[0]]:
-        if il_peptide in comparison_seq:
+    if sequences_found[il_peptide].hpp and len(output_proteins) > 0 and len([g for g in output_genes if g != 'N/A']) <= 1 and len(cannonical_proteins) <= 1 and il_peptide in protein_mappings[output_proteins[0]]:
+        if sequences_found[il_peptide].comparison.match:
             outdict['type'] = 'Matches existing evidence'
         else:
             outdict['type'] = 'New protein evidence'
@@ -182,38 +183,36 @@ def main():
 
     sequences_per_dataset = defaultdict(set)
 
-    comparison_proteins = defaultdict(lambda: defaultdict(list))
-    added_proteins = defaultdict(lambda: defaultdict(list))
-    all_proteins = defaultdict(lambda: defaultdict(list))
-    pep_mapping_info = {}
-    comparison_proteins_w_synthetic = defaultdict(lambda: defaultdict(list))
-    comparison_proteins_w_synthetic_cosine = defaultdict(lambda: defaultdict(list))
+    SeqOccurances = namedtuple('SeqOccurances',['match','synthetic_match','synthetic_match_cosine'])
+    SeqInfo = namedtuple('SeqInfo',['hpp','isoform_unique','added','comparison'])
 
-    added_proteins_matching_synthetic = defaultdict(lambda: defaultdict(list))
-    added_proteins_matching_synthetic_cosine = defaultdict(lambda: defaultdict(list))
-    added_proteins_explained_intensity = defaultdict(lambda: defaultdict(list))
-    added_proteins_isoform_unique = defaultdict(lambda: defaultdict(list))
+    protein_mapping = defaultdict(lambda: defaultdict(set))
+    sequences_found = defaultdict(lambda: SeqInfo(False,False,SeqOccurances(False,False,False),SeqOccurances(False,False,False)))
+
+    pep_mapping_info = {}
 
     frequency = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
     with open(args.msv_to_pxd_mapping) as json_file:
         msv_mapping = json.load(json_file)
 
-    comparison_seq = set()
-
     with open(args.comparison_pep) as f:
         r = csv.DictReader(f, delimiter='\t')
         for l in r:
-            comparison_seq.add(l['demodified'].replace('I','L'))
-            comparison_proteins[l['protein']][l['demodified'].replace('I','L')].append((int(l['aa_start']),int(l['aa_end'])))
-            if float(l.get('synthetic_cosine',-1)) >= 0:
-                comparison_proteins_w_synthetic[l['protein']][l['demodified'].replace('I','L')].append((int(l['aa_start']),int(l['aa_end'])))
-                if float(l['synthetic_cosine']) > args.cosine_cutoff:
-                    comparison_proteins_w_synthetic_cosine[l['protein']][l['demodified'].replace('I','L')].append((int(l['aa_start']),int(l['aa_end'])))
-
+            il_peptide = l['demodified'].replace('I','L')
+            has_synthetic = False
+            has_synthetic_cosine = False
+            protein_mapping[l['protein']][il_peptide].add((int(l['aa_start']),int(l['aa_end']),None))
+            comparison = sequences_found[il_peptide].comparison
+            if comparison != SeqOccurances(True,True,True):
+                if float(l.get('synthetic_cosine',-1)) >= 0:
+                    has_synthetic = True
+                    if float(l['synthetic_cosine']) > args.cosine_cutoff:
+                        has_synthetic_cosine = True
+                comparison = SeqOccurances(True, comparison.synthetic_match or has_synthetic, comparison.synthetic_match_cosine or has_synthetic_cosine)
+                sequences_found[il_peptide] = sequences_found[il_peptide]._replace(comparison = comparison)
+        
     peptide_to_protein = defaultdict(list)
-    peptide_to_protein_added = {}
-
     peptide_to_exon_map = defaultdict(list)
 
     nextprot_releases_pe = {}
@@ -227,18 +226,24 @@ def main():
     latest_nextprot_release = sorted(list(nextprot_releases_pe.keys()))[-1]
     nextprot_pe = nextprot_releases_pe[latest_nextprot_release]
 
-
+    start_time = datetime.now()
     for protein_coverage_file in chain(args.protein_coverage.glob('*'),args.protein_coverage_external.glob('*')):
         if(protein_coverage_file.is_file()):
-            all_proteins,added_proteins,pep_mapping_info,peptide_to_exon_map = read_mappings.read_protein_coverage(protein_coverage_file,all_proteins,added_proteins,pep_mapping_info,peptide_to_exon_map,proteome)
+            print("{}: Loading {} ({} cumulative peptides @ {} peptides/second)".format(datetime.now().strftime("%H:%M:%S"),protein_coverage_file,len(pep_mapping_info),len(pep_mapping_info)/(1+(datetime.now()-start_time).seconds)))
+            protein_mapping_added,pep_mapping_info_added,peptide_to_exon_map_added = read_mappings.read_protein_coverage(protein_coverage_file,set(pep_mapping_info.keys()),proteome)
+            pep_mapping_info.update(pep_mapping_info_added)
+            peptide_to_exon_map.update(peptide_to_exon_map_added)
+            for protein, peptide_mapping in protein_mapping_added.items():
+                protein_mapping[protein].update(peptide_mapping)
 
     print("Loaded Protein Coverage")
 
-    for protein in all_proteins:
-        for peptide in all_proteins[protein].keys():
+    for protein in protein_mapping:
+        for peptide in protein_mapping[protein].keys():
             peptide_to_protein[peptide.replace('I','L')].append(protein)
 
-    all_psms_with_score = []
+    for peptide, pep_mapping in pep_mapping_info.items():
+        sequences_found[peptide.replace('I','L')] = sequences_found[peptide.replace('I','L')]._replace(hpp = pep_mapping['hpp'])
 
     if args.output_psms:
         with open(args.output_psms,'w') as w:
@@ -261,9 +266,10 @@ def main():
                         l['sequence_unmodified'] = peptide
                         l['sequence_unmodified_il'] = il_peptide
                         l.update(pep_mapping_info.get(peptide,{}))
-                        protein_info_dict, output_proteins = protein_info((l['sequence'],l['charge']), il_peptide, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe)
+
+                        protein_info_dict, output_proteins = protein_info(peptide, peptide_to_protein, protein_mapping, sequences_found, proteome, nextprot_pe)
                         for protein in output_proteins:
-                            aa_start,aa_end = all_proteins[protein][il_peptide][0][0]
+                            aa_start,aa_end,_ = next(iter(protein_mapping[protein][il_peptide]))
                             frequency[protein][(aa_start,aa_end)][(l['sequence'],l['charge'])] += 1
                         l.update(protein_info_dict)
                         proteins = l['protein'].split(' ###')[0].split(';')
@@ -271,6 +277,8 @@ def main():
                         # if 'Canonical' in l.get('protein_type','') and len(proteins) == 1 and l.get('hpp_match','') == 'True' and float(l['explained_intensity']) >= args.explained_intensity_cutoff:
                         #     all_psms_with_score.append(fdr.ScoredElement(l['usi'],'XXX_' in proteins[0],l['score']))
                         l.pop('mapped_proteins')
+                        l.pop('hpp')
+                        l.pop('len')
                         if args.output_psms_flag == 1:
                             o.writerow(l)
                         sequence, charge = l['sequence'],l['charge']
@@ -322,8 +330,6 @@ def main():
             proteins = best_psm['protein'].split(' ###')[0].split(';')
             # PSM-level FDR was inefficient at this scale - need to rethink
             if 'Canonical' in best_psm.get('protein_type','') and len(proteins) == 1 and best_psm.get('hpp_match','') == 'True' and float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
-            #     all_psms_with_score.append(fdr.ScoredElement(l['usi'],'XXX_' in proteins[0],l['score']))
-            # if psm_fdr.get(best_psm['database_usi'],1) < 0.01:
                 all_hpp_precursors.append(fdr.ScoredElement((sequence, charge),'XXX_' in proteins[0],best_psm['score']))
 
         precursor_fdr = fdr.calculate_fdr(all_hpp_precursors)
@@ -334,6 +340,7 @@ def main():
 
     def output_protein_level_results(best_psm):
 
+        sequence = best_psm['sequence_unmodified']
         sequence_il = best_psm['sequence_unmodified_il']
 
         proteins = best_psm['protein'].split(' ###')[0].split(';')
@@ -346,31 +353,47 @@ def main():
         cannonical_proteins = [protein for protein in proteins if proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso]
         output_genes = set([proteome.proteins[protein].gene if proteome.proteins[protein].gene else 'N/A' for protein in proteins])
 
+
         if len([g for g in output_genes if g != 'N/A']) <= 1 and len(cannonical_proteins) <= 1:
-            for protein in cannonical_proteins:
-                if sequence_il in added_proteins[protein] and float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
+            is_hpp = pep_mapping_info[sequence]['hpp']
+            match = False
+            has_synthetic = False
+            has_synthetic_cosine = False
+            is_isoform_unique = False
+            if len(cannonical_proteins) == 1:
+                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
                     if float(best_psm['cosine']) >= 0:
-                        added_proteins_matching_synthetic[protein][sequence_il] = added_proteins[protein][sequence_il]
+                        has_synthetic = True
                         if float(best_psm['cosine']) >= args.cosine_cutoff:
-                            added_proteins_matching_synthetic_cosine[protein][sequence_il] = added_proteins[protein][sequence_il]
-                    added_proteins_explained_intensity[protein][sequence_il] = added_proteins[protein][sequence_il]
-        if len(proteins) == 1:
-            for protein in proteins:
-                if sequence_il in added_proteins[protein] and float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
-                    added_proteins_isoform_unique[protein][sequence_il] = added_proteins[protein][sequence_il]
+                            has_synthetic_cosine = True
+                    match = True
+            if len(proteins) == 1:
+                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
+                    is_isoform_unique = True
+            added = sequences_found[sequence_il].added
+            sequences_found[sequence_il] = sequences_found[sequence_il]._replace(
+                hpp=is_hpp,
+                isoform_unique=is_isoform_unique,
+                added = SeqOccurances(
+                    added.match or match,
+                    added.synthetic_match or has_synthetic,
+                    added.synthetic_match_cosine or has_synthetic_cosine
+                    )
+                )
+
 
     if args.output_peptides:
         with open(args.output_peptides,'w') as w:
             header = ['precursor_fdr','psm_fdr','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
             r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
             r.writeheader()
-
             for (sequence, charge), best_psm in representative_per_precursor.items():
                 sequence_nomod = ''.join([p for p in sequence if p.isalpha()])
-                sequence_il = ''.join([p.replace('I','L') for p in sequence if p.isalpha()])
                 best_psm.update(pep_mapping_info.get(sequence_nomod,{}))
-                best_psm.update(protein_info((sequence,charge), sequence_il, peptide_to_protein, all_proteins, added_proteins, proteome, comparison_seq, nextprot_pe)[0])
+                best_psm.update(protein_info(sequence_nomod, peptide_to_protein, protein_mapping, sequences_found, proteome, nextprot_pe)[0])
                 best_psm.pop('mapped_proteins')
+                best_psm.pop('hpp')
+                best_psm.pop('len')
                 best_psm['precursor_fdr'] = precursor_fdr.get((sequence, charge),1)
                 best_psm['psm_fdr'] = -1
                 r.writerow(best_psm)
@@ -398,16 +421,16 @@ def main():
         # ProteinMapping = namedtuple('ProteinMapping','protein_accession, start_pos, end_pos, il_ambiguous, mismatches')
         for sequence, mapping_info in pep_mapping_info.items():
             protein_mappings = mapping.string_to_protein_mappings(mapping_info['all_proteins_w_coords'])
-            for protein_mapping in protein_mappings:
-                precursor_count = sum([len(position.keys()) for position in frequency[protein_mapping.protein_accession].values()])
-                psm_count = sum([sum(list(position.values())) for position in frequency[protein_mapping.protein_accession].values()])
+            for pmapping in protein_mappings:
+                precursor_count = sum([len(position.keys()) for position in frequency[pmapping.protein_accession].values()])
+                psm_count = sum([sum(list(position.values())) for position in frequency[pmapping.protein_accession].values()])
 
                 mapped_precursors_at_pos = []
                 mapped_psms_at_pos = 0
                 best_precursor = None
 
-                if (protein_mapping.start_pos, protein_mapping.end_pos) in frequency[protein_mapping.protein_accession]:
-                    for precursor, count in frequency[protein_mapping.protein_accession][(protein_mapping.start_pos, protein_mapping.end_pos)].items():
+                if (pmapping.start_pos, pmapping.end_pos) in frequency[pmapping.protein_accession]:
+                    for precursor, count in frequency[pmapping.protein_accession][(pmapping.start_pos, pmapping.end_pos)].items():
                         mapped_precursors_at_pos.append(precursor)
                         mapped_psms_at_pos += count
 
@@ -421,19 +444,19 @@ def main():
                 delta_mass = 0
                 mismatch_string = ''
 
-                if len(protein_mapping.mismatches) > 0:
-                    mismatch = protein_mapping.mismatches[0]
+                if len(pmapping.mismatches) > 0:
+                    mismatch = pmapping.mismatches[0]
                 else:
                     mismatch = mapping.Mismatch(None,'N/A','N/A')
 
                 r.writerow({
                     'sequence':sequence,
-                    'protein':protein_mapping.protein_accession,
-                    'protein_type':protein_type(protein_mapping.protein_accession, proteome),
-                    'gene':proteome.proteins[protein_mapping.protein_accession].gene,
-                    'start_aa':protein_mapping.start_pos,
-                    'end_aa': protein_mapping.end_pos,
-                    'mismatch_position':int(mismatch.position)+int(protein_mapping.start_pos) if mismatch.position else 'N/A',
+                    'protein':pmapping.protein_accession,
+                    'protein_type':protein_type(pmapping.protein_accession, proteome),
+                    'gene':proteome.proteins[pmapping.protein_accession].gene,
+                    'start_aa':pmapping.start_pos,
+                    'end_aa': pmapping.end_pos,
+                    'mismatch_position':int(mismatch.position)+int(pmapping.start_pos) if mismatch.position else 'N/A',
                     'protein_aa':mismatch.protein_aa,
                     'peptide_aa':mismatch.peptide_aa,
                     'delta_mass':unit_delta(mismatch.peptide_aa,mismatch.protein_aa),
@@ -482,16 +505,39 @@ def main():
                 'fdr':fdr_dict.get(protein,1)
             }
 
+            all_protein_mappings = protein_mapping[protein]
+
+            compare_mappings = defaultdict(dict)
+
+            for sequence, mappings in all_protein_mappings.items():
+                found = sequences_found[sequence]
+                if found.hpp:
+                    if found.comparison.match:
+                        compare_mappings['comparison_match'].update({sequence:mappings})
+                    if found.comparison.synthetic_match:
+                        compare_mappings['comparison_synthetic_match'].update({sequence:mappings})
+                    if found.comparison.synthetic_match:
+                        compare_mappings['comparison_synthetic_match_cosine'].update({sequence:mappings})
+                    if found.added.match:
+                        compare_mappings['added_match'].update({sequence:mappings})
+                    if found.added.synthetic_match:
+                        compare_mappings['added_synthetic_match'].update({sequence:mappings})
+                    if found.added.synthetic_match:
+                        compare_mappings['added_synthetic_match_cosine'].update({sequence:mappings})
+                    if found.isoform_unique:
+                        compare_mappings['isoform_unique'].update({sequence:mappings})
+
             if is_canonical:
-                protein_dict.update(find_overlap(comparison_proteins.get(protein,{}),added_proteins_explained_intensity.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
+                protein_dict.update(find_overlap(compare_mappings['comparison_match'],compare_mappings['added_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
             else:
-                protein_dict.update(find_overlap(comparison_proteins.get(protein,{}),added_proteins_isoform_unique.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
+                protein_dict.update(find_overlap(compare_mappings['comparison_match'],compare_mappings['isoform_unique'],int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0])
 
             #comparison_proteins.get(protein,{})
-            protein_dict.update(find_overlap(comparison_proteins_w_synthetic.get(protein,{}),added_proteins_matching_synthetic.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
-            protein_dict.update(find_overlap(comparison_proteins_w_synthetic_cosine.get(protein,{}),added_proteins_matching_synthetic_cosine.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine')[0])
-            protein_dict.update(find_overlap({},added_proteins_explained_intensity.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current')[0])
-            protein_dict.update(find_overlap({},added_proteins_isoform_unique.get(protein,{}),int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current_iso_unique')[0])
+            protein_dict.update(find_overlap(compare_mappings['comparison_synthetic_match'],compare_mappings['added_synthetic_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
+            protein_dict.update(find_overlap(compare_mappings['comparison_synthetic_match_cosine'],compare_mappings['added_synthetic_match_cosine'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine')[0])
+            
+            protein_dict.update(find_overlap({},compare_mappings['added_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current')[0])
+            protein_dict.update(find_overlap({},compare_mappings['isoform_unique'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current_iso_unique')[0])
 
             protein_dict.update({
                 'cosine_cutoff':args.cosine_cutoff,
@@ -534,7 +580,7 @@ def main():
                 protein_dict['_dyn_#neXtProt Release {}'.format(release)] = pe_dict.get(protein_entry.id,0) if is_canonical else 0
 
             for dataset,dataset_sequences in sequences_per_dataset.items():
-                dataset_positions = {k:v for k,v in added_proteins_explained_intensity.get(protein,{}).items() if k in dataset_sequences}
+                dataset_positions = {k:v for k,v in {k:v for k,v in protein_mapping[protein].items() if sequences_found[k].hpp and sequences_found[k].added.match}.items() if k in dataset_sequences}
                 overlaps = find_overlap({},dataset_positions,int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0]
                 protein_dict['_dyn_#{}'.format(dataset)] = overlaps['combined_hpp']
 
@@ -586,7 +632,7 @@ def main():
     if args.export_explorers and args.export_explorers == 1:
         hupo_mapping = {}
         unique_mapping = {}
-        for protein, peptides in added_proteins.items():
+        for protein, peptides in protein_mapping.items():
             if 'XXX_' not in protein:
                 protein_dict = {
                     'protein': protein,
@@ -594,7 +640,7 @@ def main():
                     'aa_total':proteome.proteins.get(protein).length
                 }
                 hupo_mapping[protein] = find_overlap({},peptides,int(protein_dict['aa_total']),int(protein_dict['pe']),'')[0]['new_hpp']
-        for protein, peptides in all_proteins.items():
+        for protein, peptides in protein_mapping.items():
             if 'XXX_' not in protein:
                 unique_mapping[protein] = len(set([peptide for peptide, mappings in peptides.items() if mappings[0][1]]))
         explorer_export.output_for_explorer(args.explorers_output, pep_mapping_info, representative_per_precursor, args.external_provenance, hupo_mapping, unique_mapping, args.library_name, args.library_version)

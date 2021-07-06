@@ -24,8 +24,8 @@ def read_coverage_folder(input_folder,proteome):
     pep_mapping_info = {}
     peptide_to_exon_map = defaultdict(list)
     for protein_coverage_file in input_folder.glob('*'):
-        all_proteins,added_proteins,pep_mapping_info,peptide_to_exon_map = read_mappings.read_protein_coverage(protein_coverage_file, all_proteins,added_proteins,pep_mapping_info,peptide_to_exon_map,proteome)
-    return added_proteins
+        protein_mapping_out,pep_info,_ = read_mappings.read_protein_coverage(protein_coverage_file, set() ,proteome,True)
+    return protein_mapping_out,pep_info
 
 def main():
     args = arguments()
@@ -41,16 +41,18 @@ def main():
             with open(args.kb_pep, 'w') as w:
                 r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
                 r.writeheader()
-                for protein, peptide_mappings in read_coverage_folder(args.comparisons, proteome).items():
+                protein_mapping_out,pep_info = read_coverage_folder(args.comparisons, proteome)
+                for protein, peptide_mappings in protein_mapping_out.items():
                     for peptide, mappings in peptide_mappings.items():
-                        for (start, end, cosine) in mappings:
-                            r.writerow({
-                                'protein':protein,
-                                'aa_start':start,
-                                'aa_end':end,
-                                'demodified':peptide,
-                                'synthetic_cosine':cosine
-                            })
+                        if pep_info[peptide].hpp:
+                            for (start, end, cosine) in mappings:
+                                r.writerow({
+                                    'protein':protein,
+                                    'aa_start':start,
+                                    'aa_end':end,
+                                    'demodified':peptide,
+                                    'synthetic_cosine':cosine
+                                })
         except:
             header = ['protein','aa_start','aa_end','demodified','synthetic_cosine']
             with open(args.kb_pep, 'w') as w:

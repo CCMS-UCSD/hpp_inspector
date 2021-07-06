@@ -28,6 +28,8 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                 mapped_exon_str = l['mapped_exons'] if 'mapped_exons' in l else l['all_mapped_exons']
 
                 precursor_fdr = float(l.get('precursor_fdr',-1))
+                expl_intensity = float(l.get('explained_intensity',1))
+                annoated_ions = float(l.get('matched_ions',1000))
 
                 protein_mappings = mapping.string_to_protein_mappings(mapped_protein_str)
                 exon_mappings = mapping.string_to_exon_mappings(mapped_exon_str)
@@ -50,7 +52,7 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                     'mapped_proteins' : []
                 }
 
-                if not filter or precursor_fdr <= 0.01:
+                if not filter or (precursor_fdr <= 0.01 and expl_intensity >= 0.4 and annoated_ions >= 6):
 
                     for protein_mapping in protein_mappings:
                         if len(protein_mapping.mismatches) == 0:

@@ -13,31 +13,31 @@ from datetime import datetime
 
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
-    parser.add_argument('-k','--comparison_pep', type = Path, help='Peptides to Compare')
-    parser.add_argument('-f','--fasta', type = Path, help='Input FASTA')
-    parser.add_argument('-a','--input_psms', type = Path, help='Input PSMs')
-    parser.add_argument('-y','--input_psms_external', type = Path, help='Input PSMs (External)')
+    parser.add_argument('--comparison_pep', type = Path, help='Peptides to Compare')
+    parser.add_argument('--fasta', type = Path, help='Input FASTA')
+    parser.add_argument('--input_psms', type = Path, help='Input PSMs')
+    parser.add_argument('--input_psms_external', type = Path, help='Input PSMs (External)')
     parser.add_argument('--input_peptides', type = Path, help='Input PSMs (External)')
-    parser.add_argument('-i','--output_psms_flag', type = int, help='Output PSMs Flag')
-    parser.add_argument('-o','--output_psms', type = Path, help='Output PSMs')
-    parser.add_argument('-p','--output_peptides', type = Path, help='Output Peptides')
-    parser.add_argument('-r','--output_proteins', type = Path, help='Output Proteins')
-    parser.add_argument('-b','--output_exons', type = Path, help='Output Exons')
-    parser.add_argument('-z','--output_mappings', type = Path, help='Output Mappings')
+    parser.add_argument('--output_psms_flag', type = int, help='Output PSMs Flag')
+    parser.add_argument('--output_psms', type = Path, help='Output PSMs')
+    parser.add_argument('--output_peptides', type = Path, help='Output Peptides')
+    parser.add_argument('--output_proteins', type = Path, help='Output Proteins')
+    parser.add_argument('--output_exons', type = Path, help='Output Exons')
+    parser.add_argument('--output_mappings', type = Path, help='Output Mappings')
     parser.add_argument('--output_dataset_proteins', type = Path, help='Output Dataset Proteins')
-    parser.add_argument('-c','--protein_coverage', type = Path, help='Added Protein Coverage')
-    parser.add_argument('-d','--protein_coverage_external', type = Path, help='Added Protein Coverage (External)')
-    parser.add_argument('-t','--cosine_cutoff', type = float, help='Cosine Cutoff')
-    parser.add_argument('-l','--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
+    parser.add_argument('--protein_coverage', type = Path, help='Added Protein Coverage')
+    parser.add_argument('--protein_coverage_external', type = Path, help='Added Protein Coverage (External)')
+    parser.add_argument('--cosine_cutoff', type = float, help='Cosine Cutoff')
+    parser.add_argument('--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
     parser.add_argument('--annotated_ions_cutoff', type = float, help='Annotated Ion Cutoff')
     parser.add_argument('--precursor_fdr', type = float, help='Precursor FDR')
-    parser.add_argument('-w','--nextprot_releases', type = Path, help='NextProt Releases')
-    parser.add_argument('-m','--msv_to_pxd_mapping', type = Path, help='MSV to PXD Mapping')
-    parser.add_argument('-g','--external_provenance', type = Path, help='Provenance from Library Creation')
-    parser.add_argument('-v','--library_version', type = int, help='Library Version')
-    parser.add_argument('-n','--library_name', type = int, help='Library Name')
-    parser.add_argument('-x','--export_explorers', type = int, help='Export Explorer Tables (0/1)')
-    parser.add_argument('-e','--explorers_output', type = Path, help='Tables for Explorers')
+    parser.add_argument('--nextprot_releases', type = Path, help='NextProt Releases')
+    parser.add_argument('--msv_to_pxd_mapping', type = Path, help='MSV to PXD Mapping')
+    parser.add_argument('--external_provenance', type = Path, help='Provenance from Library Creation')
+    parser.add_argument('--library_version', type = int, help='Library Version')
+    parser.add_argument('--library_name', type = int, help='Library Name')
+    parser.add_argument('--export_explorers', type = int, help='Export Explorer Tables (0/1)')
+    parser.add_argument('--explorers_output', type = Path, help='Tables for Explorers')
 
     if len(sys.argv) < 4:
         parser.print_help()
@@ -213,7 +213,7 @@ def main():
                         has_synthetic_cosine = True
                 comparison = SeqOccurances(True, comparison.synthetic_match or has_synthetic, comparison.synthetic_match_cosine or has_synthetic_cosine)
                 sequences_found[il_peptide] = sequences_found[il_peptide]._replace(comparison = comparison)
-        
+
     peptide_to_protein = defaultdict(list)
     peptide_to_exon_map = defaultdict(list)
 
@@ -564,7 +564,7 @@ def main():
             #comparison_proteins.get(protein,{})
             protein_dict.update(find_overlap(compare_mappings['comparison_synthetic_match'],compare_mappings['added_synthetic_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
             protein_dict.update(find_overlap(compare_mappings['comparison_synthetic_match_cosine'],compare_mappings['added_synthetic_match_cosine'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine')[0])
-            
+
             protein_dict.update(find_overlap({},compare_mappings['added_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current')[0])
             protein_dict.update(find_overlap({},compare_mappings['isoform_unique'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current_iso_unique')[0])
 

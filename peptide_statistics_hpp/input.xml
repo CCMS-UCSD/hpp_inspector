@@ -41,6 +41,11 @@
 			<validator type="float" minimum="0"/>
 		</parameter>
 
+		<parameter name="annotated_ions_threshold" label="Annotated Ions Threshold">
+			<default value="6"/>
+			<validator type="integer" minimum="0"/>
+		</parameter>
+
 		<parameter name="precursor_fdr" label="Precursor FDR">
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
@@ -201,6 +206,14 @@
 										</cell>
 										<cell colspan="3">
 												<input type="text" parameter="precursor_fdr"/>
+										</cell>
+										<cell>
+												<label>
+														<content parameter="annotated_ions_threshold"/>
+												</label>
+										</cell>
+										<cell colspan="3">
+												<input type="text" parameter="annotated_ions_threshold"/>
 										</cell>
 								</row>
 	</block>

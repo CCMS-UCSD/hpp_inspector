@@ -76,7 +76,7 @@ def extract_annotated_peaks(spectrum, fragment_tolerance):
     ion_vector = spectrum._replace(peaks = ion_vector)
     ion_vector = processing.normalize_spectrum(ion_vector)
     spectrum = processing.filter_precursor_peaks(spectrum,fragment_tolerance)
-    spectrum = processing.apply_low_mass_filter(spectrum,230)
+    spectrum = processing.apply_low_mass_filter(spectrum,232)
     spectrum = processing.window_filter_peaks(spectrum,50,10)
     spectrum = processing.normalize_spectrum(spectrum)
     explained_intensity, ion_vector_after_filter = processing.calculate_explained_intensity(spectrum,fragment_tolerance)

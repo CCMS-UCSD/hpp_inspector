@@ -3,21 +3,27 @@ import sys
 from collections import defaultdict
 from python_ms_utilities import mapping
 import pandas as pd
+from datetime import datetime
 
 csv.field_size_limit(sys.maxsize)
 
-def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter = False):
+def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter = False, output_representatives = True):
 
     pep_info = {}
     protein_mapping_out = defaultdict(lambda: defaultdict(set))
     peptide_to_exon_map = defaultdict(list)
+    output_peptides = []
 
     already_seen = 0
     need_to_parse = 0
 
+    current_time = datetime.now()
+
     with open(protein_coverage_file) as f:
         r = csv.DictReader(f, delimiter='\t')
+
         for l in r:
+
             peptide = l['peptide'] if 'peptide' in l else l['sequence_unmodified']
 
             if peptide not in seen_sequences:
@@ -63,6 +69,10 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                     pep_info[peptide] = match_obj
             else:
                 already_seen += 1
+                
+            if output_representatives:
+                output_peptides.append(l)
+            
         print("Seen {}, need to parse {} mappings".format(already_seen,need_to_parse))
 
-    return protein_mapping_out,pep_info,peptide_to_exon_map
+    return protein_mapping_out,pep_info,peptide_to_exon_map,output_peptides

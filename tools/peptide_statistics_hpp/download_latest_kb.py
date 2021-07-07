@@ -24,7 +24,7 @@ def read_coverage_folder(input_folder,proteome):
     pep_mapping_info = {}
     peptide_to_exon_map = defaultdict(list)
     for protein_coverage_file in input_folder.glob('*'):
-        protein_mapping_out,pep_info,_ = read_mappings.read_protein_coverage(protein_coverage_file, set() ,proteome,True)
+        protein_mapping_out,pep_info,_,_ = read_mappings.read_protein_coverage(protein_coverage_file, set() ,proteome,True,False)
     return protein_mapping_out,pep_info
 
 def main():

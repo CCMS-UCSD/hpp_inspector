@@ -29,7 +29,7 @@ def arguments():
     parser.add_argument('-d','--protein_coverage_external', type = Path, help='Added Protein Coverage (External)')
     parser.add_argument('-t','--cosine_cutoff', type = float, help='Cosine Cutoff')
     parser.add_argument('-l','--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
-    parser.add_argument('-l','--annotated_ions_cutoff', type = float, help='Annotated Ion Cutoff')
+    parser.add_argument('--annotated_ions_cutoff', type = float, help='Annotated Ion Cutoff')
     parser.add_argument('--precursor_fdr', type = float, help='Precursor FDR')
     parser.add_argument('-w','--nextprot_releases', type = Path, help='NextProt Releases')
     parser.add_argument('-m','--msv_to_pxd_mapping', type = Path, help='MSV to PXD Mapping')
@@ -175,6 +175,7 @@ def protein_info(peptide, peptide_to_protein, protein_mappings, sequences_found,
         outdict['hpp_match'] = 'False'
     return outdict, output_proteins
 
+
 def main():
     args = arguments()
 
@@ -227,16 +228,72 @@ def main():
     latest_nextprot_release = sorted(list(nextprot_releases_pe.keys()))[-1]
     nextprot_pe = nextprot_releases_pe[latest_nextprot_release]
 
-    start_time = datetime.now()
-    for protein_coverage_file in chain(args.protein_coverage.glob('*'),args.protein_coverage_external.glob('*')):
+    def update_precursor_representative(l,from_psm = True):
+        datasets = set([d for d in l.get('datasets','').split(';') if d != ''])
+        sequence, charge = l['sequence'],l['charge']
+        if not (sequence, charge) in representative_per_precursor:
+            representative_per_precursor[(sequence, charge)] = l.copy()
+            precursor_representative = representative_per_precursor[(sequence, charge)]
+            precursor_representative['datasets'] = datasets
+            if from_psm:
+                precursor_representative['database_filename'] = l['filename']
+                precursor_representative['database_scan'] = l['scan']
+                precursor_representative['database_usi'] = l['usi']
+                precursor_representative['explained_intensity'] = float(l['explained_intensity'])
+                precursor_representative['cosine'] = float(l['cosine'])
+                precursor_representative['score'] = float(l['score'])
+                precursor_representative.pop('filename')
+                precursor_representative.pop('scan')
+                precursor_representative.pop('usi')
+
+        precursor_representative = representative_per_precursor[(sequence, charge)]
+
+        precursor_representative['datasets'] |= datasets
+
+        best_cosine = float(l['cosine']) >= float(precursor_representative['cosine'])
+        best_score = float(l['score']) >= float(precursor_representative['score'])
+        potential_psm_loss = float(l['explained_intensity']) < args.explained_intensity_cutoff and float(precursor_representative['explained_intensity']) >= args.explained_intensity_cutoff
+        if best_score and not potential_psm_loss:
+            precursor_representative['database_filename'] = l['filename'] if from_psm else l['database_filename']
+            precursor_representative['database_scan'] = l['scan'] if from_psm else l['database_scan']
+            precursor_representative['database_usi'] = l['usi'] if from_psm else l['database_usi']
+            precursor_representative['score'] = float(l['score'])
+            precursor_representative['explained_intensity'] = float(l['explained_intensity'])
+            precursor_representative['matched_ions'] = int(l['matched_ions'])
+        if best_cosine and float(l['cosine']) >= 0 and l['synthetic_usi'] != 'N/A':
+            precursor_representative['cosine_filename'] = l['filename'] if from_psm else l['cosine_filename']
+            precursor_representative['cosine_scan'] = l['scan'] if from_psm else l['cosine_scan']
+            precursor_representative['cosine_usi'] = l['usi'] if from_psm else l['cosine_usi']
+            precursor_representative['synthetic_filename'] = l['synthetic_filename']
+            precursor_representative['synthetic_scan'] = l['synthetic_scan']
+            precursor_representative['synthetic_usi'] = l['synthetic_usi']
+            precursor_representative['cosine'] = float(l['cosine'])
+
+        if (best_score and best_cosine):
+            precursor_representative['cosine_score_match'] = 'Yes'
+        else:
+            precursor_representative['cosine_score_match'] = 'No'
+
+    def update_mappings(protein_coverage_file,update_precursor_representatives):
         if(protein_coverage_file.is_file()):
             print("{}: Loading {} ({} cumulative peptides @ {} peptides/second)".format(datetime.now().strftime("%H:%M:%S"),protein_coverage_file,len(pep_mapping_info),len(pep_mapping_info)/(1+(datetime.now()-start_time).seconds)))
-            protein_mapping_added,pep_mapping_info_added,peptide_to_exon_map_added = read_mappings.read_protein_coverage(protein_coverage_file,set(pep_mapping_info.keys()),proteome)
+            protein_mapping_added,pep_mapping_info_added,peptide_to_exon_map_added,output_peptides = read_mappings.read_protein_coverage(protein_coverage_file,set(pep_mapping_info.keys()),proteome)
             pep_mapping_info.update(pep_mapping_info_added)
             peptide_to_exon_map.update(peptide_to_exon_map_added)
             for protein, peptide_mapping in protein_mapping_added.items():
                 protein_mapping[protein].update(peptide_mapping)
+            if update_precursor_representatives:
+                for l in output_peptides:
+                    update_precursor_representative(l,False)
 
+
+    start_time = datetime.now()
+    for protein_coverage_file in args.protein_coverage.glob('*'):
+        update_mappings(protein_coverage_file,False)
+            
+    for protein_coverage_file in args.protein_coverage_external.glob('*'):
+        update_mappings(protein_coverage_file,True)
+            
     print("Loaded Protein Coverage")
 
     for protein in protein_mapping:
@@ -245,14 +302,16 @@ def main():
 
     for peptide, pep_mapping in pep_mapping_info.items():
         sequences_found[peptide.replace('I','L')] = sequences_found[peptide.replace('I','L')]._replace(hpp = pep_mapping['hpp'])
+    
+    print("About to load PSMs")
 
     if args.output_psms:
         with open(args.output_psms,'w') as w:
-            header = ['protein','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
+            header = ['protein','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets']
 
             o = csv.DictWriter(w, delimiter='\t',fieldnames = header, restval='N/A')
             o.writeheader()
-            for input_psm in chain(args.input_psms.glob('*'),args.input_psms_external.glob('*')):
+            for input_psm in args.input_psms.glob('*'):
                 with open(input_psm) as f:
                     r = csv.DictReader(f, delimiter='\t')
                     for l in r:
@@ -260,12 +319,14 @@ def main():
                         il_peptide = ''.join([p.replace('I','L') for p in l['sequence'] if p.isalpha()])
 
                         l['usi'] = correct_usi(l['usi'], msv_mapping)
-                        if float(l['explained_intensity']) >= args.explained_intensity_cutoff:
-                            sequences_per_dataset[l['usi'].split(':')[1]].add(il_peptide)
+                        l['datasets'] = l['usi'].split(':')[1]
+                        # if float(l['explained_intensity']) >= args.explained_intensity_cutoff:
+                        #     sequences_per_dataset[l['usi'].split(':')[1]].add(il_peptide)
                         l['synthetic_usi'] = correct_usi(l['synthetic_usi'], msv_mapping) if (l['synthetic_usi'] != 'N/A' and l['synthetic_usi'] != '') else 'N/A'
                         # l['sequence'] = l['sequence'] if '[' in l['sequence'] else add_brackets(l['sequence'])
                         l['sequence_unmodified'] = peptide
                         l['sequence_unmodified_il'] = il_peptide
+
                         l.update(pep_mapping_info.get(peptide,{}))
 
                         protein_info_dict, output_proteins = protein_info(peptide, peptide_to_protein, protein_mapping, sequences_found, proteome, nextprot_pe)
@@ -282,58 +343,21 @@ def main():
                         l.pop('len')
                         if args.output_psms_flag == 1:
                             o.writerow(l)
-                        sequence, charge = l['sequence'],l['charge']
-                        if not (sequence, charge) in representative_per_precursor:
-                            representative_per_precursor[(sequence, charge)] = l.copy()
-                            precursor_representative = representative_per_precursor[(sequence, charge)]
-                            precursor_representative['database_filename'] = l['filename']
-                            precursor_representative['database_scan'] = l['scan']
-                            precursor_representative['database_usi'] = l['usi']
-                            precursor_representative['explained_intensity'] = float(l['explained_intensity'])
-                            precursor_representative['cosine'] = float(l['cosine'])
-                            precursor_representative['score'] = float(l['score'])
-                            precursor_representative.pop('filename')
-                            precursor_representative.pop('scan')
-                            precursor_representative.pop('usi')
-
-                        precursor_representative = representative_per_precursor[(sequence, charge)]
-
-                        best_cosine = float(l['cosine']) >= precursor_representative['cosine']
-                        best_score = float(l['score']) >= precursor_representative['score']
-                        potential_psm_loss = float(l['explained_intensity']) < args.explained_intensity_cutoff and precursor_representative['explained_intensity'] >= args.explained_intensity_cutoff
-                        if best_score and not potential_psm_loss:
-                            precursor_representative['database_filename'] = l['filename']
-                            precursor_representative['database_scan'] = l['scan']
-                            precursor_representative['database_usi'] = l['usi']
-                            precursor_representative['score'] = float(l['score'])
-                            precursor_representative['explained_intensity'] = float(l['explained_intensity'])
-                            precursor_representative['matched_ions'] = int(l['matched_ions'])
-                        if best_cosine and float(l['cosine']) >= 0 and l['synthetic_usi'] != 'N/A':
-                            precursor_representative['cosine_filename'] = l['filename']
-                            precursor_representative['cosine_scan'] = l['scan']
-                            precursor_representative['cosine_usi'] = l['usi']
-                            precursor_representative['synthetic_filename'] = l['synthetic_filename']
-                            precursor_representative['synthetic_scan'] = l['synthetic_scan']
-                            precursor_representative['synthetic_usi'] = l['synthetic_usi']
-                            precursor_representative['cosine'] = float(l['cosine'])
-
-                            # precursor_representative['explained_intensity'] = float(l['explained_intensity'])
-                        if (best_score and best_cosine):
-                            precursor_representative['cosine_score_match'] = 'Yes'
-                        else:
-                            precursor_representative['cosine_score_match'] = 'No'
+                        update_precursor_representative(l)
 
     # psm_fdr = fdr.calculate_fdr(all_psms_with_score)
 
-        all_hpp_precursors = []
+    print("About to calculate precursor FDR")
 
-        for (sequence, charge), best_psm in representative_per_precursor.items():
-            proteins = best_psm['protein'].split(' ###')[0].split(';')
-            # PSM-level FDR was inefficient at this scale - need to rethink
-            if 'Canonical' in best_psm.get('protein_type','') and len(proteins) == 1 and best_psm.get('hpp_match','') == 'True' and float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
-                all_hpp_precursors.append(fdr.ScoredElement((sequence, charge),'XXX_' in proteins[0],best_psm['score']))
+    all_hpp_precursors = []
 
-        precursor_fdr = fdr.calculate_fdr(all_hpp_precursors)
+    for (sequence, charge), best_psm in representative_per_precursor.items():
+        proteins = best_psm['protein'].split(' ###')[0].split(';')
+        # PSM-level FDR was inefficient at this scale - need to rethink
+        if 'Canonical' in best_psm.get('protein_type','') and len(proteins) == 1 and best_psm.get('hpp_match','') == 'True' and float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
+            all_hpp_precursors.append(fdr.ScoredElement((sequence, charge),'XXX_' in proteins[0],best_psm['score']))
+
+    precursor_fdr = fdr.calculate_fdr(all_hpp_precursors)
 
     precursors_per_protein = defaultdict(lambda: defaultdict(float))
 
@@ -354,7 +378,6 @@ def main():
         cannonical_proteins = [protein for protein in proteins if proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso]
         output_genes = set([proteome.proteins[protein].gene if proteome.proteins[protein].gene else 'N/A' for protein in proteins])
 
-
         if len([g for g in output_genes if g != 'N/A']) <= 1 and len(cannonical_proteins) <= 1:
             is_hpp = pep_mapping_info[sequence]['hpp']
             match = False
@@ -368,6 +391,9 @@ def main():
                         if float(best_psm['cosine']) >= args.cosine_cutoff:
                             has_synthetic_cosine = True
                     match = True
+                    for dataset in best_psm['datasets']:
+                        sequences_per_dataset[dataset].add(sequence_il)
+                    best_psm['datasets'] = ';'.join(best_psm['datasets'])
             if len(proteins) == 1:
                 if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff:
                     is_isoform_unique = True
@@ -381,11 +407,11 @@ def main():
                     added.synthetic_match_cosine or has_synthetic_cosine
                     )
                 )
-
+    print("About to output sequences")
 
     if args.output_peptides:
         with open(args.output_peptides,'w') as w:
-            header = ['precursor_fdr','psm_fdr','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons']
+            header = ['precursor_fdr','psm_fdr','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets']
             r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
             r.writeheader()
             for (sequence, charge), best_psm in representative_per_precursor.items():
@@ -397,6 +423,7 @@ def main():
                 best_psm.pop('len')
                 best_psm['precursor_fdr'] = precursor_fdr.get((sequence, charge),1)
                 best_psm['psm_fdr'] = -1
+                best_psm['synthetic_sequence'] = sequence.replace('+229.163','').replace('+229.162932','')
                 r.writerow(best_psm)
                 output_protein_level_results(best_psm)
     elif args.input_peptides:

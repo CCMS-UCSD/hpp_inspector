@@ -204,15 +204,16 @@ def main():
             il_peptide = l['demodified'].replace('I','L')
             has_synthetic = False
             has_synthetic_cosine = False
-            protein_mapping[l['protein']][il_peptide].add((int(l['aa_start']),int(l['aa_end']),None))
-            comparison = sequences_found[il_peptide].comparison
-            if comparison != SeqOccurances(True,True,True):
-                if float(l.get('synthetic_cosine',-1)) >= 0:
-                    has_synthetic = True
-                    if float(l['synthetic_cosine']) > args.cosine_cutoff:
-                        has_synthetic_cosine = True
-                comparison = SeqOccurances(True, comparison.synthetic_match or has_synthetic, comparison.synthetic_match_cosine or has_synthetic_cosine)
-                sequences_found[il_peptide] = sequences_found[il_peptide]._replace(comparison = comparison)
+            if l['protein'] in proteome.proteins:
+                protein_mapping[l['protein']][il_peptide].add((int(l['aa_start']),int(l['aa_end']),None))
+                comparison = sequences_found[il_peptide].comparison
+                if comparison != SeqOccurances(True,True,True):
+                    if float(l.get('synthetic_cosine',-1)) >= 0:
+                        has_synthetic = True
+                        if float(l['synthetic_cosine']) > args.cosine_cutoff:
+                            has_synthetic_cosine = True
+                    comparison = SeqOccurances(True, comparison.synthetic_match or has_synthetic, comparison.synthetic_match_cosine or has_synthetic_cosine)
+                    sequences_found[il_peptide] = sequences_found[il_peptide]._replace(comparison = comparison)
 
     peptide_to_protein = defaultdict(list)
     peptide_to_exon_map = defaultdict(list)
@@ -384,8 +385,8 @@ def main():
             has_synthetic = False
             has_synthetic_cosine = False
             is_isoform_unique = False
-            if len(cannonical_proteins) == 1 and len(proteins) == 1:
-                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff:
+            if len(cannonical_proteins) == 1:
+                if (float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff or float(best_psm['cosine']) >= args.cosine_cutoff) and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff:
                     if float(best_psm['cosine']) >= 0:
                         has_synthetic = True
                         if float(best_psm['cosine']) >= args.cosine_cutoff:
@@ -395,7 +396,7 @@ def main():
                         sequences_per_dataset[dataset].add(sequence_il)
                     best_psm['datasets'] = ';'.join(best_psm['datasets'])
             if len(proteins) == 1:
-                if float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff:
+                if (float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff or float(best_psm['cosine']) >= args.cosine_cutoff) and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff:
                     is_isoform_unique = True
             added = sequences_found[sequence_il].added
             sequences_found[sequence_il] = sequences_found[sequence_il]._replace(
@@ -564,8 +565,11 @@ def main():
             #comparison_proteins.get(protein,{})
             protein_dict.update(find_overlap(compare_mappings['comparison_synthetic_match'],compare_mappings['added_synthetic_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic')[0])
             protein_dict.update(find_overlap(compare_mappings['comparison_synthetic_match_cosine'],compare_mappings['added_synthetic_match_cosine'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine')[0])
+            if is_canonical:
+                protein_dict.update(find_overlap({},compare_mappings['added_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current')[0])
+            else:
+                protein_dict.update(find_overlap({},{},int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current')[0])
 
-            protein_dict.update(find_overlap({},compare_mappings['added_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current')[0])
             protein_dict.update(find_overlap({},compare_mappings['isoform_unique'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current_iso_unique')[0])
 
             protein_dict.update({

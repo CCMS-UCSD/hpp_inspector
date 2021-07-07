@@ -263,7 +263,7 @@
                     <parameter name="file"          file="[synthetic_filename]"/>
                     <parameter name="scan"          value="[synthetic_scan]"/>
                     <parameter name="charge"        value="[charge]"/>
-                    <parameter name="peptide"       value="[sequence]"/>
+                    <parameter name="peptide"       value="[synthetic_sequence]"/>
                     <parameter name="modformat"     value="inspect"/>
                 </column>
             </row>

@@ -167,31 +167,6 @@ def main():
     threshold = float(args.cosine_threshold)
     explained_intensity = float(args.explained_intensity)
 
-    # if len(synthetic_keys) > 0:
-    #     print("{}: Loading synthetics".format(datetime.now().strftime("%H:%M:%S")))
-    #     with open(args.synthetics,'rb') as f:
-    #         total_subbuckets = pickle.load(f)
-    #         print("Total buckets: {}:".format(total_subbuckets))
-    #         for _ in range(total_subbuckets):
-    #             partial_loaded_synthetics = pickle.load(f)
-    #             print("Bucket size: {}:".format(len(partial_loaded_synthetics.keys())))
-    #             for key in synthetic_keys:
-    #                 if key in partial_loaded_synthetics:
-    #                     for synthetic_filescan,synthetic_spectrum in partial_loaded_synthetics[key]:
-    #                         _, synthetic_ion_vector = extract_annotated_peaks(
-    #                             synthetic_spectrum._replace(
-    #                                 precursor_z = int(key[1]),
-    #                                 annotation = processing.Annotation(key[0], None)
-    #                             ), tolerance
-    #                         )
-    #                         synthetic_scans[key].append((synthetic_filescan,synthetic_ion_vector))
-    #             print("Cumulative total: {}:".format(len(synthetic_scans.keys())))
-    #     print("{}: Loaded {} synthetics".format(datetime.now().strftime("%H:%M:%S"),len(synthetic_scans)))
-    # else:
-    #     print("Not loading synthetics, nothing to match")
-
-    # print(synthetic_keys)
-
     if len(synthetic_keys) > 0 and args.synthetics:
         start_synthetic_read = datetime.now()
         print("{}: Loading synthetics".format(start_synthetic_read.strftime("%H:%M:%S")))

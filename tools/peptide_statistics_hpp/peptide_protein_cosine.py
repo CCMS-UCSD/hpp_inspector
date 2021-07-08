@@ -357,8 +357,10 @@ def main():
         # PSM-level FDR was inefficient at this scale - need to rethink
         if 'Canonical' in best_psm.get('protein_type','') and len(proteins) == 1 and best_psm.get('hpp_match','') == 'True' and float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
             all_hpp_precursors.append(fdr.ScoredElement((sequence, charge),'XXX_' in proteins[0],best_psm['score']))
-
-    precursor_fdr = fdr.calculate_fdr(all_hpp_precursors)
+    
+    precursor_fdr = {}
+    if len(all_hpp_precursors) > 0:
+        precursor_fdr = fdr.calculate_fdr(all_hpp_precursors)
 
     precursors_per_protein = defaultdict(lambda: defaultdict(float))
 
@@ -440,8 +442,10 @@ def main():
         score, count = mapping.non_nested_score([(*k,v) for k,v in precursors.items()])
         protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
         score_dict[protein] = score
-
-    fdr_dict = fdr.calculate_fdr(protein_w_scores)
+    
+    fdr_dict = {}
+    if len(protein_w_scores) > 0:
+        fdr_dict = fdr.calculate_fdr(protein_w_scores)
 
     with open(args.output_mappings, 'w') as w:
         header = ['sequence','protein','protein_type','gene','start_aa','end_aa','mismatch_position','protein_aa','peptide_aa','delta_mass','precursor_count','psm_count','best_precursor_usi','best_precursor_filename','best_precursor_scan','best_precursor_charge','best_precursor_sequence']

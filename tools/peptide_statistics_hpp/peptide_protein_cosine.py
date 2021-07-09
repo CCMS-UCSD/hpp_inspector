@@ -416,23 +416,21 @@ def main():
                 )
     print("About to output sequences")
 
+    all_precursors = []
+
     if args.output_peptides:
-        with open(args.output_peptides,'w') as w:
-            header = ['precursor_fdr','psm_fdr','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets']
-            r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
-            r.writeheader()
-            for (sequence, charge), best_psm in representative_per_precursor.items():
-                sequence_nomod = ''.join([p for p in sequence if p.isalpha()])
-                best_psm.update(pep_mapping_info.get(sequence_nomod,{}))
-                best_psm.update(protein_info(sequence_nomod, peptide_to_protein, protein_mapping, sequences_found, proteome, nextprot_pe)[0])
-                best_psm.pop('mapped_proteins')
-                best_psm.pop('hpp')
-                best_psm.pop('len')
-                best_psm['precursor_fdr'] = precursor_fdr.get((sequence, charge),1)
-                best_psm['psm_fdr'] = -1
-                best_psm['synthetic_sequence'] = sequence.replace('+229.163','').replace('+229.162932','')
-                r.writerow(best_psm)
-                output_protein_level_results(best_psm)
+        for (sequence, charge), best_psm in representative_per_precursor.items():
+            sequence_nomod = ''.join([p for p in sequence if p.isalpha()])
+            best_psm.update(pep_mapping_info.get(sequence_nomod,{}))
+            best_psm.update(protein_info(sequence_nomod, peptide_to_protein, protein_mapping, sequences_found, proteome, nextprot_pe)[0])
+            best_psm.pop('mapped_proteins')
+            best_psm.pop('hpp')
+            best_psm.pop('len')
+            best_psm['precursor_fdr'] = precursor_fdr.get((sequence, charge),1)
+            best_psm['psm_fdr'] = -1
+            best_psm['synthetic_sequence'] = sequence.replace('+229.163','').replace('+229.162932','')
+            all_precursors.append(best_psm)
+            output_protein_level_results(best_psm)
     elif args.input_peptides:
         with open(args.input_peptides) as f:
             r = csv.DictReader(f, delimiter='\t')
@@ -462,6 +460,21 @@ def main():
     all_fdr_dict = {}
     if len(hpp_protein_w_scores) > 0:
         all_fdr_dict = fdr.calculate_fdr(all_protein_w_scores)
+
+    if args.output_peptides:
+        with open(args.output_peptides,'w') as w:
+            header = ['all_protein_fdr','hpp_protein_fdr','precursor_fdr','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets']
+            r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
+            r.writeheader()
+            for precursor in all_precursors:
+                if float(l['precursor_fdr']) < 1:
+                    proteins = precursor['protein'].split(' ###')[0].split(';')
+                    l['all_protein_fdr'] = all_fdr_dict.get(proteins[0],1)
+                    l['hpp_protein_fdr'] = hpp_fdr_dict.get(proteins[0],1)
+                else:
+                    l['all_protein_fdr'] = 1
+                    l['hpp_protein_fdr'] = 1
+                r.writerow(precursor)
 
     with open(args.output_mappings, 'w') as w:
         header = ['sequence','protein','protein_type','gene','start_aa','end_aa','mismatch_position','protein_aa','peptide_aa','delta_mass','precursor_count','psm_count','best_precursor_usi','best_precursor_filename','best_precursor_scan','best_precursor_charge','best_precursor_sequence']

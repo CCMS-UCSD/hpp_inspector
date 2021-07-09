@@ -253,7 +253,7 @@ def main():
 
         best_cosine = float(l['cosine']) >= float(precursor_representative['cosine'])
         best_score = float(l['score']) >= float(precursor_representative['score'])
-        potential_psm_loss = float(l['explained_intensity']) < args.explained_intensity_cutoff and float(precursor_representative['explained_intensity']) >= args.explained_intensity_cutoff
+        potential_psm_loss = ((float(l['explained_intensity']) < args.explained_intensity_cutoff or int(l['matched_ions']) < args.annotated_ions_cutoff) and float(precursor_representative['explained_intensity']) >= args.explained_intensity_cutoff and int(precursor_representative['matched_ions']) >= args.annotated_ions_cutoff)
         if best_score and not potential_psm_loss:
             precursor_representative['database_filename'] = l['filename'] if from_psm else l['database_filename']
             precursor_representative['database_scan'] = l['scan'] if from_psm else l['database_scan']
@@ -355,16 +355,17 @@ def main():
     for (sequence, charge), best_psm in representative_per_precursor.items():
         proteins = best_psm['protein'].split(' ###')[0].split(';')
         # PSM-level FDR was inefficient at this scale - need to rethink
-        if 'Canonical' in best_psm.get('protein_type','') and len(proteins) == 1 and best_psm.get('hpp_match','') == 'True' and float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
+        if 'Canonical' in best_psm.get('protein_type','') and len(proteins) == 1:
             all_hpp_precursors.append(fdr.ScoredElement((sequence, charge),'XXX_' in proteins[0],best_psm['score']))
     
     precursor_fdr = {}
     if len(all_hpp_precursors) > 0:
         precursor_fdr = fdr.calculate_fdr(all_hpp_precursors)
 
-    precursors_per_protein = defaultdict(lambda: defaultdict(float))
+    precursors_per_protein_all = defaultdict(lambda: defaultdict(float))
+    precursors_per_protein_hpp = defaultdict(lambda: defaultdict(float))
 
-
+    row_pass_filters = lambda best_psm: (float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff or float(best_psm['cosine']) >= args.cosine_cutoff) and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff
 
     def output_protein_level_results(best_psm):
 
@@ -372,10 +373,13 @@ def main():
         sequence_il = best_psm['sequence_unmodified_il']
 
         proteins = best_psm['protein'].split(' ###')[0].split(';')
-        if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1 and best_psm.get('hpp_match','') == 'True' and float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff:
+        if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1:
             pos = (int(best_psm['aa_start']),int(best_psm['aa_end']))
-            prev_score = precursors_per_protein[proteins[0]][pos]
-            precursors_per_protein[proteins[0]][pos] = max(float(best_psm['score']),prev_score)
+            if best_psm.get('hpp_match','') == 'True' and row_pass_filters(best_psm):
+                prev_score_hpp = precursors_per_protein_hpp[proteins[0]][pos]
+                precursors_per_protein_hpp[proteins[0]][pos] = max(float(best_psm['score']),prev_score_hpp)
+            prev_score = precursors_per_protein_all[proteins[0]][pos]
+            precursors_per_protein_all[proteins[0]][pos] = max(float(best_psm['score']),prev_score)
 
         proteins = peptide_to_protein.get(sequence_il,[])
         cannonical_proteins = [protein for protein in proteins if proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso]
@@ -388,7 +392,7 @@ def main():
             has_synthetic_cosine = False
             is_isoform_unique = False
             if len(cannonical_proteins) == 1:
-                if (float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff or float(best_psm['cosine']) >= args.cosine_cutoff) and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff:
+                if row_pass_filters(best_psm):
                     if float(best_psm['cosine']) >= 0:
                         has_synthetic = True
                         if float(best_psm['cosine']) >= args.cosine_cutoff:
@@ -398,7 +402,7 @@ def main():
                         sequences_per_dataset[dataset].add(sequence_il)
                     best_psm['datasets'] = ';'.join(best_psm['datasets'])
             if len(proteins) == 1:
-                if (float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff or float(best_psm['cosine']) >= args.cosine_cutoff) and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff:
+                if row_pass_filters(best_psm):
                     is_isoform_unique = True
             added = sequences_found[sequence_il].added
             sequences_found[sequence_il] = sequences_found[sequence_il]._replace(
@@ -435,17 +439,29 @@ def main():
             for best_psm in r:
                 output_protein_level_results(best_psm)
 
-    protein_w_scores = []
-    score_dict = {}
+    hpp_protein_w_scores = []
+    hpp_score_dict = {}
 
-    for protein, precursors in precursors_per_protein.items():
+    all_protein_w_scores = []
+    all_score_dict = {}
+
+    for protein, precursors in precursors_per_protein_hpp.items():
         score, count = mapping.non_nested_score([(*k,v) for k,v in precursors.items()])
-        protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
-        score_dict[protein] = score
+        hpp_protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
+        hpp_score_dict[protein] = score
     
-    fdr_dict = {}
-    if len(protein_w_scores) > 0:
-        fdr_dict = fdr.calculate_fdr(protein_w_scores)
+    for protein, precursors in precursors_per_protein_all.items():
+        score = sum([v for k,v in precursors.items()])
+        all_protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
+        all_score_dict[protein] = score
+
+    hpp_fdr_dict = {}
+    if len(hpp_protein_w_scores) > 0:
+        hpp_fdr_dict = fdr.calculate_fdr(hpp_protein_w_scores)
+
+    all_fdr_dict = {}
+    if len(hpp_protein_w_scores) > 0:
+        all_fdr_dict = fdr.calculate_fdr(all_protein_w_scores)
 
     with open(args.output_mappings, 'w') as w:
         header = ['sequence','protein','protein_type','gene','start_aa','end_aa','mismatch_position','protein_aa','peptide_aa','delta_mass','precursor_count','psm_count','best_precursor_usi','best_precursor_filename','best_precursor_scan','best_precursor_charge','best_precursor_sequence']
@@ -512,8 +528,10 @@ def main():
             'gene',
             'pe',
             'aa_total',
-            'score',
-            'fdr',
+            'hpp_score',
+            'hpp_fdr',
+            'all_score',
+            'all_fdr',
             'cosine_cutoff',
             'explained_intensity_cutoff',
             'annotated_ions_cutoff'
@@ -535,8 +553,10 @@ def main():
                 'pe': nextprot_pe.get(protein_entry.id,0) if is_canonical else 0,
                 'aa_total':protein_entry.length,
                 'gene':protein_entry.gene,
-                'score':score_dict.get(protein,0),
-                'fdr':fdr_dict.get(protein,1)
+                'hpp_score':hpp_score_dict.get(protein,0),
+                'hpp_fdr':hpp_fdr_dict.get(protein,1),
+                'all_score':all_score_dict.get(protein,0),
+                'all_fdr':all_fdr_dict.get(protein,1)
             }
 
             all_protein_mappings = protein_mapping[protein]
@@ -593,8 +613,10 @@ def main():
             'gene',
             'pe',
             'aa_total',
-            'score',
-            'fdr',
+            'hpp_score',
+            'hpp_fdr',
+            'all_score',
+            'all_fdr',
         ] + ['_dyn_#neXtProt Release {}'.format(release) for release in sorted(nextprot_releases_pe.keys())] + ['_dyn_#{}'.format(d) for d in sequences_per_dataset.keys()]
 
         w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames, restval=0)
@@ -610,8 +632,10 @@ def main():
                 'pe': nextprot_pe.get(protein_entry.id,0) if is_canonical else 0,
                 'aa_total':protein_entry.length,
                 'gene':protein_entry.gene,
-                'score':score_dict.get(protein,0),
-                'fdr':fdr_dict.get(protein,1)
+                'hpp_score':hpp_score_dict.get(protein,0),
+                'hpp_fdr':hpp_fdr_dict.get(protein,1),
+                'all_score':all_score_dict.get(protein,0),
+                'all_fdr':all_fdr_dict.get(protein,1)
             }
 
             for release, pe_dict in nextprot_releases_pe.items():

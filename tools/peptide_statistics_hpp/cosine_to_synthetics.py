@@ -28,7 +28,6 @@ def arguments():
     parser.add_argument('-t','--peak_tolerance', type = str, help='Peak Tolerance for Matching')
     parser.add_argument('-e','--explained_intensity', type = str, help='Explained Intensity Filter')
     parser.add_argument('-l','--labeled', type = str, help='Labeled data')
-
     parser.add_argument('-c','--cosine_threshold', type = str, help='Cosine Threshold')
 
     if len(sys.argv) < 4:
@@ -37,7 +36,7 @@ def arguments():
     return parser.parse_args()
 
 def read_mzml_spectrum(spectrum):
-    peaks = [processing.Peak(*p) for p in zip(spectrum['m/z array'],spectrum['intensity array'])]
+    peaks = [processing.Peak(float(p[0]),float(p[1])) for p in zip(spectrum['m/z array'],spectrum['intensity array'])]
     precursor = float(spectrum['precursorList']['precursor'][0]['selectedIonList']['selectedIon'][0]['selected ion m/z'])
     return processing.Spectrum(
         peaks,
@@ -56,13 +55,13 @@ def get_mzml_spectrum(mzml_object, scan):
     return read_mzml_spectrum(spectrum)
 
 def read_mzxml_spectrum(spectrum):
-    peaks = [processing.Peak(*p) for p in zip(spectrum['m/z array'],spectrum['intensity array'])]
+    peaks = [processing.Peak(float(p[0]),float(p[1])) for p in zip(spectrum['m/z array'],spectrum['intensity array'])]
     precursor = float(spectrum["precursorMz"][0]["precursorMz"])
     return processing.Spectrum(
         peaks,
         precursor,
         None,
-        spectrum['id'],
+        "scan={}".format(spectrum['id']),
         None
     )
 
@@ -72,15 +71,17 @@ def get_mzxml_spectrum(mzxml_object, scan):
     return read_mzxml_spectrum(spectrum)
 
 def extract_annotated_peaks(spectrum, fragment_tolerance):
-    _, ion_vector = processing.calculate_explained_intensity(spectrum,fragment_tolerance)
+    spectrum, explained_intensity, ion_vector = processing.process_spectrum(
+            spectrum,
+            fragment_tolerance,
+            precursor_filter_window=1.5,
+            low_mass_filter=232,
+            isobaric_tag_type=None,
+            min_snr=2
+    )
     ion_vector = spectrum._replace(peaks = ion_vector)
-    ion_vector = processing.normalize_spectrum(ion_vector)
-    spectrum = processing.filter_precursor_peaks(spectrum,fragment_tolerance)
-    spectrum = processing.apply_low_mass_filter(spectrum,232)
-    spectrum = processing.window_filter_peaks(spectrum,50,10)
-    spectrum = processing.normalize_spectrum(spectrum)
-    explained_intensity, ion_vector_after_filter = processing.calculate_explained_intensity(spectrum,fragment_tolerance)
-    return (explained_intensity,len(ion_vector_after_filter)), ion_vector
+    # ion_vector = processing.normalize_spectrum(ion_vector)
+    return (explained_intensity,len(ion_vector)), ion_vector
 
 def find_ei_and_intensity(spectrum, psm, synthetic_scans):
     best_cosine = None
@@ -184,7 +185,7 @@ def main():
                         precursor_mz = s['params'].get('pepmass')[0]
                         mz = s['m/z array']
                         intn = s['intensity array']
-                        peaks = [processing.Peak(mz[i],intn[i]) for i in range(len(mz))]
+                        peaks = [processing.Peak(float(mz[i]),float(intn[i])) for i in range(len(mz))]
                         spectrum = processing.Spectrum(
                             peaks,
                             precursor_mz,

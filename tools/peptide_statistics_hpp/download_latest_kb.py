@@ -24,11 +24,13 @@ def read_coverage_folder(input_folder,proteome):
     pep_mapping_info = {}
     peptide_to_exon_map = defaultdict(list)
     for protein_coverage_file in input_folder.glob('*'):
-        protein_mapping_out,pep_info,_,_ = read_mappings.read_protein_coverage(protein_coverage_file, set() ,proteome,True,False)
+        protein_mapping_out,pep_info,_,_ = read_mappings.read_protein_coverage(protein_coverage_file,set(),proteome,True,False)
     return protein_mapping_out,pep_info
 
 def main():
     args = arguments()
+
+    header = ['protein','aa_start','aa_end','demodified','synthetic_cosine','all_protein_fdr','hpp_protein_fdr']
 
     if args.comparisons:
 
@@ -37,23 +39,23 @@ def main():
             proteome = mapping.read_uniprot(args.proteome_fasta)
             proteome = mapping.add_decoys(proteome)
 
-            header = ['protein','aa_start','aa_end','demodified','synthetic_cosine']
             with open(args.kb_pep, 'w') as w:
                 r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
                 r.writeheader()
-                protein_mapping_out,pep_info = read_coverage_folder(args.comparisons, proteome)
+                protein_mapping_out,_ = read_coverage_folder(args.comparisons, proteome)
                 for protein, peptide_mappings in protein_mapping_out.items():
                     for peptide, mappings in peptide_mappings.items():
-                        for (start, end, cosine) in mappings:
+                        for (start, end, cosine, all_protein_fdr, hpp_protein_fdr) in mappings:
                             r.writerow({
                                 'protein':protein,
                                 'aa_start':start,
                                 'aa_end':end,
                                 'demodified':peptide,
-                                'synthetic_cosine':cosine
+                                'synthetic_cosine':cosine,
+                                'all_protein_fdr':all_protein_fdr,
+                                'hpp_protein_fdr':hpp_protein_fdr
                             })
         except:
-            header = ['protein','aa_start','aa_end','demodified','synthetic_cosine']
             with open(args.kb_pep, 'w') as w:
                 r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
                 r.writeheader()
@@ -85,7 +87,9 @@ def main():
                         'aa_start':in_vivo_seq[1],
                         'aa_end':in_vivo_seq[2],
                         'demodified':in_vivo_seq[3],
-                        'synthetic_cosine': '0' if in_vivo_seq in synthetic else '-1'
+                        'synthetic_cosine': '0' if in_vivo_seq in synthetic else '-1',
+                        'all_protein_fdr': '0',
+                        'hpp_protein_fdr': '0'
                     })
 
     else:

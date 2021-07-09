@@ -7,7 +7,7 @@ from datetime import datetime
 
 csv.field_size_limit(sys.maxsize)
 
-def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter = False, output_representatives = True):
+def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter = None, output_representatives = True):
 
     pep_info = {}
     protein_mapping_out = defaultdict(lambda: defaultdict(set))
@@ -33,9 +33,18 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                 mapped_protein_str = l['mapped_proteins'] if 'mapped_proteins' in l else l['all_proteins_w_coords']
                 mapped_exon_str = l['mapped_exons'] if 'mapped_exons' in l else l['all_mapped_exons']
 
-                precursor_fdr = float(l.get('precursor_fdr',-1))
-                expl_intensity = float(l.get('explained_intensity',1))
-                annoated_ions = float(l.get('matched_ions',1000))
+                all_protein_fdr = float(l.get('all_protein_fdr',-1))
+                hpp_protein_fdr = float(l.get('hpp_protein_fdr',-1))
+                cosine = float(l.get('cosine',-1))
+
+                pass_filters = True
+
+                if filter:
+                    pass_precursor_fdr = float(l.get('precursor_fdr',-1)) >= float(l.get('precursor_fdr_cutoff',-1))
+                    pass_cosine = cosine >= float(l.get('cosine_cutoff',-1))
+                    pass_expl_intensity = float(l.get('explained_intensity',1)) >= float(l.get('explained_intensity_cutoff',0))
+                    pass_annotated_ions = float(l.get('matched_ions',1000)) >= float(l.get('matched_ions_cutoff',0))
+                    pass_filters = pass_precursor_fdr and pass_annotated_ions and (pass_cosine or pass_expl_intensity)
 
                 protein_mappings = mapping.string_to_protein_mappings(mapped_protein_str)
                 exon_mappings = mapping.string_to_exon_mappings(mapped_exon_str)
@@ -58,11 +67,11 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                     'mapped_proteins' : []
                 }
 
-                if not filter or (precursor_fdr <= 0.01 and expl_intensity >= 0.4 and annoated_ions >= 6):
+                if pass_filters:
 
                     for protein_mapping in protein_mappings:
                         if len(protein_mapping.mismatches) == 0:
-                            protein_mapping_out[protein_mapping.protein_accession][il_peptide].add((protein_mapping.start_pos,protein_mapping.end_pos,l.get('cosine')))
+                            protein_mapping_out[protein_mapping.protein_accession][il_peptide].add((protein_mapping.start_pos,protein_mapping.end_pos,cosine,all_protein_fdr,hpp_protein_fdr))
                             match_obj['mapped_proteins'].append((protein_mapping.protein_accession,(protein_mapping.start_pos,protein_mapping.end_pos),protein_mapping.il_ambiguous))
                     for exon_mapping in exon_mappings:
                         for (complete, mapped) in zip(exon_mapping.complete_coordinates, exon_mapping.matched_coordinates):

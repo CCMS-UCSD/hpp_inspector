@@ -20,8 +20,10 @@
           <!-- <column type="float" field="comparison_coverage" label="Coverage (KB Only)" width="2"/>
           <column type="float" field="new_coverage" label="Coverage (Added Only)" width="2"/> -->
           <column type="text" field="protein" label="Protein" width="4"/>
-          <column type="float" field="fdr" label="FDR" width="4" tooltip=""/>
-          <column type="float" field="score" label="Score" width="4" tooltip=""/>
+          <column type="float" precision="4" field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
         <column type="text" field="protein_type" label="Protein Type" width="4"/>
 
             <column label="View Peptides" type="genericurlgenerator" width="5">
@@ -165,7 +167,7 @@
             </data>
             <row>
                 <column type="slideExpandableHidden" characterhidelimit="18" buttontext="Show all proteins" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
-                <column type="float" field="precursor_fdr" label="Precursor FDR" width="4" tooltip=""/>
+                <column type="float" precision="4" field="precursor_fdr" label="Precursor FDR" width="4" tooltip=""/>
                 <column type="expandable" field="gene" label="Gene" width="4" tooltip="Gene for the protein"/>
                 <column type="text" field="protein_type" label="Protein Type" width="4"/>
                 <column type="integer" field="aa_start" label="AA Start" width="1" tooltip="Start location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
@@ -190,10 +192,10 @@
                 <column type="text" field="parent_mass" label="Precursor Mass" width="20"/>
                 <!-- <column type="text" field="type" label="Evidence Type" width="6"/> -->
                 <column type="float" field="score" label="Peptide Spectrum Match (PSM) Identification Score" width="6" tooltip="Score for Peptide Spectrum Match (PSM) indicates the quality of this spectrum for this particular peptide."/>
-                <column type="float" field="explained_intensity" label="Explained Intensity" width="6"/>
-                <column type="integer" field="explained_intensity" label="Matched Ions" width="6"/>
+                <column type="float" precision="3"  field="explained_intensity" label="Explained Intensity" width="6"/>
+                <column type="integer" field="matched_ions" label="Matched Ions" width="6"/>
                 <!-- <column type="text" field="pass" label="Above Library Threshold" width="6"/> -->
-                <column type="float" field="cosine" label="Best Annotated Cosine to Synthetic Spectrum Match" width="6" tooltip="Spectrum cosine using only annotated peaks from the input spectrum and closest matching synthetic."/>
+                <column type="float" precision="3"  field="cosine" label="Best Annotated Cosine to Synthetic Spectrum Match" width="6" tooltip="Spectrum cosine using only annotated peaks from the input spectrum and closest matching synthetic."/>
                 <column type="integer" field="canonical_matches" label="#SAAP protein matches" width="1" tooltip = "Number of proteins the peptide matches to with a single amino acid variant."/>
                 <column type="text" field="gene_unique" label="Gene Unique" width="2" tooltip = "Peptide matches uniquely to a single gene with a single amino acid variant (True/False)."/>
                 <column type="integer" field="exon_junctions_covered" label="Exon Junctions Covered" width="1"/>

@@ -12,10 +12,6 @@ def arguments():
     parser.add_argument('-c','--comparisons', type = Path, help='Comparison Jobs')
     parser.add_argument('-f','--proteome_fasta', type = Path, help='FASTA File')
     parser.add_argument('-b','--backup_kb_pep', type = Path, help='Backup KB Peptides')
-    parser.add_argument('--cosine_cutoff', type = float, help='Cosine Cutoff')
-    parser.add_argument('--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
-    parser.add_argument('--annotated_ions_cutoff', type = float, help='Annotated Ion Cutoff')
-    parser.add_argument('--precursor_fdr', type = float, help='Precursor FDR')
     parser.add_argument('-k','--kb_pep', type = Path, help='Output KB Peptides')
     if len(sys.argv) < 2:
         parser.print_help()

@@ -168,6 +168,8 @@
             <row>
                 <column type="slideExpandableHidden" characterhidelimit="18" buttontext="Show all proteins" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
                 <column type="float" precision="4" field="precursor_fdr" label="Precursor FDR" width="4" tooltip=""/>
+                <column type="float" precision="4" field="all_protein_fdr" label="Protein FDR (Canonical)" width="4" tooltip=""/>
+                <column type="float" precision="4"  field="hpp_protein_fdr" label="Protein FDR (HPP 2+)" width="4" tooltip=""/>
                 <column type="expandable" field="gene" label="Gene" width="4" tooltip="Gene for the protein"/>
                 <column type="text" field="protein_type" label="Protein Type" width="4"/>
                 <column type="integer" field="aa_start" label="AA Start" width="1" tooltip="Start location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>

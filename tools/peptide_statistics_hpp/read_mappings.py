@@ -40,7 +40,7 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                 pass_filters = True
 
                 if filter:
-                    pass_precursor_fdr = float(l.get('precursor_fdr',-1)) >= float(l.get('precursor_fdr_cutoff',-1))
+                    pass_precursor_fdr = float(l.get('precursor_fdr',-1)) <= float(l.get('precursor_fdr_cutoff',-1))
                     pass_cosine = cosine >= float(l.get('cosine_cutoff',-1))
                     pass_expl_intensity = float(l.get('explained_intensity',1)) >= float(l.get('explained_intensity_cutoff',0))
                     pass_annotated_ions = float(l.get('matched_ions',1000)) >= float(l.get('matched_ions_cutoff',0))
@@ -58,7 +58,8 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                     'gene_unique': gene_unique,
                     'canonical_matches': int(sp_matches_saav),
                     'len': len(il_peptide),
-                    'hpp': len(il_peptide) >= 9 and gene_unique and sp_matches_saav == 1,
+                    # remove gene-uniqueness from HPP criteria
+                    'hpp': len(il_peptide) >= 9 and sp_matches_saav == 1,
                     'all_proteins_w_coords': mapped_protein_str,
                     'all_mapped_exons': mapped_exon_str,
                     'exon_junctions_covered': m['exon_junctions_covered'],
@@ -71,7 +72,7 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
 
                     for protein_mapping in protein_mappings:
                         if len(protein_mapping.mismatches) == 0:
-                            protein_mapping_out[protein_mapping.protein_accession][il_peptide].add((protein_mapping.start_pos,protein_mapping.end_pos,cosine,all_protein_fdr,hpp_protein_fdr))
+                            protein_mapping_out[protein_mapping.protein_accession][il_peptide].add((protein_mapping.start_pos,protein_mapping.end_pos,cosine,all_protein_fdr,hpp_protein_fdr,len(il_peptide) >= 9 and sp_matches_saav == 1))
                             match_obj['mapped_proteins'].append((protein_mapping.protein_accession,(protein_mapping.start_pos,protein_mapping.end_pos),protein_mapping.il_ambiguous))
                     for exon_mapping in exon_mappings:
                         for (complete, mapped) in zip(exon_mapping.complete_coordinates, exon_mapping.matched_coordinates):

@@ -20,10 +20,12 @@
           <!-- <column type="float" field="comparison_coverage" label="Coverage (KB Only)" width="2"/>
           <column type="float" field="new_coverage" label="Coverage (Added Only)" width="2"/> -->
           <column type="text" field="protein" label="Protein" width="4"/>
-          <column type="float" precision="4" field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
+          
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
+          <column type="float" precision="4" field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
+
         <column type="text" field="protein_type" label="Protein Type" width="4"/>
 
             <column label="View Peptides" type="genericurlgenerator" width="5">
@@ -39,6 +41,7 @@
             <column type="text" field="gene" label="Gene" width="4"/>
             <column type="integer" field="pe" label="PE" width="1"/>
             <column type="integer" field="aa_total" label="Protein Length" width="3"/>
+            <column type="integer" field="num_sequences" label="#Sequences" width="1"/>
             <column type="integer" field="combined_hpp_just_current" label="#HPP Peptides (Canonical-unique)" width="5"/>
             <column type="integer" field="combined_hpp_just_current_iso_unique" label="#HPP Peptides (Isoform-unique)" width="5"/>
             <!-- <column type="integer" field="comparison_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
@@ -48,7 +51,9 @@
             <column type="expandable" field="supporting_peptides" label="Previously-known Peptides" width="20"/>
             <column type="expandable" field="novel_peptides" label="Novel Peptides" width="20"/>
             <column type="integer" field="combined_hpp" label="#HPP Peptides (Combined)" width="5"/>
-            <column type="integer" field="comparison_hpp" label="#HPP Peptides (KB Only)" width="2"/>
+            <column type="integer" field="comparison_hpp_allfdr" label="#HPP Peptides (Reference Common FDR)" width="2"/>
+            <column type="integer" field="comparison_hpp_hppfdr" label="#HPP Peptides (Reference HPP FDR)" width="2"/>
+
             <column type="integer" field="new_hpp" label="#HPP Peptides (Added Only)" width="2"/>
             <column type="float" field="total_coverage" label="Coverage (Total)" width="2"/>
             <column type="float" field="coverage_increase" label="Coverage Increase (All)" width="2"/>
@@ -56,7 +61,9 @@
             <column type="expandable" field="supporting_peptides_w_synthetic" label="Previously-known Peptides (Synthetic)" width="20"/>
             <column type="expandable" field="novel_peptides_w_synthetic" label="Novel Peptides (Synthetic)" width="20"/>
             <column type="integer" field="combined_hpp_w_synthetic" label="#HPP Peptides (Combined) (Synthetic)" width="5"/>
-            <column type="integer" field="comparison_hpp_w_synthetic" label="#HPP Peptides (KB Only) (Synthetic)" width="2"/>
+            <column type="integer" field="comparison_hpp_allfdr_w_synthetic" label="#HPP Peptides (Reference Common FDR) (Synthetic)" width="2"/>
+            <column type="integer" field="comparison_hpp_hppfdr_w_synthetic" label="#HPP Peptides (Reference HPP FDR)(Synthetic)" width="2"/>
+
             <column type="integer" field="new_hpp_w_synthetic" label="#HPP Peptides (Added Only) (Synthetic)" width="2"/>
             <column type="float" field="total_coverage_w_synthetic" label="Coverage (Total) (Synthetic)" width="2"/>
             <column type="float" field="coverage_increase_w_synthetic" label="Coverage Increase (Synthetic)" width="2"/>
@@ -64,8 +71,9 @@
             <!-- <column type="text" field="promoted_w_synthetic" label="Evidence to Promote (Synthetic)" width="2"/> -->
             <column type="expandable" field="supporting_peptides_w_synthetic_cosine" label="Previously-known Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
             <column type="expandable" field="novel_peptides_w_synthetic_cosine" label="Novel Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
-            <column type="integer" field="combined_hpp_w_synthetic_cosine" label="#HPP Peptides (Combined) (Synthetic + Pass Cosine Threshold)" width="5"/>
-            <column type="integer" field="comparison_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
+            <column type="integer" field="comparison_hpp_allfdr_w_synthetic_cosine" label="#HPP Peptides (Reference Common FDR) (Synthetic + Pass Cosine Threshold)" width="2"/>
+            <column type="integer" field="comparison_hpp_hppfdr_w_synthetic_cosine_" label="#HPP Peptides (Reference HPP FDR)(Synthetic + Pass Cosine Threshold)" width="2"/>
+
             <column type="integer" field="new_hpp_w_synthetic_cosine" label="#HPP Peptides (Added Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="float" field="total_coverage_w_synthetic_cosine" label="Coverage (Total) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="float" field="coverage_increase_w_synthetic_cosine" label="Coverage (Added) (Synthetic + Pass Cosine Threshold)" width="2"/>

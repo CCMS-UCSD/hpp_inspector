@@ -30,7 +30,7 @@ def read_coverage_folder(input_folder,proteome):
 def main():
     args = arguments()
 
-    header = ['protein','aa_start','aa_end','demodified','synthetic_cosine','all_protein_fdr','hpp_protein_fdr']
+    header = ['protein','aa_start','aa_end','demodified','synthetic_cosine','all_protein_fdr','hpp_protein_fdr','is_hpp']
 
     if args.comparisons:
 
@@ -45,7 +45,7 @@ def main():
                 protein_mapping_out,_ = read_coverage_folder(args.comparisons, proteome)
                 for protein, peptide_mappings in protein_mapping_out.items():
                     for peptide, mappings in peptide_mappings.items():
-                        for (start, end, cosine, all_protein_fdr, hpp_protein_fdr) in mappings:
+                        for (start, end, cosine, all_protein_fdr, hpp_protein_fdr,is_hpp) in mappings:
                             r.writerow({
                                 'protein':protein,
                                 'aa_start':start,
@@ -53,7 +53,8 @@ def main():
                                 'demodified':peptide,
                                 'synthetic_cosine':cosine,
                                 'all_protein_fdr':all_protein_fdr,
-                                'hpp_protein_fdr':hpp_protein_fdr
+                                'hpp_protein_fdr':hpp_protein_fdr,
+                                'is_hpp':is_hpp
                             })
         except:
             with open(args.kb_pep, 'w') as w:
@@ -88,8 +89,9 @@ def main():
                         'aa_end':in_vivo_seq[2],
                         'demodified':in_vivo_seq[3],
                         'synthetic_cosine': '0' if in_vivo_seq in synthetic else '-1',
-                        'all_protein_fdr': '0',
-                        'hpp_protein_fdr': '0'
+                        'all_protein_fdr': '1',
+                        'hpp_protein_fdr': '0',
+                        'is_hpp':'True'
                     })
 
     else:

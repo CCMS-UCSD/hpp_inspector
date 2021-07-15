@@ -201,7 +201,7 @@ def main():
     cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
     explained_intensity_per_spectrum = {}
 
-    min_peaks_to_load_file = 0
+    min_spectra_to_load_file = 20
 
     for filename in psms_to_consider:
         print("{}: Looking at {}".format(datetime.now().strftime("%H:%M:%S"),filename))
@@ -224,7 +224,7 @@ def main():
                 get_spectrum_func = None
                 read_scan = None
 
-                if len(psms_to_consider[filename]) > min_peaks_to_load_file:
+                if len(psms_to_consider[filename]) >= min_spectra_to_load_file:
                     if exts[0] == '.mzML':
                         file = open(filepath, 'rb')
                         file_object = mzml.MzML(file)
@@ -251,7 +251,7 @@ def main():
 
                 if file:
                     if file_object and get_spectrum_func:
-                        if len(psms_to_consider[filename]) > min_peaks_to_load_file:
+                        if len(psms_to_consider[filename]) >= min_spectra_to_load_file:
                             file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum_read_file(psms_to_consider,filename,synthetic_scans,tol,threshold,file_object,get_spectrum_func,read_scan)
                         else:
                             file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum(psms_to_consider,filename,synthetic_scans,tol,threshold,file_object,get_spectrum_func)

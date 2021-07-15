@@ -32,8 +32,9 @@ def main():
     proteome_with_decoys = mapping.add_decoys(proteome)
     peptide_list = load_peptide_list(args.peptide_list)
 
-    peptide_to_protein_map = mapping.map_peptides(proteome_with_decoys,peptide_list)
-    peptide_to_exon_map = exon_mapping.map_peptides_to_exons(args.exon_fasta,peptide_list)
+    # peptide_to_exon_map = exon_mapping.map_peptides_to_exons(args.exon_fasta,peptide_list)
+    peptide_to_exon_map = {}
+    kmer_proteome_hashes = mapping.prepare_proteome_for_mapping(proteome_with_decoys, peptide_list)
 
     output_dict = defaultdict(list)
 
@@ -52,7 +53,7 @@ def main():
 
             output_dict = {}
 
-            mapped_proteins = peptide_to_protein_map.get(peptide,[])
+            mapped_proteins = mapping.map_peptide_to_proteome(peptide,proteome_with_decoys,kmer_proteome_hashes)
             mapped_exons = peptide_to_exon_map.get(peptide,[])
 
             output_dict["peptide"] = peptide
@@ -60,7 +61,7 @@ def main():
             output_dict["mapped_proteins"] = mapping.protein_mappings_to_string(mapped_proteins)
             output_dict["mapped_exons"] = mapping.exon_mappings_to_string(mapped_exons)
 
-            output_dict.update(mapping.summarize_protein_mappings(proteome_with_decoys,mapped_proteins,mapped_exons))
+            # output_dict.update(mapping.summarize_protein_mappings(proteome_with_decoys,mapped_proteins,mapped_exons))
 
             w.writerow(output_dict)
 

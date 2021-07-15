@@ -161,7 +161,7 @@ def main():
                     comparison_all_fdr[l['protein']] = float(l['all_protein_fdr'])
                     comparison_hpp_fdr[l['protein']] = float(l['hpp_protein_fdr'])
 
-                protein_mapping[l['protein']][il_peptide].add((int(l['aa_start']),int(l['aa_end']),None,None,None))
+                protein_mapping[l['protein']][il_peptide].add((int(l['aa_start']),int(l['aa_end']),None,None,None,None))
                 comparison = sequences_found[il_peptide].comparison
                 if comparison != SeqOccurances(True,True,True):
                     if float(l.get('synthetic_cosine',-1)) >= 0:
@@ -170,6 +170,8 @@ def main():
                             has_synthetic_cosine = True
                     comparison = SeqOccurances(True, comparison.synthetic_match or has_synthetic, comparison.synthetic_match_cosine or has_synthetic_cosine)
                     sequences_found[il_peptide] = sequences_found[il_peptide]._replace(comparison = comparison)
+                if l['is_hpp'] == 'True':
+                    sequences_found[il_peptide] = sequences_found[il_peptide]._replace(hpp = True)
 
     peptide_to_protein = defaultdict(list)
     peptide_to_exon_map = defaultdict(list)
@@ -307,9 +309,9 @@ def main():
                 'pe': '',
             })
         if len(cannonical_proteins) == 1 and il_peptide in protein_mappings.get(cannonical_proteins[0],{}):
-            outdict['aa_start'],outdict['aa_end'],_,_,_ = next(iter(protein_mappings[cannonical_proteins[0]][il_peptide]))
+            outdict['aa_start'],outdict['aa_end'],_,_,_,_ = next(iter(protein_mappings[cannonical_proteins[0]][il_peptide]))
         elif len(output_proteins) == 1 and il_peptide in protein_mappings.get(output_proteins[0],{}):
-            outdict['aa_start'],outdict['aa_end'],_,_,_ = next(iter(protein_mappings[output_proteins[0]][il_peptide]))
+            outdict['aa_start'],outdict['aa_end'],_,_,_,_ = next(iter(protein_mappings[output_proteins[0]][il_peptide]))
         else:
             outdict['aa_start'],outdict['aa_end'] = "N/A","N/A"
 
@@ -354,7 +356,7 @@ def main():
 
                         protein_info_dict, output_proteins = protein_info(peptide, peptide_to_protein, protein_mapping, sequences_found, proteome, nextprot_pe)
                         for protein in output_proteins:
-                            aa_start,aa_end,_,_,_ = next(iter(protein_mapping[protein][il_peptide]))
+                            aa_start,aa_end,_,_,_,_ = next(iter(protein_mapping[protein][il_peptide]))
                             frequency[protein][(aa_start,aa_end)][(l['sequence'],l['charge'])] += 1
                         l.update(protein_info_dict)
                         proteins = l['protein'].split(' ###')[0].split(';')

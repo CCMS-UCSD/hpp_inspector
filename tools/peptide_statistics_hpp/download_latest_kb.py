@@ -45,7 +45,7 @@ def main():
                 protein_mapping_out,_ = read_coverage_folder(args.comparisons, proteome)
                 for protein, peptide_mappings in protein_mapping_out.items():
                     for peptide, mappings in peptide_mappings.items():
-                        for (start, end, cosine, all_protein_fdr, hpp_protein_fdr,is_hpp) in mappings:
+                        for (start, end, cosine, all_protein_fdr, hpp_protein_fdr, is_hpp) in mappings:
                             r.writerow({
                                 'protein':protein,
                                 'aa_start':start,
@@ -93,7 +93,6 @@ def main():
                         'hpp_protein_fdr': '0',
                         'is_hpp':'True'
                     })
-
     else:
         args.kb_pep.write_text(args.backup_kb_pep.read_text())
 

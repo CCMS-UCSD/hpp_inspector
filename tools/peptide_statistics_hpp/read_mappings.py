@@ -44,6 +44,7 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                     pass_cosine = cosine >= float(l.get('cosine_cutoff',-1))
                     pass_expl_intensity = float(l.get('explained_intensity',1)) >= float(l.get('explained_intensity_cutoff',0))
                     pass_annotated_ions = float(l.get('matched_ions',1000)) >= float(l.get('matched_ions_cutoff',0))
+                    # print(pass_precursor_fdr,pass_cosine,pass_expl_intensity,pass_annotated_ions)
                     pass_filters = pass_precursor_fdr and pass_annotated_ions and (pass_cosine or pass_expl_intensity)
 
                 protein_mappings = mapping.string_to_protein_mappings(mapped_protein_str)

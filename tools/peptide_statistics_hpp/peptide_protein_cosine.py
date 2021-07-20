@@ -398,7 +398,7 @@ def main():
         sequence_il = best_psm['sequence_unmodified_il']
 
         proteins = [p for p in best_psm['protein'].split(' ###')[0].split(';') if p != '']
-        if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1 and 'Canonical' in best_psm.get('protein_type',''):
+        if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1 and 'Canonical' in best_psm.get('protein_type','') and row_pass_filters(best_psm):
             pos = (int(best_psm['aa_start']),int(best_psm['aa_end']))
             if best_psm.get('hpp_match','') == 'True':
                 prev_score_hpp = precursors_per_protein_hpp[proteins[0]][pos]
@@ -410,7 +410,7 @@ def main():
         cannonical_proteins = [protein for protein in proteins if proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso]
         output_genes = set([proteome.proteins[protein].gene if proteome.proteins[protein].gene else 'N/A' for protein in proteins])
 
-        if len([g for g in output_genes if g != 'N/A']) <= 1 and len(cannonical_proteins) <= 1:
+        if len(cannonical_proteins) <= 1 and best_psm.get('hpp_match','') == 'True':
             is_hpp = pep_mapping_info[sequence]['hpp']
             match = False
             has_synthetic = False

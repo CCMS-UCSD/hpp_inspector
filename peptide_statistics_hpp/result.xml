@@ -356,8 +356,10 @@
           </data>
           <row>
             <column type="text" field="protein" label="Protein" width="4"/>
-            <column type="float" field="fdr" label="FDR" width="4" tooltip=""/>
-            <column type="float" field="score" label="Score" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
+          <column type="float" precision="4" field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
             <column type="text" field="protein_type" label="Protein Type" width="4"/>
             <column type="text" field="gene" label="Gene" width="4"/>
             <column type="integer" field="pe" label="PE" width="1"/>

@@ -71,9 +71,9 @@
             <!-- <column type="text" field="promoted_w_synthetic" label="Evidence to Promote (Synthetic)" width="2"/> -->
             <column type="expandable" field="supporting_peptides_w_synthetic_cosine" label="Previously-known Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
             <column type="expandable" field="novel_peptides_w_synthetic_cosine" label="Novel Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
+                        <column type="integer" field="combined_hpp_w_synthetic_cosine" label="#HPP Peptides (Combined) (Synthetic + Pass Cosine Threshold)" width="5"/>
             <column type="integer" field="comparison_hpp_allfdr_w_synthetic_cosine" label="#HPP Peptides (Reference Common FDR) (Synthetic + Pass Cosine Threshold)" width="2"/>
-            <column type="integer" field="comparison_hpp_hppfdr_w_synthetic_cosine_" label="#HPP Peptides (Reference HPP FDR)(Synthetic + Pass Cosine Threshold)" width="2"/>
-
+            <column type="integer" field="comparison_hpp_hppfdr_w_synthetic_cosine" label="#HPP Peptides (Reference HPP FDR) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="integer" field="new_hpp_w_synthetic_cosine" label="#HPP Peptides (Added Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="float" field="total_coverage_w_synthetic_cosine" label="Coverage (Total) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="float" field="coverage_increase_w_synthetic_cosine" label="Coverage (Added) (Synthetic + Pass Cosine Threshold)" width="2"/>

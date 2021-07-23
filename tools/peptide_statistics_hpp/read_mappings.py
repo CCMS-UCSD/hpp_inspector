@@ -53,7 +53,7 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                 m = mapping.summarize_protein_mappings(proteome,protein_mappings,exon_mappings)
 
                 gene_unique = m['gene_unique_incl_mismatch']
-                sp_matches_saav = int(m['num_proteins_no_tr_incl_mismatch'])
+                sp_matches_saav = int(m['num_proteins_no_iso_no_tr_incl_mismatch'])
 
                 match_obj = {
                     'gene_unique': gene_unique,

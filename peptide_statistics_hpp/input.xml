@@ -50,7 +50,14 @@
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
-
+		<parameter name="canonical_protein_fdr" label="Canonical Protein FDR">
+			<default value="0.01"/>
+			<validator type="float" minimum="0"/>
+		</parameter>
+		<parameter name="hpp_protein_fdr" label="HPP 2+ Protein FDR">
+			<default value="0.01"/>
+			<validator type="float" minimum="0"/>
+		</parameter>
 		<parameter name="parallel_cosine.parallel_cosine" label="Parallelism (For Cosine Calculations)">
 			<default value="10"/>
 			<validator type="integer"/>
@@ -181,10 +188,12 @@
 		            <cell colspan="3">
 		                <input type="text" parameter="peak_tolerance"/>
 		            </cell>
-								<cell>
-										<label>
-												<content parameter="cosine_threshold"/>
-										</label>
+					</row>
+					<row>
+							<cell>
+									<label>
+											<content parameter="cosine_threshold"/>
+									</label>
 								</cell>
 								<cell colspan="3">
 										<input type="text" parameter="cosine_threshold"/>
@@ -197,6 +206,14 @@
 								<cell colspan="3">
 										<input type="text" parameter="explained_intensity_threshold"/>
 								</cell>
+																		<cell>
+												<label>
+														<content parameter="annotated_ions_threshold"/>
+												</label>
+										</cell>
+										<cell colspan="3">
+												<input type="text" parameter="annotated_ions_threshold"/>
+										</cell>
 		        </row>
 						<row>
 										<cell>
@@ -209,12 +226,21 @@
 										</cell>
 										<cell>
 												<label>
-														<content parameter="annotated_ions_threshold"/>
+														<content parameter="hpp_protein_fdr"/>
 												</label>
 										</cell>
 										<cell colspan="3">
-												<input type="text" parameter="annotated_ions_threshold"/>
+												<input type="text" parameter="hpp_protein_fdr"/>
+										</cell>			
+										<cell>
+												<label>
+														<content parameter="canonical_protein_fdr"/>
+												</label>
 										</cell>
+										<cell colspan="3">
+												<input type="text" parameter="canonical_protein_fdr"/>
+										</cell>
+							
 								</row>
 	</block>
 	<block label="Comparison">

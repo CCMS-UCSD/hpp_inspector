@@ -141,6 +141,8 @@
           <arg option="-precursor_fdr"        valueRef="@precursor_fdr"/>
           <arg option="-hpp_protein_fdr"        valueRef="@hpp_protein_fdr"/>
           <arg option="-canonical_protein_fdr"        valueRef="@canonical_protein_fdr"/>
+          <arg option="-filter_rows_fdr"        valueRef="@filter_rows_fdr"/>
+          <arg option="-use_all_peps_canonical_fdr"        valueRef="@use_all_canonical"/>
           <arg option="-nextprot_releases" pathRef="nextprot_releases"/>
           <arg option="-msv_to_pxd_mapping" pathRef="msv_to_pxd_mapping"/>
           <arg option="-external_provenance"  valueRef="external_provenance"/>

@@ -43,7 +43,7 @@ def main():
         "il_peptide",
         "mapped_proteins",
         "mapped_exons"
-    ] + list(mapping.summarize_protein_mappings(proteome,[],[]).keys())
+    ]
 
     with open(args.output_folder.joinpath(args.peptide_list.name), 'w') as f:
         w = DictWriter(f, delimiter = '\t', fieldnames = fieldnames)
@@ -60,8 +60,6 @@ def main():
             output_dict["il_peptide"] = peptide.replace("I", "L")
             output_dict["mapped_proteins"] = mapping.protein_mappings_to_string(mapped_proteins)
             output_dict["mapped_exons"] = mapping.exon_mappings_to_string(mapped_exons)
-
-            # output_dict.update(mapping.summarize_protein_mappings(proteome_with_decoys,mapped_proteins,mapped_exons))
 
             w.writerow(output_dict)
 

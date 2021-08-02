@@ -515,7 +515,8 @@ def main():
 
     all_fdr_dict = {}
     if len(all_protein_w_scores) > 0:
-        all_fdr_dict = fdr.calculate_fdr(all_protein_w_scores)
+        #do proteomicsDB style FDR for canonical FDR
+        all_fdr_dict = fdr.calculate_fdr(all_protein_w_scores, fdr.default_decoy_to_target_function)
 
     if args.output_peptides:
         with open(args.output_peptides,'w') as w:

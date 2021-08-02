@@ -71,7 +71,7 @@ def get_mzxml_spectrum(mzxml_object, scan):
     return read_mzxml_spectrum(spectrum)
 
 def extract_annotated_peaks(spectrum, fragment_tolerance):
-    spectrum, explained_intensity, ion_vector = processing.process_spectrum(
+    spectrum, explained_intensity, ion_vector, b_y_peaks = processing.process_spectrum(
             spectrum,
             fragment_tolerance,
             precursor_filter_window=1.5,
@@ -81,7 +81,7 @@ def extract_annotated_peaks(spectrum, fragment_tolerance):
     )
     ion_vector = spectrum._replace(peaks = ion_vector)
     # ion_vector = processing.normalize_spectrum(ion_vector)
-    return (explained_intensity,len(ion_vector)), ion_vector
+    return (explained_intensity,b_y_peaks), ion_vector
 
 def find_ei_and_intensity(spectrum, psm, synthetic_scans):
     best_cosine = None

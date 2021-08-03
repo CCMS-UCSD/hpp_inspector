@@ -80,7 +80,7 @@ def extract_annotated_peaks(spectrum, fragment_tolerance):
             min_snr=2
     )
     ion_vector = spectrum._replace(peaks = ion_vector)
-    # ion_vector = processing.normalize_spectrum(ion_vector)
+    ion_vector = processing.normalize_spectrum(ion_vector)
     return (explained_intensity,b_y_peaks), ion_vector
 
 def find_ei_and_intensity(spectrum, psm, synthetic_scans):

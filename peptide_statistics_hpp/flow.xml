@@ -113,18 +113,12 @@
 			<output  port="explorer_export"   					collection="explorer_export"/>
 		</action>
 
-		<!-- <action name="convert_tsv_to_sqlite">
-			<input  port="novel_peptides_w_cosine"      object="novel_peptides_w_cosine"/>
-			<input  port="merged_novel_psms_w_cosine"   object="merged_novel_psms_w_cosine"/>
-			<output port="sqlite" 											collection="sqlite"/>
-		</action> -->
-
-		<!-- <object name="log"/>
+		<object name="log"/>
 
 		<action name="build_results">
 				<input port="novel_proteins_w_cosine"     object="novel_proteins_w_cosine"/>
 				<output port="log"      object="log"/>
-		</action> -->
+		</action>
 
 
 		<object name="dna"/>
@@ -152,9 +146,7 @@
 		<input port="novel_exons" object="novel_exons"/>
 		<input port="all_mappings" object="all_mappings"/>
 		<input port="dataset_proteins" object="dataset_proteins"/>
-		<!-- <input port="sqlite" collection="sqlite"/> -->
 		<input port="explorer_export" collection="explorer_export"/>
-		<!-- <input port="log" collection="log"/> -->
-
+		<input port="log" collection="log"/>
 	</action>
 </flow>

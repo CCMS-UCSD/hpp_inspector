@@ -93,13 +93,7 @@
         <productionToOutput port="dataset_proteins"     production="dataset_proteins"/>
         <productionToOutput port="explorer_export"     production="explorer_export"/>
     </bind>
-
-    <!-- <bind action="convert_tsv_to_sqlite" tool="convert_tsv_to_sqlite">
-        <inputAsRequirement port="novel_peptides_w_cosine"     requirement="novel_peptides_w_cosine"/>
-        <inputAsRequirement port="merged_novel_psms_w_cosine"  requirement="merged_novel_psms_w_cosine"/>
-        <productionToOutput port="sqlite"                      production="sqlite"/>
-    </bind> -->
-
+    
     <!-- Exon mapping -->
 
     <bind action="make_fasta_from_gff" tool="make_fasta_from_gff">
@@ -109,10 +103,10 @@
         <productionToOutput port="exon_fasta"      production="fastadb"/>
     </bind>
 
-    <!-- <bind action="build_results" tool="buildResults">
+    <bind action="build_results" tool="buildResults">
         <inputAsRequirement port="novel_proteins_w_cosine"             requirement="novel_proteins_w_cosine"/>
         <productionToOutput port="log"      production="log"/>
-    </bind> -->
+    </bind>
 
     <bind action="end" type="upload">
         <url value="{livesearch.upload}"/>
@@ -152,15 +146,11 @@
         <upload port="dataset_proteins" type="file">
             <query name="resource" value="dataset_proteins"/>
         </upload>
-        <!-- <upload port="sqlite" type="folder">
-            <query name="resource" value="sqlite"/>
-        </upload> -->
-      <upload port="explorer_export" type="folder">
-          <query name="resource" value="explorer_export"/>
-      </upload>
-
-      <!-- <upload port="log" type="file">
-          <query name="resource" value="log"/>
-      </upload> -->
+        <upload port="explorer_export" type="folder">
+            <query name="resource" value="explorer_export"/>
+        </upload>
+        <upload port="log" type="file">
+            <query name="resource" value="log"/>
+        </upload>
     </bind>
 </binding>

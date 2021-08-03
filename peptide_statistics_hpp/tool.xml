@@ -153,28 +153,7 @@
 
       </execution>
   </tool>
-
-  <pathSet base="/Users/bpullman/miniconda3/envs/datasette_env/bin">
-    <toolPath tool="convert_tsv_to_sqlite" path="python3" />
-  </pathSet>
-  <pathSet base="generate_sqlite_result/0.2">
-    <pathVar name="convert_tsv_to_sqlite.script" path="convert_tsv_to_sqlite.py" />
-  </pathSet>
-  <!-- <pathSet base="anaconda3">
-    <toolPath tool="convert_tsv_to_sqlite" path="bin/python3.5" />
-  </pathSet> -->
-  <!-- <tool name="convert_tsv_to_sqlite">
-      <require name="merged_novel_psms_w_cosine"      type="file"/>
-      <require name="novel_peptides_w_cosine"         type="file"/>
-      <produce name="sqlite"                          type="folder"/>
-      <execution env="binary" argConvention="adhoc">
-          <arg pathRef="convert_tsv_to_sqlite.script"/>
-          <arg valueRef="sqlite"/>
-          <arg option="view_added_psm" valueRef="merged_novel_psms_w_cosine"/>
-          <arg option="view_added_peptides" valueRef="novel_peptides_w_cosine"/>
-      </execution>
-  </tool> -->
-
+  
   <!-- Exon Mappings -->
 
   <pathSet base="$base/exon_aux_scripts">
@@ -200,7 +179,7 @@
       </execution>
   </tool>
 
-  <!-- <pathSet base="ProteoSAFe-core/0.2">
+  <pathSet base="ProteoSAFe-core/0.2">
     <toolPath tool="buildResults" path="ProteoSAFe-core.jar"/>
   </pathSet>
   <tool name="buildResults">
@@ -211,9 +190,9 @@
   		<envArg option="Xmx8G"/>
   		<arg option="task"   valueRef="@task"/>
   		<arg option="result" value=".workflow/result.xml"/>
+      <arg option="result" value=".workflow/result.xml"/>
   		<arg option="log"    valueRef="log"/>
   	</execution>
   </tool>
- -->
 
 </toolset>

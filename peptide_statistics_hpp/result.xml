@@ -23,8 +23,12 @@
           
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
-          <column type="float" precision="4" field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
+          <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical old)" width="4" tooltip=""/> -->
+          <column type="float" precision="4"  field="hint_score" label="Score (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hint_fdr" label="FDR (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_score" label="Score (Canonical)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
 
         <column type="text" field="protein_type" label="Protein Type" width="4"/>
 
@@ -93,10 +97,14 @@
         <blockRef id="main" type="view_mappings"/>
     </view>
 
-    <view id="view_dataset_proteins" label="View Proteins Per Dataset">
+    <view id="view_dataset_proteins_hpp" label="View Proteins Per Dataset (HPP)">
         <blockRef id="main" type="view_dataset_proteins"/>
     </view>
 
+    <view id="view_dataset_proteins_all" label="View Proteins Per Dataset (All)">
+        <blockRef id="main" type="view_dataset_proteins"/>
+    </view>
+    
     <block id="view_added_psm" type="table_ss">
         <data>
             <source type="file" name="merged_novel_psms_w_cosine/"/>
@@ -176,7 +184,7 @@
             <row>
                 <column type="slideExpandableHidden" characterhidelimit="18" buttontext="Show all proteins" field="protein" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
                 <column type="float" precision="4" field="precursor_fdr" label="Precursor FDR" width="4" tooltip=""/>
-                <column type="float" precision="4" field="all_protein_fdr" label="Protein FDR (Canonical)" width="4" tooltip=""/>
+                <column type="float" precision="4" field="hint_protein_fdr" label="Protein FDR (Canonical)" width="4" tooltip=""/>
                 <column type="float" precision="4"  field="hpp_protein_fdr" label="Protein FDR (HPP 2+)" width="4" tooltip=""/>
                 <column type="expandable" field="gene" label="Gene" width="4" tooltip="Gene for the protein"/>
                 <column type="text" field="protein_type" label="Protein Type" width="4"/>
@@ -347,9 +355,9 @@
 
 
 
-      <block id="view_dataset_proteins" type="table_ss">
+      <block id="view_dataset_proteins_hpp" type="table_ss">
           <data>
-              <source type="file" name="dataset_proteins/"/>
+              <source type="file" name="dataset_proteins_hpp/"/>
               <parsers>
                   <parser type="SQLite"/>
               </parsers>
@@ -358,8 +366,36 @@
             <column type="text" field="protein" label="Protein" width="4"/>
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
-          <column type="float" precision="4" field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
+          <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical old)" width="4" tooltip=""/> -->
+          <column type="float" precision="4"  field="hint_score" label="Score (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hint_fdr" label="FDR (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_score" label="Score (Canonical)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
+            <column type="text" field="protein_type" label="Protein Type" width="4"/>
+            <column type="text" field="gene" label="Gene" width="4"/>
+            <column type="integer" field="pe" label="PE" width="1"/>
+            <column type="integer" field="aa_total" label="Protein Length" width="3"/>
+          </row>
+      </block>
+
+            <block id="view_dataset_proteins_all" type="table_ss">
+          <data>
+              <source type="file" name="dataset_proteins_all/"/>
+              <parsers>
+                  <parser type="SQLite"/>
+              </parsers>
+          </data>
+          <row>
+            <column type="text" field="protein" label="Protein" width="4"/>
+          <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
+          <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical old)" width="4" tooltip=""/> -->
+          <column type="float" precision="4"  field="hint_score" label="Score (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hint_fdr" label="FDR (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_score" label="Score (Canonical)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
             <column type="text" field="protein_type" label="Protein Type" width="4"/>
             <column type="text" field="gene" label="Gene" width="4"/>
             <column type="integer" field="pe" label="PE" width="1"/>

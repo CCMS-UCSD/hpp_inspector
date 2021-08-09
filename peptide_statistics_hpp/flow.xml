@@ -5,13 +5,14 @@
     <collection name="peptide_list"/>
 		<collection name="peptide_list_exonmapped"/>
 
-    <object name="fastadb"/>
 		<collection name="mztab"/>
 		<collection name="spec_on_server"/>
 		<collection name="library_output"/>
 		<object name="synthetics"/>
 
 		<object name="kb_pep"/>
+
+	<collection name="fastadb"/>
 
 	<collection name="parallel_params"/>
 	<collection name="intermediate_protein_coverage"/>
@@ -39,7 +40,7 @@
     <action name="begin">
         <output port="mztab"       			 collection="mztab"/>
 				<output port="spec_on_server"       collection="spec_on_server"/>
-        <output port="fastadb" 		  object="fastadb"/>
+        <output port="fastadb" 		  collection="fastadb"/>
 				<output port="synthetics" 		  object="synthetics"/>
         <output port="params" object="workflowParameters"/>
 				<output port="peptide_coverage_merged_external"       			 collection="peptide_coverage_merged_external"/>
@@ -94,7 +95,8 @@
 		<object name="novel_peptides_w_cosine"/>
 		<object name="merged_novel_psms_w_cosine"/>
 		<object name="all_mappings"/>
-		<object name="dataset_proteins"/>
+		<object name="dataset_proteins_hpp"/>
+		<object name="dataset_proteins_all"/>
 
 		<action name="peptide_protein_cosine">
 			<input   port="kb_pep"       			    object="kb_pep"/>
@@ -109,17 +111,18 @@
 			<output  port="merged_novel_psms_w_cosine"   object="merged_novel_psms_w_cosine"/>
 			<output  port="novel_exons"   				 object="novel_exons"/>
 			<output  port="all_mappings"   				 object="all_mappings"/>
-			<output  port="dataset_proteins"   				 object="dataset_proteins"/>
+			<output  port="dataset_proteins_hpp"   				 object="dataset_proteins_hpp"/>
+			<output  port="dataset_proteins_all"   				 object="dataset_proteins_all"/>
 			<output  port="explorer_export"   					collection="explorer_export"/>
 		</action>
-
+<!-- 
 		<object name="log"/>
 
 		<action name="build_results">
 				<input port="novel_proteins_w_cosine"     object="novel_proteins_w_cosine"/>
 				<output port="log"      object="log"/>
 		</action>
-
+ -->
 
 		<object name="dna"/>
 		<object name="gff"/>
@@ -145,8 +148,9 @@
 		<input port="novel_peptides_w_cosine" object="novel_peptides_w_cosine"/>
 		<input port="novel_exons" object="novel_exons"/>
 		<input port="all_mappings" object="all_mappings"/>
-		<input port="dataset_proteins" object="dataset_proteins"/>
+		<input port="dataset_proteins_hpp" object="dataset_proteins_hpp"/>
+		<input port="dataset_proteins_all" object="dataset_proteins_all"/>
 		<input port="explorer_export" collection="explorer_export"/>
-		<input port="log" collection="log"/>
+		<!-- <input port="log" collection="log"/> -->
 	</action>
 </flow>

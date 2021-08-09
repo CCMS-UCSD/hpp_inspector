@@ -50,7 +50,7 @@
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
-		<parameter name="canonical_protein_fdr" label="Canonical Protein FDR">
+		<parameter name="hint_protein_fdr" label="Canonical Protein FDR">
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
@@ -67,7 +67,7 @@
 			<default value="0" />
 			<validator type="set" />
 		</parameter>
-
+<!-- 
 		<parameter name="use_all_canonical" label="Use All Peptides in Canonical FDR">
 			<options>
 				<option label="Yes" value="1" />
@@ -75,7 +75,7 @@
 			</options>
 			<default value="1" />
 			<validator type="set" />
-		</parameter>
+		</parameter> -->
 
 
 		<parameter name="parallel_cosine.parallel_cosine" label="Parallelism (For Cosine Calculations)">
@@ -254,11 +254,11 @@
 										</cell>			
 										<cell>
 												<label>
-														<content parameter="canonical_protein_fdr"/>
+														<content parameter="hint_protein_fdr"/>
 												</label>
 										</cell>
 										<cell colspan="3">
-												<input type="text" parameter="canonical_protein_fdr"/>
+												<input type="text" parameter="hint_protein_fdr"/>
 										</cell>
 							
 								</row>
@@ -272,14 +272,14 @@
 					<cell colspan="3">
 						<input type="select" parameter="filter_rows_fdr"/>
 					</cell>
-										<cell>
+										<!-- <cell>
 						<label>
 							<content parameter="use_all_canonical"/>
 						</label>
 					</cell>
 					<cell colspan="3">
 						<input type="select" parameter="use_all_canonical"/>
-					</cell>
+					</cell> -->
 				</row>
 
 				use_all_canonical

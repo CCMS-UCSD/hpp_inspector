@@ -43,7 +43,7 @@
 
     <tool name="download_latest_kb">
       <require name="params"    type="file"/>
-            <require name="fastadb"            type="file"/>
+            <require name="fastadb"            type="folder"/>
       <require name="peptide_coverage_comparisons"    type="folder"/>
       <produce name="kb_pep" type="file" naming="explicit"  extension="out"/>
 
@@ -59,7 +59,7 @@
 
   <tool name="map_peptides">
       <require name="peptide_list"       type="file"/>
-      <require name="fastadb"            type="file"/>
+      <require name="fastadb"            type="folder"/>
       <require name="exon_fasta"            type="file"/>
       <produce name="peptide_coverage"        type="folder"/>
       <execution env="binary" argConvention="adhoc">
@@ -106,7 +106,7 @@
 
   <tool name="peptide_protein_cosine">
       <require name="kb_pep"    type="file"/>
-      <require name="fastadb"            type="file"/>
+      <require name="fastadb"            type="folder"/>
       <require name="novel_psms_w_cosine"             type="folder"/>
       <require name="peptide_coverage"                type="folder"/>
       <require name="novel_psms_w_cosine_external"     type="folder"/>
@@ -117,7 +117,8 @@
       <produce name="novel_proteins_w_cosine"         type="file" naming="explicit"  extension="tsv"/>
     <produce name="novel_exons"         type="file" naming="explicit"  extension="tsv"/>
     <produce name="all_mappings"         type="file" naming="explicit"  extension="tsv"/>
-    <produce name="dataset_proteins"         type="file" naming="explicit"  extension="tsv"/>
+    <produce name="dataset_proteins_hpp"         type="file" naming="explicit"  extension="tsv"/>
+        <produce name="dataset_proteins_all"         type="file" naming="explicit"  extension="tsv"/>
       <produce name="explorer_export"                type="folder"/>
 
       <execution env="binary" argConvention="adhoc">
@@ -134,15 +135,15 @@
           <arg option="-output_proteins"      valueRef="novel_proteins_w_cosine"/>
           <arg option="-output_exons"      valueRef="novel_exons"/>
           <arg option="-output_mappings"      valueRef="all_mappings"/>
-          <arg option="-output_dataset_proteins"      valueRef="dataset_proteins"/>
+          <arg option="-output_dataset_proteins_hpp"      valueRef="dataset_proteins_hpp"/>
+          <arg option="-output_dataset_proteins_all"      valueRef="dataset_proteins_all"/>
           <arg option="-cosine_cutoff"        valueRef="@cosine_threshold"/>
           <arg option="-explained_intensity_cutoff"        valueRef="@explained_intensity_threshold"/>
           <arg option="-annotated_ions_cutoff"        valueRef="@annotated_ions_threshold"/>
           <arg option="-precursor_fdr"        valueRef="@precursor_fdr"/>
           <arg option="-hpp_protein_fdr"        valueRef="@hpp_protein_fdr"/>
-          <arg option="-canonical_protein_fdr"        valueRef="@canonical_protein_fdr"/>
+          <arg option="-hint_protein_fdr"        valueRef="@hint_protein_fdr"/>
           <arg option="-filter_rows_fdr"        valueRef="@filter_rows_fdr"/>
-          <arg option="-use_all_peps_canonical_fdr"        valueRef="@use_all_canonical"/>
           <arg option="-nextprot_releases" pathRef="nextprot_releases"/>
           <arg option="-msv_to_pxd_mapping" pathRef="msv_to_pxd_mapping"/>
           <arg option="-external_provenance"  valueRef="external_provenance"/>
@@ -179,7 +180,7 @@
       </execution>
   </tool>
 
-  <pathSet base="ProteoSAFe-core/0.2">
+  <!-- <pathSet base="ProteoSAFe-core/0.2">
     <toolPath tool="buildResults" path="ProteoSAFe-core.jar"/>
   </pathSet>
   <tool name="buildResults">
@@ -193,6 +194,6 @@
       <arg option="result" value=".workflow/result.xml"/>
   		<arg option="log"    valueRef="log"/>
   	</execution>
-  </tool>
+  </tool> -->
 
 </toolset>

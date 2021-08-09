@@ -24,16 +24,16 @@ def arguments():
     parser.add_argument('--output_proteins', type = Path, help='Output Proteins')
     parser.add_argument('--output_exons', type = Path, help='Output Exons')
     parser.add_argument('--output_mappings', type = Path, help='Output Mappings')
-    parser.add_argument('--output_dataset_proteins', type = Path, help='Output Dataset Proteins')
+    parser.add_argument('--output_dataset_proteins_hpp', type = Path, help='Output Dataset Proteins (HPP)')
+    parser.add_argument('--output_dataset_proteins_all', type = Path, help='Output Dataset Proteins (All)')
     parser.add_argument('--protein_coverage', type = Path, help='Added Protein Coverage')
     parser.add_argument('--protein_coverage_external', type = Path, help='Added Protein Coverage (External)')
     parser.add_argument('--cosine_cutoff', type = float, help='Cosine Cutoff')
     parser.add_argument('--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
     parser.add_argument('--annotated_ions_cutoff', type = float, help='Annotated Ion Cutoff')
     parser.add_argument('--precursor_fdr', type = float, help='Precursor FDR')
-    parser.add_argument('--canonical_protein_fdr', type = float, help='Canonical Protein FDR')
+    parser.add_argument('--hint_protein_fdr', type = float, help='Canonical Protein FDR')
     parser.add_argument('--hpp_protein_fdr', type = float, help='HPP Protein FDR')
-    parser.add_argument('--use_all_peps_canonical_fdr', type = int, help='Use all canonical peptides for FDR')
     parser.add_argument('--filter_rows_fdr', type = int, help='Filter Rows By FDR')
     parser.add_argument('--nextprot_releases', type = Path, help='NextProt Releases')
     parser.add_argument('--msv_to_pxd_mapping', type = Path, help='MSV to PXD Mapping')
@@ -89,14 +89,14 @@ def correct_usi(usi_input, msv_mapping):
         return ':'.join(split_usi)
 
 
-def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, name, max_seq_output = 10, pass_this_all_fdr = False, pass_this_hpp_fdr = False, pass_comparison_all_fdr = False, pass_comparison_hpp_fdr = False):
+def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, name, max_seq_output = 10, pass_this_hint_fdr = False, pass_this_hpp_fdr = False, pass_comparison_hint_fdr = False, pass_comparison_hpp_fdr = False):
     comparison_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in existing_peptides.values()])
     added_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in new_peptides.values()])
 
-    if not pass_comparison_all_fdr and not pass_comparison_hpp_fdr:
+    if not pass_comparison_hint_fdr and not pass_comparison_hpp_fdr:
         comparison_pos = set()
 
-    if not pass_this_all_fdr and not pass_this_hpp_fdr:
+    if not pass_this_hint_fdr and not pass_this_hpp_fdr:
         added_pos = set()
 
     comparison_peptides = set(["{} ({}-{})".format(peptide.replace('L','I'),sorted(positions, key = lambda x: x[0])[0][0],sorted(positions, key = lambda x: x[0])[0][1]) for peptide, positions in existing_peptides.items()])
@@ -121,7 +121,7 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
 
     if pass_comparison_hpp_fdr:
         nonoverlapping_all_previous_hppfdr = nonoverlapping_all_previous
-    elif pass_comparison_all_fdr:
+    elif pass_comparison_hint_fdr:
         nonoverlapping_all_previous_allfdr = nonoverlapping_all_previous
 
     added_coverage = mapping.find_coverage(list(existing_peptides.values()), list(new_peptides.values()), protein_length)
@@ -157,7 +157,7 @@ def main():
 
     pep_mapping_info = {}
 
-    comparison_all_fdr = {}
+    comparison_hint_fdr = {}
     comparison_hpp_fdr = {}
 
     frequency = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
@@ -180,7 +180,7 @@ def main():
             if l['protein'] in proteome.proteins:
                 
                 if proteome.proteins[l['protein']].db == 'sp' and not proteome.proteins[l['protein']].iso:
-                    comparison_all_fdr[l['protein']] = float(l['all_protein_fdr'])
+                    comparison_hint_fdr[l['protein']] = float(l['all_protein_fdr'])
                     comparison_hpp_fdr[l['protein']] = float(l['hpp_protein_fdr'])
 
                 protein_mapping[l['protein']][il_peptide].add((int(l['aa_start']),int(l['aa_end']),None,None,None,None))
@@ -339,7 +339,7 @@ def main():
 
         if sequences_found[il_peptide].hpp and len(output_proteins) > 0 and len(cannonical_proteins) <= 1 and il_peptide in protein_mappings[output_proteins[0]]:
             if sequences_found[il_peptide].comparison.match:
-                if comparison_all_fdr.get(output_proteins[0],1) <= 0.01:
+                if comparison_hint_fdr.get(output_proteins[0],1) <= 0.01:
                     outdict['type'] = 'Matches existing evidence'
                 else:
                     outdict['type'] = 'New protein evidence (hint in reference)'
@@ -401,10 +401,9 @@ def main():
     all_hpp_precursors = []
 
     for (sequence, charge), best_psm in representative_per_precursor.items():
-        proteins = best_psm['protein'].split(' ###')[0].split(';')
-        # PSM-level FDR was inefficient at this scale - need to rethink
-        if 'Canonical' in best_psm.get('protein_type','') and len(proteins) == 1 and row_pass_filters(best_psm):
-            all_hpp_precursors.append(fdr.ScoredElement((sequence, charge),'XXX_' in proteins[0],best_psm['score']))
+        all_targets = [p for ps in best_psm['protein'].split(' ###') for p in ps.split(';') if 'XXX_' not in p]
+        if best_psm['protein'] != '':
+            all_hpp_precursors.append(fdr.ScoredElement((sequence, charge),len(all_targets)==0,best_psm['score']))
     
     precursor_fdr = {}
     if len(all_hpp_precursors) > 0:
@@ -493,8 +492,13 @@ def main():
     hpp_protein_w_scores = []
     hpp_score_dict = {}
 
-    all_protein_w_scores = []
-    all_score_dict = {}
+    hint_protein_w_scores = []
+    hint_score_dict = {}
+
+    common_protein_w_scores = []
+    common_score_dict = {}
+
+    seen_picked = set()
 
     for protein, precursors in precursors_per_protein_hpp.items():
         score, count = mapping.non_nested_score([(*k,v) for k,v in precursors.items()])
@@ -505,39 +509,52 @@ def main():
     hpp_fdr_dict = {}
     if len(hpp_protein_w_scores) > 0:
         hpp_fdr_dict = fdr.calculate_fdr(hpp_protein_w_scores)
+    
+    for protein, fdr_val in hpp_fdr_dict.items():
+        if fdr_val <= 0.01:
+            seen_picked.add(protein.replace('XXX_',''))
 
     for protein, precursors in precursors_per_protein_all.items():
-        if args.use_all_peps_canonical_fdr or hpp_fdr_dict.get(protein,1) > 0.01:
-            score = sum([v for k,v in precursors.items()])
+        score = sum([v for k,v in precursors.items()])
+        #remove corresponding found targets/decoys before running the picked FDR
+        if hpp_fdr_dict.get(protein,1) > 0.01 and protein.replace('XXX_','') not in seen_picked:
             if score != 0:
-                all_protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
-                all_score_dict[protein] = score
+                hint_protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
+                hint_score_dict[protein] = score
+        if score != 0:
+            common_protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
+            common_score_dict[protein] = score
 
-    all_fdr_dict = {}
-    if len(all_protein_w_scores) > 0:
+    hint_fdr_dict = {}
+    if len(hint_protein_w_scores) > 0:
         #do proteomicsDB style FDR for canonical FDR
-        all_fdr_dict = fdr.calculate_fdr(all_protein_w_scores, fdr.default_decoy_to_target_function)
+        hint_fdr_dict = fdr.calculate_fdr(hint_protein_w_scores, fdr.default_decoy_to_target_function)
+
+    common_fdr_dict = {}
+    if len(common_protein_w_scores) > 0:
+        #do common FDR as well
+        common_fdr_dict = fdr.calculate_fdr(common_protein_w_scores, None)
 
     if args.output_peptides:
         with open(args.output_peptides,'w') as w:
-            header = ['all_protein_fdr','hpp_protein_fdr','precursor_fdr','psm_fdr','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets']
-            header += ['precursor_fdr_cutoff', 'canonical_protein_fdr_cutoff', 'hpp_protein_fdr_cutoff', 'cosine_cutoff', 'explained_intensity_cutoff', 'annotated_ions_cutoff']
+            header = ['hint_protein_fdr','hpp_protein_fdr','precursor_fdr','psm_fdr','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets']
+            header += ['precursor_fdr_cutoff', 'hint_protein_fdr_cutoff', 'hpp_protein_fdr_cutoff', 'cosine_cutoff', 'explained_intensity_cutoff', 'annotated_ions_cutoff']
             r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
             r.writeheader()
             for precursor in all_precursors:
                 if float(precursor['precursor_fdr']) < 1:
                     proteins = precursor['protein'].split(' ###')[0].split(';')
-                    precursor['all_protein_fdr'] = min(all_fdr_dict.get(proteins[0],1),1)
+                    precursor['hint_protein_fdr'] = min(hint_fdr_dict.get(proteins[0],1),1)
                     precursor['hpp_protein_fdr'] = min(hpp_fdr_dict.get(proteins[0],1),1)
                 else:
-                    precursor['all_protein_fdr'] = 1
+                    precursor['hint_protein_fdr'] = 1
                     precursor['hpp_protein_fdr'] = 1
                 precursor.update({
                     'cosine_cutoff':args.cosine_cutoff,
                     'explained_intensity_cutoff':args.explained_intensity_cutoff,
                     'annotated_ions_cutoff':args.annotated_ions_cutoff,
                     'precursor_fdr_cutoff':args.precursor_fdr,
-                    'canonical_protein_fdr_cutoff':args.canonical_protein_fdr,
+                    'hint_protein_fdr_cutoff':args.hint_protein_fdr,
                     'hpp_protein_fdr_cutoff':args.hpp_protein_fdr
                 })
                 r.writerow(precursor)
@@ -609,13 +626,15 @@ def main():
             'aa_total',
             'hpp_score',
             'hpp_fdr',
-            'all_score',
-            'all_fdr',
+            'hint_score',
+            'hint_fdr',
+            'common_score',
+            'common_fdr',
             'num_sequences_incl_shared',
             'num_sequences',
             'precursor_fdr_cutoff',
             'hpp_protein_fdr_cutoff',
-            'canonical_protein_fdr_cutoff',
+            'hint_protein_fdr_cutoff',
             'cosine_cutoff',
             'explained_intensity_cutoff',
             'annotated_ions_cutoff'
@@ -639,16 +658,18 @@ def main():
                 'gene':protein_entry.gene,
                 'hpp_score':hpp_score_dict.get(protein,0),
                 'hpp_fdr':min(1,hpp_fdr_dict.get(protein,1)),
-                'all_score':all_score_dict.get(protein,0),
-                'all_fdr':min(1,all_fdr_dict.get(protein,1)),
+                'hint_score':hint_score_dict.get(protein,0),
+                'hint_fdr':min(1,hint_fdr_dict.get(protein,1)),
+                'common_score':common_score_dict.get(protein,0),
+                'common_fdr':min(1,common_fdr_dict.get(protein,1)),
                 'num_sequences':len(precursors_per_protein_all.get(protein,[])),
                 'num_sequences_incl_shared':len(precursors_per_protein_non_unique.get(protein,[]))
             }
 
-            pass_comparison_all_fdr,pass_comparison_hpp_fdr = comparison_all_fdr.get(protein,1) <= 0.01, comparison_hpp_fdr.get(protein,1) <= 0.01
-            pass_all_fdr, pass_hpp_fdr = protein_dict['all_fdr'] <= args.canonical_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
+            pass_comparison_hint_fdr,pass_comparison_hpp_fdr = comparison_hint_fdr.get(protein,1) <= 0.01, comparison_hpp_fdr.get(protein,1) <= 0.01
+            pass_hint_fdr, pass_hpp_fdr = protein_dict['hint_fdr'] <= args.hint_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
 
-            if not args.filter_rows_fdr or any([pass_comparison_all_fdr, pass_comparison_hpp_fdr, pass_all_fdr, pass_hpp_fdr]):
+            if not args.filter_rows_fdr or any([pass_comparison_hint_fdr, pass_comparison_hpp_fdr, pass_hint_fdr, pass_hpp_fdr]):
 
                 all_protein_mappings = protein_mapping[protein]
 
@@ -673,26 +694,26 @@ def main():
                             compare_mappings['isoform_unique'].update({sequence:mappings})
                 
                 if is_canonical:
-                    protein_dict.update(find_overlap(compare_mappings['comparison_match'],compare_mappings['added_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'',10,pass_all_fdr, pass_hpp_fdr, pass_comparison_all_fdr,pass_comparison_hpp_fdr)[0])
+                    protein_dict.update(find_overlap(compare_mappings['comparison_match'],compare_mappings['added_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'',10,pass_hint_fdr, pass_hpp_fdr, pass_comparison_hint_fdr,pass_comparison_hpp_fdr)[0])
                 else:
-                    protein_dict.update(find_overlap(compare_mappings['comparison_match'],compare_mappings['isoform_unique'],int(protein_dict['aa_total']),int(protein_dict['pe']),'',10,pass_all_fdr, pass_hpp_fdr, pass_comparison_all_fdr,pass_comparison_hpp_fdr)[0])
+                    protein_dict.update(find_overlap(compare_mappings['comparison_match'],compare_mappings['isoform_unique'],int(protein_dict['aa_total']),int(protein_dict['pe']),'',10,pass_hint_fdr, pass_hpp_fdr, pass_comparison_hint_fdr,pass_comparison_hpp_fdr)[0])
 
                 #comparison_proteins.get(protein,{})
-                protein_dict.update(find_overlap(compare_mappings['comparison_synthetic_match'],compare_mappings['added_synthetic_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic',10,pass_all_fdr, pass_hpp_fdr, pass_comparison_all_fdr,pass_comparison_hpp_fdr)[0])
-                protein_dict.update(find_overlap(compare_mappings['comparison_synthetic_match_cosine'],compare_mappings['added_synthetic_match_cosine'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine',10,pass_all_fdr, pass_hpp_fdr, pass_comparison_all_fdr,pass_comparison_hpp_fdr)[0])
+                protein_dict.update(find_overlap(compare_mappings['comparison_synthetic_match'],compare_mappings['added_synthetic_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic',10,pass_hint_fdr, pass_hpp_fdr, pass_comparison_hint_fdr,pass_comparison_hpp_fdr)[0])
+                protein_dict.update(find_overlap(compare_mappings['comparison_synthetic_match_cosine'],compare_mappings['added_synthetic_match_cosine'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_w_synthetic_cosine',10,pass_hint_fdr, pass_hpp_fdr, pass_comparison_hint_fdr,pass_comparison_hpp_fdr)[0])
                 if is_canonical:
-                    protein_dict.update(find_overlap({},compare_mappings['added_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current',10,pass_all_fdr, pass_hpp_fdr)[0])
+                    protein_dict.update(find_overlap({},compare_mappings['added_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current',10,pass_hint_fdr, pass_hpp_fdr)[0])
                 else:
-                    protein_dict.update(find_overlap({},{},int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current',10,pass_all_fdr, pass_hpp_fdr)[0])
+                    protein_dict.update(find_overlap({},{},int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current',10,pass_hint_fdr, pass_hpp_fdr)[0])
 
-                protein_dict.update(find_overlap({},compare_mappings['isoform_unique'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current_iso_unique',10,pass_all_fdr, pass_hpp_fdr)[0])
+                protein_dict.update(find_overlap({},compare_mappings['isoform_unique'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current_iso_unique',10,pass_hint_fdr, pass_hpp_fdr)[0])
 
                 protein_dict.update({
                     'cosine_cutoff':args.cosine_cutoff,
                     'explained_intensity_cutoff':args.explained_intensity_cutoff,
                     'annotated_ions_cutoff':args.annotated_ions_cutoff,
                     'precursor_fdr_cutoff':args.precursor_fdr,
-                    'canonical_protein_fdr_cutoff':args.canonical_protein_fdr,
+                    'hint_protein_fdr_cutoff':args.hint_protein_fdr,
                     'hpp_protein_fdr_cutoff':args.hpp_protein_fdr
                 })
 
@@ -700,7 +721,7 @@ def main():
                     protein_dict['_dyn_#neXtProt Release {}'.format(release)] = pe_dict.get(protein_entry.id,0) if is_canonical else 0
                 w.writerow(protein_dict)
 
-    with open(args.output_dataset_proteins, 'w') as fo:
+    with open(args.output_dataset_proteins_hpp, 'w') as f_hpp, open(args.output_dataset_proteins_all, 'w') as f_all:
 
         dataset_header = lambda d: '_dyn_#{}'.format("{}/{}".format(pxd_mapping[d],d) if d in pxd_mapping else d)
 
@@ -712,12 +733,15 @@ def main():
             'aa_total',
             'hpp_score',
             'hpp_fdr',
-            'all_score',
-            'all_fdr',
+            'hint_score',
+            'hint_fdr',
         ] + ['_dyn_#neXtProt Release {}'.format(release) for release in sorted(nextprot_releases_pe.keys())] + [dataset_header(d) for d in sequences_per_dataset.keys()]
 
-        w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames, restval=0)
-        w.writeheader()
+        w_hpp = csv.DictWriter(f_hpp, delimiter = '\t', fieldnames = fieldnames, restval=0)
+        w_hpp.writeheader()
+
+        w_all = csv.DictWriter(f_all, delimiter = '\t', fieldnames = fieldnames, restval=0)
+        w_all.writeheader()
 
         for i,(protein,protein_entry) in enumerate(proteome.proteins.items()):
 
@@ -731,11 +755,11 @@ def main():
                 'gene':protein_entry.gene,
                 'hpp_score':hpp_score_dict.get(protein,0),
                 'hpp_fdr':min(1,hpp_fdr_dict.get(protein,1)),
-                'all_score':all_score_dict.get(protein,0),
-                'all_fdr':min(1,all_fdr_dict.get(protein,1))
+                'hint_score':hint_score_dict.get(protein,0),
+                'hint_fdr':min(1,hint_fdr_dict.get(protein,1))
             }
 
-            pass_all_fdr, pass_hpp_fdr = protein_dict['all_fdr'] <= args.canonical_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
+            pass_hint_fdr, pass_hpp_fdr = protein_dict['hint_fdr'] <= args.hint_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
 
             all_protein_mappings = protein_mapping[protein]
 
@@ -750,12 +774,20 @@ def main():
             for release, pe_dict in nextprot_releases_pe.items():
                 protein_dict['_dyn_#neXtProt Release {}'.format(release)] = pe_dict.get(protein_entry.id,0) if is_canonical else 0
 
+            protein_dict_hpp = protein_dict.copy()
+            protein_dict_all = protein_dict.copy()
+
             for dataset,dataset_sequences in sequences_per_dataset.items():
                 dataset_positions = {k:v for k,v in {k:v for k,v in compare_mappings['comparison_match'].items()}.items() if k in dataset_sequences}
                 overlaps = find_overlap({},dataset_positions,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, True, True,0,0)[0]
-                protein_dict[dataset_header(dataset)] = overlaps['combined_hpp']
+                protein_dict_hpp[dataset_header(dataset)] = overlaps['combined_hpp']
 
-            w.writerow(protein_dict)
+            for dataset,dataset_sequences in sequences_per_dataset.items():
+                dataset_positions = {k:v for k,v in {k:v for k,v in compare_mappings['comparison_match'].items()}.items() if k in dataset_sequences}
+                protein_dict_all[dataset_header(dataset)] = len(dataset_positions)
+
+            w_hpp.writerow(protein_dict_hpp)
+            w_all.writerow(protein_dict_all)
 
     with open(args.output_exons, 'w') as fo:
 
@@ -811,11 +843,11 @@ def main():
                     'aa_total':proteome.proteins.get(protein).length,
                     'hpp_score':hpp_score_dict.get(protein,0),
                     'hpp_fdr':min(1,hpp_fdr_dict.get(protein,1)),
-                    'all_score':all_score_dict.get(protein,0),
-                    'all_fdr':min(1,all_fdr_dict.get(protein,1))
+                    'hint_score':hint_score_dict.get(protein,0),
+                    'hint_fdr':min(1,hint_fdr_dict.get(protein,1))
                 }
-                pass_all_fdr, pass_hpp_fdr = protein_dict['all_fdr'] <= args.canonical_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
-                hupo_mapping[protein] = find_overlap({},peptides,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, pass_all_fdr, pass_hpp_fdr,0,0)[0]['new_hpp']
+                pass_hint_fdr, pass_hpp_fdr = protein_dict['hint_fdr'] <= args.hint_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
+                hupo_mapping[protein] = find_overlap({},peptides,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, pass_hint_fdr, pass_hpp_fdr,0,0)[0]['new_hpp']
         for protein, peptides in protein_mapping.items():
             if 'XXX_' not in protein:
                 unique_mapping[protein] = len(set([peptide for peptide, mappings in peptides.items() if mappings[0][1]]))

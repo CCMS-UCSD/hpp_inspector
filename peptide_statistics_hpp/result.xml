@@ -29,7 +29,8 @@
           <column type="float" precision="4"  field="hint_fdr" label="FDR (Picked)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="common_score" label="Score (Canonical)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
-
+          <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
         <column type="text" field="protein_type" label="Protein Type" width="4"/>
 
             <column label="View Peptides" type="genericurlgenerator" width="5">
@@ -98,13 +99,13 @@
     </view>
 
     <view id="view_dataset_proteins_hpp" label="View Proteins Per Dataset (HPP)">
-        <blockRef id="main" type="view_dataset_proteins"/>
+        <blockRef id="main" type="view_dataset_proteins_hpp"/>
     </view>
 
     <view id="view_dataset_proteins_all" label="View Proteins Per Dataset (All)">
-        <blockRef id="main" type="view_dataset_proteins"/>
+        <blockRef id="main" type="view_dataset_proteins_all"/>
     </view>
-    
+
     <block id="view_added_psm" type="table_ss">
         <data>
             <source type="file" name="merged_novel_psms_w_cosine/"/>

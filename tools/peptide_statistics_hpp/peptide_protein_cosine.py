@@ -233,8 +233,28 @@ def main():
 
         best_cosine = float(l['cosine']) >= float(precursor_representative['cosine'])
         best_score = float(l['score']) >= float(precursor_representative['score'])
-        potential_psm_loss = ((float(l['explained_intensity']) < args.explained_intensity_cutoff or int(l['matched_ions']) < args.annotated_ions_cutoff) and float(precursor_representative['explained_intensity']) >= args.explained_intensity_cutoff and int(precursor_representative['matched_ions']) >= args.annotated_ions_cutoff)
-        if best_score and not potential_psm_loss:
+
+        this_pass_ei = float(l['explained_intensity']) >= args.explained_intensity_cutoff
+        this_pass_cos = float(l['cosine']) >= args.cosine_cutoff
+        this_pass_by = int(l['matched_ions']) >= args.annotated_ions_cutoff
+        best_pass_ei = float(precursor_representative['explained_intensity']) >= args.explained_intensity_cutoff
+        best_pass_cos = float(precursor_representative['cosine']) >= args.cosine_cutoff
+        best_pass_by = int(precursor_representative['matched_ions']) >= args.annotated_ions_cutoff
+
+        # we want to find the spectrum with the best score,
+        # but sometimes the highest scoring spectrum does not pass the filters
+
+        potential_psm_loss = (
+            ((not this_pass_ei and not this_pass_cos) or not this_pass_by) and
+            ((best_pass_ei or best_pass_cos) and best_pass_by)
+        )
+
+        potential_psm_gain = (
+            ((not best_pass_ei and not best_pass_cos) or not best_pass_by) and
+            ((this_pass_ei or this_pass_cos) and this_pass_by)
+        )
+
+        if potential_psm_gain or (best_score and not potential_psm_loss):
             precursor_representative['database_filename'] = l['filename'] if from_psm else l['database_filename']
             precursor_representative['database_scan'] = l['scan'] if from_psm else l['database_scan']
             precursor_representative['database_usi'] = l['usi'] if from_psm else l['database_usi']
@@ -646,6 +666,8 @@ def main():
         w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames)
         w.writeheader()
 
+        hpp_per_protein = {}
+
         for i,(protein,protein_entry) in enumerate(proteome.proteins.items()):
 
             is_canonical = protein_entry.db == 'sp' and not protein_entry.iso
@@ -706,6 +728,8 @@ def main():
                 else:
                     protein_dict.update(find_overlap({},{},int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current',10,pass_hint_fdr, pass_hpp_fdr)[0])
 
+                hpp_per_protein[protein] = protein_dict['combined_hpp_just_current']
+
                 protein_dict.update(find_overlap({},compare_mappings['isoform_unique'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current_iso_unique',10,pass_hint_fdr, pass_hpp_fdr)[0])
 
                 protein_dict.update({
@@ -731,6 +755,7 @@ def main():
             'gene',
             'pe',
             'aa_total',
+            'hpp_sequences',
             'hpp_score',
             'hpp_fdr',
             'hint_score',
@@ -752,6 +777,7 @@ def main():
                 'protein_type':protein_type(protein, proteome),
                 'pe': nextprot_pe.get(protein_entry.id,0) if is_canonical else 0,
                 'aa_total':protein_entry.length,
+                'hpp_sequences': hpp_per_protein[protein],
                 'gene':protein_entry.gene,
                 'hpp_score':hpp_score_dict.get(protein,0),
                 'hpp_fdr':min(1,hpp_fdr_dict.get(protein,1)),
@@ -768,8 +794,8 @@ def main():
             for sequence, mappings in all_protein_mappings.items():
                 found = sequences_found[sequence]
                 if found.hpp:
-                    if found.comparison.match:
-                        compare_mappings['comparison_match'].update({sequence:mappings})
+                    if found.added.match:
+                        compare_mappings['added_match'].update({sequence:mappings})
 
             for release, pe_dict in nextprot_releases_pe.items():
                 protein_dict['_dyn_#neXtProt Release {}'.format(release)] = pe_dict.get(protein_entry.id,0) if is_canonical else 0
@@ -778,12 +804,12 @@ def main():
             protein_dict_all = protein_dict.copy()
 
             for dataset,dataset_sequences in sequences_per_dataset.items():
-                dataset_positions = {k:v for k,v in {k:v for k,v in compare_mappings['comparison_match'].items()}.items() if k in dataset_sequences}
+                dataset_positions = {k:v for k,v in {k:v for k,v in compare_mappings['added_match'].items()}.items() if k in dataset_sequences}
                 overlaps = find_overlap({},dataset_positions,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, True, True,0,0)[0]
                 protein_dict_hpp[dataset_header(dataset)] = overlaps['combined_hpp']
 
             for dataset,dataset_sequences in sequences_per_dataset.items():
-                dataset_positions = {k:v for k,v in {k:v for k,v in compare_mappings['comparison_match'].items()}.items() if k in dataset_sequences}
+                dataset_positions = {k:v for k,v in {k:v for k,v in compare_mappings['added_match'].items()}.items() if k in dataset_sequences}
                 protein_dict_all[dataset_header(dataset)] = len(dataset_positions)
 
             w_hpp.writerow(protein_dict_hpp)

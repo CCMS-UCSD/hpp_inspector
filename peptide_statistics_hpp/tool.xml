@@ -33,6 +33,7 @@
         <produce name="novel_psms" type="file" naming="explicit"  extension="tsv"/>
         <execution env="binary" argConvention="adhoc">
             <arg pathRef="extract_from_mztab.script"/>
+            <arg option="-proteosafe_parameters" valueRef="params"/>
             <arg option="-mztab"        valueRef="mztab"/>
             <arg option="-novel_psms"       valueRef="novel_psms"/>
             <arg option="-peak_tolerance"  valueRef="@peak_tolerance"/>
@@ -119,6 +120,8 @@
     <produce name="all_mappings"         type="file" naming="explicit"  extension="tsv"/>
     <produce name="dataset_proteins_hpp"         type="file" naming="explicit"  extension="tsv"/>
         <produce name="dataset_proteins_all"         type="file" naming="explicit"  extension="tsv"/>
+            <produce name="task_proteins_hpp"         type="file" naming="explicit"  extension="tsv"/>
+        <produce name="task_proteins_all"         type="file" naming="explicit"  extension="tsv"/>
       <produce name="explorer_export"                type="folder"/>
 
       <execution env="binary" argConvention="adhoc">
@@ -137,6 +140,8 @@
           <arg option="-output_mappings"      valueRef="all_mappings"/>
           <arg option="-output_dataset_proteins_hpp"      valueRef="dataset_proteins_hpp"/>
           <arg option="-output_dataset_proteins_all"      valueRef="dataset_proteins_all"/>
+          <arg option="-output_task_proteins_hpp"      valueRef="task_proteins_hpp"/>
+          <arg option="-output_task_proteins_all"      valueRef="task_proteins_all"/>
           <arg option="-cosine_cutoff"        valueRef="@cosine_threshold"/>
           <arg option="-explained_intensity_cutoff"        valueRef="@explained_intensity_threshold"/>
           <arg option="-annotated_ions_cutoff"        valueRef="@annotated_ions_threshold"/>

@@ -4,7 +4,7 @@ import csv
 import glob
 import requests
 from collections import defaultdict
-from python_ms_utilities import mztab
+from python_ms_utilities import mztab, proteosafe
 import urllib
 import requests
 import json
@@ -20,6 +20,7 @@ def arguments():
     parser.add_argument('-p','--peptide_folder', type = Path, help='Output Peptide Folder')
     parser.add_argument('-l','--mapping_parallelism', type = int, help='Parallelism for Mapping')
     parser.add_argument('-t','--peak_tolerance', type = float, help='Peak Tolerance for Matching')
+    parser.add_argument('-s','--proteosafe_parameters', type = Path, help='ProteoSAFe Parameters')
 
     if len(sys.argv) < 3:
         parser.print_help()
@@ -32,16 +33,31 @@ def main():
     ids = {}
 
     if args.mztab != None:
+
+        proteosafe_params = proteosafe.parse_xml_file(args.proteosafe_parameters)
+        reanalyzed_tasks = [t for ts in proteosafe_params.get('reanalyzed_tasks',[]) for t in ts.split(';')]
+
+        input_files = proteosafe.get_mangled_file_mapping(proteosafe_params)
+
         for mztab_file in args.mztab.glob('*'):
+
+            mangled_name = input_files.get(mztab_file.name)
+            mztab_task = None
+
+            for task in reanalyzed_tasks:
+                if task in str(mangled_name):
+                    mztab_task = task
+                    break
+
             try:
-                ids = mztab.read(mztab_file, ids)
+                ids = mztab.read(mztab_file, ids, mztab_task)
             except:
-                ids = mztab.read_lib(mztab_file, ids)
+                ids = mztab.read_lib(mztab_file, ids, mztab_task)
 
     peptides = set()
 
     with open(args.novel_psms, 'w') as fw_psm:
-        header = ['filename','scan','sequence','charge','score','pass','type','parent_mass','frag_tol','modifications']
+        header = ['filename','scan','sequence','charge','score','pass','type','parent_mass','frag_tol','modifications','tasks']
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
         for (filescan,psm) in ids.items():
@@ -55,7 +71,8 @@ def main():
                 'pass':'N/A',
                 'parent_mass':psm[0].parent_mass,
                 'frag_tol':psm[0].fragment_tolerance if psm[0].fragment_tolerance else float(args.peak_tolerance),
-                'modifications':psm[0].modifications
+                'modifications':psm[0].modifications,
+                'tasks':psm[0].task
             }
             w_psm.writerow(psm_row)
 

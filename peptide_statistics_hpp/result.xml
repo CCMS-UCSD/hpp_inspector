@@ -29,8 +29,10 @@
           <column type="float" precision="4"  field="hint_fdr" label="FDR (Picked)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="common_score" label="Score (Canonical)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
+          <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/> -->
+        <column type="float" precision="3"  field="coverage_incl_shared" label="Total Coverage" width="4" tooltip=""/>
+          
         <column type="text" field="protein_type" label="Protein Type" width="4"/>
 
             <column label="View Peptides" type="genericurlgenerator" width="5">
@@ -86,9 +88,6 @@
         </row>
     </block>
 
-    <view id="view_added_psm" label="View PSM Evidence">
-        <blockRef id="main" type="view_added_psm"/>
-    </view>
 
     <view id="view_added_peptides" label="View Peptide Evidence">
         <blockRef id="main" type="view_added_peptides"/>
@@ -98,12 +97,24 @@
         <blockRef id="main" type="view_mappings"/>
     </view>
 
-    <view id="view_dataset_proteins_hpp" label="View Proteins Per Dataset (HPP)">
+    <view id="view_added_psm" label="View PSM Evidence">
+        <blockRef id="main" type="view_added_psm"/>
+    </view>
+
+    <view  group="Dataset-level outputs" id="view_dataset_proteins_hpp" label="View Proteins Per Dataset (HPP)">
         <blockRef id="main" type="view_dataset_proteins_hpp"/>
     </view>
 
-    <view id="view_dataset_proteins_all" label="View Proteins Per Dataset (All)">
+    <view  group="Dataset-level outputs" id="view_dataset_proteins_all" label="View Proteins Per Dataset (All)">
         <blockRef id="main" type="view_dataset_proteins_all"/>
+    </view>
+
+    <view  group="Search-level outputs" id="view_task_proteins_hpp" label="View Proteins Per Task (HPP)">
+        <blockRef id="main" type="view_task_proteins_hpp"/>
+    </view>
+
+    <view  group="Search-level outputs" id="view_task_proteins_all" label="View Proteins Per Task (All)">
+        <blockRef id="main" type="view_task_proteins_all"/>
     </view>
 
     <block id="view_added_psm" type="table_ss">
@@ -367,6 +378,10 @@
             <column type="text" field="protein" label="Protein" width="4"/>
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
+         <column type="integer" field="hpp_sequences" label="HPP Sequences" width="1"/>
+        <column type="float" precision="3"  field="coverage_incl_shared" label="Total Coverage" width="4" tooltip=""/>
+
+          
           <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical old)" width="4" tooltip=""/> -->
           <column type="float" precision="4"  field="hint_score" label="Score (Picked)" width="4" tooltip=""/>
@@ -391,6 +406,65 @@
             <column type="text" field="protein" label="Protein" width="4"/>
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
+                   <column type="integer" field="hpp_sequences" label="HPP Sequences" width="1"/>
+                           <column type="float" precision="3"  field="coverage_incl_shared" label="Total Coverage" width="4" tooltip=""/>
+
+          <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical old)" width="4" tooltip=""/> -->
+          <column type="float" precision="4"  field="hint_score" label="Score (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hint_fdr" label="FDR (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_score" label="Score (Canonical)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
+            <column type="text" field="protein_type" label="Protein Type" width="4"/>
+            <column type="text" field="gene" label="Gene" width="4"/>
+            <column type="integer" field="pe" label="PE" width="1"/>
+            <column type="integer" field="aa_total" label="Protein Length" width="3"/>
+          </row>
+      </block>
+
+
+      <block id="view_task_proteins_hpp" type="table_ss">
+          <data>
+              <source type="file" name="task_proteins_hpp/"/>
+              <parsers>
+                  <parser type="SQLite"/>
+              </parsers>
+          </data>
+          <row>
+            <column type="text" field="protein" label="Protein" width="4"/>
+          <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
+         <column type="integer" field="hpp_sequences" label="HPP Sequences" width="1"/>
+        <column type="float" precision="3"  field="coverage_incl_shared" label="Total Coverage" width="4" tooltip=""/>
+
+          
+          <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical old)" width="4" tooltip=""/> -->
+          <column type="float" precision="4"  field="hint_score" label="Score (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hint_fdr" label="FDR (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_score" label="Score (Canonical)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
+            <column type="text" field="protein_type" label="Protein Type" width="4"/>
+            <column type="text" field="gene" label="Gene" width="4"/>
+            <column type="integer" field="pe" label="PE" width="1"/>
+            <column type="integer" field="aa_total" label="Protein Length" width="3"/>
+          </row>
+      </block>
+
+            <block id="view_task_proteins_all" type="table_ss">
+          <data>
+              <source type="file" name="task_proteins_all/"/>
+              <parsers>
+                  <parser type="SQLite"/>
+              </parsers>
+          </data>
+          <row>
+            <column type="text" field="protein" label="Protein" width="4"/>
+          <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
+                   <column type="integer" field="hpp_sequences" label="HPP Sequences" width="1"/>
+                           <column type="float" precision="3"  field="coverage_incl_shared" label="Total Coverage" width="4" tooltip=""/>
+
           <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical old)" width="4" tooltip=""/> -->
           <column type="float" precision="4"  field="hint_score" label="Score (Picked)" width="4" tooltip=""/>

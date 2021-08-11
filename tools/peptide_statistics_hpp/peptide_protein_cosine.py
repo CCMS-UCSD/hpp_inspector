@@ -7,9 +7,10 @@ from pathlib import Path
 from itertools import chain
 import explorer_export
 import read_mappings
-from python_ms_utilities import mapping, resources, fdr
+from python_ms_utilities import mapping, resources, fdr, proteosafe
 import pandas as pd
 from datetime import datetime
+import requests
 
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
@@ -26,6 +27,8 @@ def arguments():
     parser.add_argument('--output_mappings', type = Path, help='Output Mappings')
     parser.add_argument('--output_dataset_proteins_hpp', type = Path, help='Output Dataset Proteins (HPP)')
     parser.add_argument('--output_dataset_proteins_all', type = Path, help='Output Dataset Proteins (All)')
+    parser.add_argument('--output_task_proteins_hpp', type = Path, help='Output Task Proteins (HPP)')
+    parser.add_argument('--output_task_proteins_all', type = Path, help='Output Task Proteins (All)')
     parser.add_argument('--protein_coverage', type = Path, help='Added Protein Coverage')
     parser.add_argument('--protein_coverage_external', type = Path, help='Added Protein Coverage (External)')
     parser.add_argument('--cosine_cutoff', type = float, help='Cosine Cutoff')
@@ -42,7 +45,6 @@ def arguments():
     parser.add_argument('--library_name', type = int, help='Library Name')
     parser.add_argument('--export_explorers', type = int, help='Export Explorer Tables (0/1)')
     parser.add_argument('--explorers_output', type = Path, help='Tables for Explorers')
-
     if len(sys.argv) < 4:
         parser.print_help()
         sys.exit(1)
@@ -148,6 +150,7 @@ def main():
     proteome = mapping.add_decoys(mapping.read_uniprot(args.fasta))
 
     sequences_per_dataset = defaultdict(set)
+    sequences_per_task = defaultdict(set)
 
     SeqOccurances = namedtuple('SeqOccurances',['match','synthetic_match','synthetic_match_cosine'])
     SeqInfo = namedtuple('SeqInfo',['hpp','isoform_unique','added','comparison'])
@@ -210,12 +213,14 @@ def main():
     nextprot_pe = nextprot_releases_pe[latest_nextprot_release]
 
     def update_precursor_representative(l,from_psm = True):
-        datasets = set([d.replace('{','').replace('}','').replace('\'','').replace(' ','') for d in l.get('datasets','').split(';') if d != ''])
+        datasets = set([d for d in l.get('datasets','').split(';') if d != ''])
+        tasks = set([t for t in l.get('tasks','').split(';') if t != ''])
         sequence, charge = l['sequence'],l['charge']
         if not (sequence, charge) in representative_per_precursor:
             representative_per_precursor[(sequence, charge)] = l.copy()
             precursor_representative = representative_per_precursor[(sequence, charge)]
             precursor_representative['datasets'] = datasets
+            precursor_representative['tasks'] = tasks
             if from_psm:
                 precursor_representative['database_filename'] = l['filename']
                 precursor_representative['database_scan'] = l['scan']
@@ -230,6 +235,7 @@ def main():
         precursor_representative = representative_per_precursor[(sequence, charge)]
 
         precursor_representative['datasets'] |= datasets
+        precursor_representative['tasks'] |= tasks
 
         best_cosine = float(l['cosine']) >= float(precursor_representative['cosine'])
         best_score = float(l['score']) >= float(precursor_representative['score'])
@@ -374,7 +380,7 @@ def main():
 
     if args.output_psms:
         with open(args.output_psms,'w') as w:
-            header = ['protein','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets']
+            header = ['protein','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
 
             o = csv.DictWriter(w, delimiter='\t',fieldnames = header, restval='N/A')
             o.writeheader()
@@ -471,6 +477,8 @@ def main():
                     match = True
                     for dataset in best_psm['datasets']:
                         sequences_per_dataset[dataset].add(sequence_il)
+                    for task in best_psm['tasks']:
+                        sequences_per_task[task].add(sequence_il)
             if len(proteins) == 1:
                 if row_pass_filters(best_psm):
                     is_isoform_unique = True
@@ -501,6 +509,7 @@ def main():
             best_psm['synthetic_sequence'] = sequence.replace('+229.163','').replace('+229.162932','')
             output_protein_level_results(best_psm)
             best_psm['datasets'] = ';'.join(best_psm['datasets'])
+            best_psm['tasks'] = ';'.join(best_psm['tasks'])
             all_precursors.append(best_psm)
 
     elif args.input_peptides:
@@ -557,7 +566,7 @@ def main():
 
     if args.output_peptides:
         with open(args.output_peptides,'w') as w:
-            header = ['hint_protein_fdr','hpp_protein_fdr','precursor_fdr','psm_fdr','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets']
+            header = ['hint_protein_fdr','hpp_protein_fdr','precursor_fdr','psm_fdr','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
             header += ['precursor_fdr_cutoff', 'hint_protein_fdr_cutoff', 'hpp_protein_fdr_cutoff', 'cosine_cutoff', 'explained_intensity_cutoff', 'annotated_ions_cutoff']
             r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
             r.writeheader()
@@ -652,6 +661,7 @@ def main():
             'common_fdr',
             'num_sequences_incl_shared',
             'num_sequences',
+            'coverage_incl_shared',
             'precursor_fdr_cutoff',
             'hpp_protein_fdr_cutoff',
             'hint_protein_fdr_cutoff',
@@ -667,6 +677,7 @@ def main():
         w.writeheader()
 
         hpp_per_protein = {}
+        coverage_per_protein = {}
 
         for i,(protein,protein_entry) in enumerate(proteome.proteins.items()):
 
@@ -685,7 +696,7 @@ def main():
                 'common_score':common_score_dict.get(protein,0),
                 'common_fdr':min(1,common_fdr_dict.get(protein,1)),
                 'num_sequences':len(precursors_per_protein_all.get(protein,[])),
-                'num_sequences_incl_shared':len(precursors_per_protein_non_unique.get(protein,[]))
+                'num_sequences_incl_shared':len(precursors_per_protein_non_unique.get(protein,[])),
             }
 
             pass_comparison_hint_fdr,pass_comparison_hpp_fdr = comparison_hint_fdr.get(protein,1) <= 0.01, comparison_hpp_fdr.get(protein,1) <= 0.01
@@ -699,6 +710,8 @@ def main():
 
                 for sequence, mappings in all_protein_mappings.items():
                     found = sequences_found[sequence]
+                    if found.added.match:
+                        compare_mappings['all'].update({sequence:mappings})
                     if found.hpp:
                         if found.comparison.match:
                             compare_mappings['comparison_match'].update({sequence:mappings})
@@ -714,7 +727,9 @@ def main():
                             compare_mappings['added_synthetic_match_cosine'].update({sequence:mappings})
                         if found.isoform_unique:
                             compare_mappings['isoform_unique'].update({sequence:mappings})
-                
+
+                protein_dict['coverage_incl_shared'] = mapping.find_coverage([],list(compare_mappings['all'].values()), protein_entry.length)/protein_entry.length
+
                 if is_canonical:
                     protein_dict.update(find_overlap(compare_mappings['comparison_match'],compare_mappings['added_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'',10,pass_hint_fdr, pass_hpp_fdr, pass_comparison_hint_fdr,pass_comparison_hpp_fdr)[0])
                 else:
@@ -729,6 +744,7 @@ def main():
                     protein_dict.update(find_overlap({},{},int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current',10,pass_hint_fdr, pass_hpp_fdr)[0])
 
                 hpp_per_protein[protein] = protein_dict['combined_hpp_just_current']
+                coverage_per_protein[protein] = protein_dict['coverage_incl_shared']
 
                 protein_dict.update(find_overlap({},compare_mappings['isoform_unique'],int(protein_dict['aa_total']),int(protein_dict['pe']),'_just_current_iso_unique',10,pass_hint_fdr, pass_hpp_fdr)[0])
 
@@ -745,11 +761,22 @@ def main():
                     protein_dict['_dyn_#neXtProt Release {}'.format(release)] = pe_dict.get(protein_entry.id,0) if is_canonical else 0
                 w.writerow(protein_dict)
 
-    with open(args.output_dataset_proteins_hpp, 'w') as f_hpp, open(args.output_dataset_proteins_all, 'w') as f_all:
+    with open(args.output_dataset_proteins_hpp, 'w') as f_dataset_hpp, open(args.output_dataset_proteins_all, 'w') as f_dataset_all, open(args.output_task_proteins_hpp, 'w') as f_task_hpp, open(args.output_task_proteins_all, 'w') as f_task_all:
 
         dataset_header = lambda d: '_dyn_#{}'.format("{}/{}".format(pxd_mapping[d],d) if d in pxd_mapping else d)
 
-        fieldnames = [
+        def get_task_name(task_id):
+            url = 'http://proteomics2.ucsd.edu/ProteoSAFe/status_json.jsp?task={}'.format(task_id)
+            return requests.get(url, verify=False).json()['description'].split(' [launched')[0]
+
+        task_names = {}
+
+        for task in sequences_per_task.keys():
+            task_names[task] = get_task_name(task)
+
+        task_header = lambda t: '_dyn_#{}'.format(task_names[t])
+
+        common_fieldnames = [
             'protein',
             'protein_type',
             'gene',
@@ -760,13 +787,25 @@ def main():
             'hpp_fdr',
             'hint_score',
             'hint_fdr',
-        ] + ['_dyn_#neXtProt Release {}'.format(release) for release in sorted(nextprot_releases_pe.keys())] + [dataset_header(d) for d in sequences_per_dataset.keys()]
+            'common_score',
+            'common_fdr',
+            'coverage_incl_shared',
+        ] + ['_dyn_#neXtProt Release {}'.format(release) for release in sorted(nextprot_releases_pe.keys())]
+        
+        dataset_fieldnames = common_fieldnames + [dataset_header(d) for d in sequences_per_dataset.keys()]
+        task_fieldnames = common_fieldnames + [task_header(t) for t in sequences_per_task.keys()]
 
-        w_hpp = csv.DictWriter(f_hpp, delimiter = '\t', fieldnames = fieldnames, restval=0)
-        w_hpp.writeheader()
+        w_dataset_hpp = csv.DictWriter(f_dataset_hpp, delimiter = '\t', fieldnames = dataset_fieldnames, restval=0)
+        w_dataset_hpp.writeheader()
 
-        w_all = csv.DictWriter(f_all, delimiter = '\t', fieldnames = fieldnames, restval=0)
-        w_all.writeheader()
+        w_dataset_all = csv.DictWriter(f_dataset_all, delimiter = '\t', fieldnames = dataset_fieldnames, restval=0)
+        w_dataset_all.writeheader()
+
+        w_task_hpp = csv.DictWriter(f_task_hpp, delimiter = '\t', fieldnames = task_fieldnames, restval=0)
+        w_task_hpp.writeheader()
+
+        w_task_all = csv.DictWriter(f_task_all, delimiter = '\t', fieldnames = task_fieldnames, restval=0)
+        w_task_all.writeheader()
 
         for i,(protein,protein_entry) in enumerate(proteome.proteins.items()):
 
@@ -782,7 +821,10 @@ def main():
                 'hpp_score':hpp_score_dict.get(protein,0),
                 'hpp_fdr':min(1,hpp_fdr_dict.get(protein,1)),
                 'hint_score':hint_score_dict.get(protein,0),
-                'hint_fdr':min(1,hint_fdr_dict.get(protein,1))
+                'hint_fdr':min(1,hint_fdr_dict.get(protein,1)),
+                'common_score':common_score_dict.get(protein,0),
+                'common_fdr':min(1,common_fdr_dict.get(protein,1)),
+                'coverage_incl_shared':coverage_per_protein[protein]
             }
 
             pass_hint_fdr, pass_hpp_fdr = protein_dict['hint_fdr'] <= args.hint_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
@@ -793,27 +835,42 @@ def main():
 
             for sequence, mappings in all_protein_mappings.items():
                 found = sequences_found[sequence]
-                if found.hpp:
-                    if found.added.match:
+                if found.added.match:
+                    compare_mappings['hpp_match'].update({sequence:mappings})
+                    if found.hpp:
                         compare_mappings['added_match'].update({sequence:mappings})
 
             for release, pe_dict in nextprot_releases_pe.items():
                 protein_dict['_dyn_#neXtProt Release {}'.format(release)] = pe_dict.get(protein_entry.id,0) if is_canonical else 0
 
-            protein_dict_hpp = protein_dict.copy()
-            protein_dict_all = protein_dict.copy()
+            protein_dict_dataset_hpp = protein_dict.copy()
+            protein_dict_dataset_all = protein_dict.copy()
+
+            protein_dict_task_hpp = protein_dict.copy()
+            protein_dict_task_all = protein_dict.copy()
 
             for dataset,dataset_sequences in sequences_per_dataset.items():
-                dataset_positions = {k:v for k,v in {k:v for k,v in compare_mappings['added_match'].items()}.items() if k in dataset_sequences}
-                overlaps = find_overlap({},dataset_positions,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, True, True,0,0)[0]
-                protein_dict_hpp[dataset_header(dataset)] = overlaps['combined_hpp']
+                positions = {k:v for k,v in {k:v for k,v in compare_mappings['hpp_match'].items()}.items() if k in dataset_sequences}
+                overlaps = find_overlap({},positions,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, True, True,0,0)[0]
+                protein_dict_dataset_hpp[dataset_header(dataset)] = overlaps['combined_hpp']
 
             for dataset,dataset_sequences in sequences_per_dataset.items():
-                dataset_positions = {k:v for k,v in {k:v for k,v in compare_mappings['added_match'].items()}.items() if k in dataset_sequences}
-                protein_dict_all[dataset_header(dataset)] = len(dataset_positions)
+                positions = {k:v for k,v in {k:v for k,v in compare_mappings['added_match'].items()}.items() if k in dataset_sequences}
+                protein_dict_dataset_all[dataset_header(dataset)] = len(positions)
 
-            w_hpp.writerow(protein_dict_hpp)
-            w_all.writerow(protein_dict_all)
+            for task,task_sequences in sequences_per_task.items():
+                positions = {k:v for k,v in {k:v for k,v in compare_mappings['hpp_match'].items()}.items() if k in task_sequences}
+                overlaps = find_overlap({},positions,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, True, True,0,0)[0]
+                protein_dict_task_hpp[task_header(task)] = overlaps['combined_hpp']
+
+            for task,task_sequences in sequences_per_task.items():
+                positions = {k:v for k,v in {k:v for k,v in compare_mappings['added_match'].items()}.items() if k in task_sequences}
+                protein_dict_task_all[task_header(task)] = len(positions)
+
+            w_dataset_hpp.writerow(protein_dict_dataset_hpp)
+            w_dataset_all.writerow(protein_dict_dataset_all)
+            w_task_hpp.writerow(protein_dict_task_hpp)
+            w_task_all.writerow(protein_dict_task_all)
 
     with open(args.output_exons, 'w') as fo:
 

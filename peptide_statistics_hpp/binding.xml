@@ -45,6 +45,7 @@
     </bind>
 
     <bind action="extract_from_mztab" tool="extract_from_mztab">
+            <inputAsRequirement port="params"    requirement="params"/>
         <inputAsRequirement port="mztab"             requirement="mztab"/>
         <productionToOutput port="peptide_list"    production="peptide_list"/>
         <productionToOutput port="novel_psms"    production="novel_psms"/>
@@ -92,6 +93,8 @@
         <productionToOutput port="all_mappings"     production="all_mappings"/>
         <productionToOutput port="dataset_proteins_hpp"     production="dataset_proteins_hpp"/>
         <productionToOutput port="dataset_proteins_all"     production="dataset_proteins_all"/>
+        <productionToOutput port="task_proteins_hpp"     production="task_proteins_hpp"/>
+        <productionToOutput port="task_proteins_all"     production="task_proteins_all"/>
         <productionToOutput port="explorer_export"     production="explorer_export"/>
     </bind>
     
@@ -149,6 +152,12 @@
         </upload>
         <upload port="dataset_proteins_all" type="file">
             <query name="resource" value="dataset_proteins_all"/>
+        </upload>
+        <upload port="task_proteins_hpp" type="file">
+            <query name="resource" value="task_proteins_hpp"/>
+        </upload>
+        <upload port="task_proteins_all" type="file">
+            <query name="resource" value="task_proteins_all"/>
         </upload>
         <upload port="explorer_export" type="folder">
             <query name="resource" value="explorer_export"/>

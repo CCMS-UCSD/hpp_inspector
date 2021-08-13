@@ -809,68 +809,70 @@ def main():
 
         for i,(protein,protein_entry) in enumerate(proteome.proteins.items()):
 
-            is_canonical = protein_entry.db == 'sp' and not protein_entry.iso
+            if protein in hpp_per_protein:
 
-            protein_dict = {
-                'protein': protein,
-                'protein_type':protein_type(protein, proteome),
-                'pe': nextprot_pe.get(protein_entry.id,0) if is_canonical else 0,
-                'aa_total':protein_entry.length,
-                'hpp_sequences': hpp_per_protein[protein],
-                'gene':protein_entry.gene,
-                'hpp_score':hpp_score_dict.get(protein,0),
-                'hpp_fdr':min(1,hpp_fdr_dict.get(protein,1)),
-                'hint_score':hint_score_dict.get(protein,0),
-                'hint_fdr':min(1,hint_fdr_dict.get(protein,1)),
-                'common_score':common_score_dict.get(protein,0),
-                'common_fdr':min(1,common_fdr_dict.get(protein,1)),
-                'coverage_incl_shared':coverage_per_protein[protein]
-            }
+                is_canonical = protein_entry.db == 'sp' and not protein_entry.iso
 
-            pass_hint_fdr, pass_hpp_fdr = protein_dict['hint_fdr'] <= args.hint_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
+                protein_dict = {
+                    'protein': protein,
+                    'protein_type':protein_type(protein, proteome),
+                    'pe': nextprot_pe.get(protein_entry.id,0) if is_canonical else 0,
+                    'aa_total':protein_entry.length,
+                    'hpp_sequences': hpp_per_protein.get(protein,0),
+                    'gene':protein_entry.gene,
+                    'hpp_score':hpp_score_dict.get(protein,0),
+                    'hpp_fdr':min(1,hpp_fdr_dict.get(protein,1)),
+                    'hint_score':hint_score_dict.get(protein,0),
+                    'hint_fdr':min(1,hint_fdr_dict.get(protein,1)),
+                    'common_score':common_score_dict.get(protein,0),
+                    'common_fdr':min(1,common_fdr_dict.get(protein,1)),
+                    'coverage_incl_shared':coverage_per_protein.get(protein,0)
+                }
 
-            all_protein_mappings = protein_mapping[protein]
+                pass_hint_fdr, pass_hpp_fdr = protein_dict['hint_fdr'] <= args.hint_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
 
-            compare_mappings = defaultdict(dict)
+                all_protein_mappings = protein_mapping[protein]
 
-            for sequence, mappings in all_protein_mappings.items():
-                found = sequences_found[sequence]
-                if found.added.match:
-                    compare_mappings['hpp_match'].update({sequence:mappings})
-                    if found.hpp:
-                        compare_mappings['added_match'].update({sequence:mappings})
+                compare_mappings = defaultdict(dict)
 
-            for release, pe_dict in nextprot_releases_pe.items():
-                protein_dict['_dyn_#neXtProt Release {}'.format(release)] = pe_dict.get(protein_entry.id,0) if is_canonical else 0
+                for sequence, mappings in all_protein_mappings.items():
+                    found = sequences_found[sequence]
+                    if found.added.match:
+                        compare_mappings['hpp_match'].update({sequence:mappings})
+                        if found.hpp:
+                            compare_mappings['added_match'].update({sequence:mappings})
 
-            protein_dict_dataset_hpp = protein_dict.copy()
-            protein_dict_dataset_all = protein_dict.copy()
+                for release, pe_dict in nextprot_releases_pe.items():
+                    protein_dict['_dyn_#neXtProt Release {}'.format(release)] = pe_dict.get(protein_entry.id,0) if is_canonical else 0
 
-            protein_dict_task_hpp = protein_dict.copy()
-            protein_dict_task_all = protein_dict.copy()
+                protein_dict_dataset_hpp = protein_dict.copy()
+                protein_dict_dataset_all = protein_dict.copy()
 
-            for dataset,dataset_sequences in sequences_per_dataset.items():
-                positions = {k:v for k,v in {k:v for k,v in compare_mappings['hpp_match'].items()}.items() if k in dataset_sequences}
-                overlaps = find_overlap({},positions,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, True, True,0,0)[0]
-                protein_dict_dataset_hpp[dataset_header(dataset)] = overlaps['combined_hpp']
+                protein_dict_task_hpp = protein_dict.copy()
+                protein_dict_task_all = protein_dict.copy()
 
-            for dataset,dataset_sequences in sequences_per_dataset.items():
-                positions = {k:v for k,v in {k:v for k,v in compare_mappings['added_match'].items()}.items() if k in dataset_sequences}
-                protein_dict_dataset_all[dataset_header(dataset)] = len(positions)
+                for dataset,dataset_sequences in sequences_per_dataset.items():
+                    positions = {k:v for k,v in {k:v for k,v in compare_mappings['hpp_match'].items()}.items() if k in dataset_sequences}
+                    overlaps = find_overlap({},positions,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, True, True,0,0)[0]
+                    protein_dict_dataset_hpp[dataset_header(dataset)] = overlaps['combined_hpp']
 
-            for task,task_sequences in sequences_per_task.items():
-                positions = {k:v for k,v in {k:v for k,v in compare_mappings['hpp_match'].items()}.items() if k in task_sequences}
-                overlaps = find_overlap({},positions,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, True, True,0,0)[0]
-                protein_dict_task_hpp[task_header(task)] = overlaps['combined_hpp']
+                for dataset,dataset_sequences in sequences_per_dataset.items():
+                    positions = {k:v for k,v in {k:v for k,v in compare_mappings['added_match'].items()}.items() if k in dataset_sequences}
+                    protein_dict_dataset_all[dataset_header(dataset)] = len(positions)
 
-            for task,task_sequences in sequences_per_task.items():
-                positions = {k:v for k,v in {k:v for k,v in compare_mappings['added_match'].items()}.items() if k in task_sequences}
-                protein_dict_task_all[task_header(task)] = len(positions)
+                for task,task_sequences in sequences_per_task.items():
+                    positions = {k:v for k,v in {k:v for k,v in compare_mappings['hpp_match'].items()}.items() if k in task_sequences}
+                    overlaps = find_overlap({},positions,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, True, True,0,0)[0]
+                    protein_dict_task_hpp[task_header(task)] = overlaps['combined_hpp']
 
-            w_dataset_hpp.writerow(protein_dict_dataset_hpp)
-            w_dataset_all.writerow(protein_dict_dataset_all)
-            w_task_hpp.writerow(protein_dict_task_hpp)
-            w_task_all.writerow(protein_dict_task_all)
+                for task,task_sequences in sequences_per_task.items():
+                    positions = {k:v for k,v in {k:v for k,v in compare_mappings['added_match'].items()}.items() if k in task_sequences}
+                    protein_dict_task_all[task_header(task)] = len(positions)
+
+                w_dataset_hpp.writerow(protein_dict_dataset_hpp)
+                w_dataset_all.writerow(protein_dict_dataset_all)
+                w_task_hpp.writerow(protein_dict_task_hpp)
+                w_task_all.writerow(protein_dict_task_all)
 
     with open(args.output_exons, 'w') as fo:
 

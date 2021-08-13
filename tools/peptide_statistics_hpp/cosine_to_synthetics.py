@@ -214,7 +214,7 @@ def main():
         else:
             filepath = filename
 
-        if threshold > 0 or explained_intensity > 0:
+        if threshold >= 0 or explained_intensity >= 0:
             if not Path(filepath).exists():
                 print("File {} likely moved or doesn't exist.".format(filepath))
             else:

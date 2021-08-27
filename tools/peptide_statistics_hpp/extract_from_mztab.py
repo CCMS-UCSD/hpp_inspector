@@ -21,7 +21,8 @@ def arguments():
     parser.add_argument('-l','--mapping_parallelism', type = int, help='Parallelism for Mapping')
     parser.add_argument('-t','--peak_tolerance', type = float, help='Peak Tolerance for Matching')
     parser.add_argument('-s','--proteosafe_parameters', type = Path, help='ProteoSAFe Parameters')
-
+    parser.add_argument('-c','--mztab_score_column', type = float, help='Column in mzTab for Score')
+    parser.add_argument('-d','--score_decreasing', type = float, help='Score increasing or decreasing')
     if len(sys.argv) < 3:
         parser.print_help()
         sys.exit(1)
@@ -50,7 +51,7 @@ def main():
                     break
 
             try:
-                ids = mztab.read(mztab_file, ids, mztab_task)
+                ids = mztab.read(mztab_file, ids, mztab_task, "psm_search_engine_score[{}]".format())
             except:
                 ids = mztab.read_lib(mztab_file, ids, mztab_task)
 

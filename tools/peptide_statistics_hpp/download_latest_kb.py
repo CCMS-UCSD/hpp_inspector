@@ -19,13 +19,41 @@ def arguments():
     return parser.parse_args()
 
 def read_coverage_folder(input_folder,proteome):
-    added_proteins = defaultdict(lambda: defaultdict(list))
-    all_proteins = defaultdict(lambda: defaultdict(list))
-    pep_mapping_info = {}
-    peptide_to_exon_map = defaultdict(list)
+    
+    protein_mapping_out_combined = {}
+
+    protein_mapping_out_per_file = []
+    protein_hpp_fdr_per_file = []
+    protein_hint_fdr_per_file = []
+
+    all_proteins = []
+
     for protein_coverage_file in input_folder.glob('*'):
-        protein_mapping_out,pep_info,_,_ = read_mappings.read_protein_coverage(protein_coverage_file,set(),proteome,True,False)
-    return protein_mapping_out,pep_info
+        protein_mapping_out,_,_,_,protein_hpp_fdr,protein_hint_fdr = read_mappings.read_protein_coverage(protein_coverage_file,set(),proteome,True,False)
+        protein_mapping_out_per_file.append(protein_mapping_out)
+        protein_hpp_fdr_per_file.append(protein_hpp_fdr)
+        protein_hint_fdr_per_file.append(protein_hint_fdr)
+        all_proteins.extend(list(protein_mapping_out.keys()))
+
+    all_proteins = set(all_proteins)
+
+    for protein in all_proteins:
+        file_to_consider_per_protein = -1
+        best_hpp_fdr_per_protein = 1
+        best_hint_fdr_per_protein = 1
+        files_pass_hpp_fdr = [(i,fdr.get(protein,1)) for i,fdr in enumerate(protein_hpp_fdr_per_file) if float(fdr.get(protein,1)) <= 0.01]
+        files_pass_hint_fdr = [(i,fdr.get(protein,1)) for i,fdr in enumerate(protein_hint_fdr_per_file) if float(fdr.get(protein,1)) <= 0.01]
+        if len(files_pass_hpp_fdr) > 0:
+            best_hpp_fdr_per_protein = min([f[1] for f in files_pass_hpp_fdr])
+            file_to_consider_per_protein = [f[0] for f in files_pass_hpp_fdr if f[1] == best_hpp_fdr_per_protein][0]
+        elif len(files_pass_hint_fdr) > 0:
+            #if only hints, just keep lowest FDR set
+            best_hint_fdr_per_protein = min([f[1] for f in files_pass_hint_fdr])
+            file_to_consider_per_protein = [f[0] for f in files_pass_hint_fdr if f[1] == best_hint_fdr_per_protein][0]
+        if file_to_consider_per_protein >= 0:
+            protein_mapping_out_combined[protein] = protein_mapping_out_per_file[file_to_consider_per_protein][protein]
+
+    return protein_mapping_out_combined
 
 def main():
     args = arguments()
@@ -36,13 +64,12 @@ def main():
 
         try:
 
-            proteome = mapping.read_uniprot(args.proteome_fasta)
-            proteome = mapping.add_decoys(proteome)
+            proteome = mapping.add_decoys(mapping.read_uniprot(args.proteome_fasta))
 
             with open(args.kb_pep, 'w') as w:
                 r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
                 r.writeheader()
-                protein_mapping_out,_ = read_coverage_folder(args.comparisons, proteome)
+                protein_mapping_out = read_coverage_folder(args.comparisons, proteome)
                 for protein, peptide_mappings in protein_mapping_out.items():
                     for peptide, mappings in peptide_mappings.items():
                         for (start, end, cosine, all_protein_fdr, hpp_protein_fdr, is_hpp) in mappings:

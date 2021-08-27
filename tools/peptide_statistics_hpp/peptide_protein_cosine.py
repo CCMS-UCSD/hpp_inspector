@@ -183,8 +183,9 @@ def main():
             if l['protein'] in proteome.proteins:
                 
                 if proteome.proteins[l['protein']].db == 'sp' and not proteome.proteins[l['protein']].iso:
-                    comparison_hint_fdr[l['protein']] = float(l['all_protein_fdr'])
-                    comparison_hpp_fdr[l['protein']] = float(l['hpp_protein_fdr'])
+                    #peptides that are not uniquely matching will have both FDRs as 1
+                    comparison_hint_fdr[l['protein']] = min(float(l['all_protein_fdr']),comparison_hint_fdr.get(l['protein'],1))
+                    comparison_hpp_fdr[l['protein']] = min(float(l['hpp_protein_fdr']),comparison_hpp_fdr.get(l['protein'],1))
 
                 protein_mapping[l['protein']][il_peptide].add((int(l['aa_start']),int(l['aa_end']),None,None,None,None))
                 comparison = sequences_found[il_peptide].comparison
@@ -284,7 +285,7 @@ def main():
     def update_mappings(protein_coverage_file,update_precursor_representatives):
         if(protein_coverage_file.is_file()):
             print("{}: Loading {} ({} cumulative peptides @ {} peptides/second)".format(datetime.now().strftime("%H:%M:%S"),protein_coverage_file,len(pep_mapping_info),len(pep_mapping_info)/(1+(datetime.now()-start_time).seconds)))
-            protein_mapping_added,pep_mapping_info_added,peptide_to_exon_map_added,output_peptides = read_mappings.read_protein_coverage(protein_coverage_file,set(pep_mapping_info.keys()),proteome)
+            protein_mapping_added,pep_mapping_info_added,peptide_to_exon_map_added,output_peptides,_,_ = read_mappings.read_protein_coverage(protein_coverage_file,set(pep_mapping_info.keys()),proteome)
             pep_mapping_info.update(pep_mapping_info_added)
             peptide_to_exon_map.update(peptide_to_exon_map_added)
             for protein, peptide_mapping in protein_mapping_added.items():
@@ -571,8 +572,8 @@ def main():
             r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
             r.writeheader()
             for precursor in all_precursors:
-                if float(precursor['precursor_fdr']) < 1:
-                    proteins = precursor['protein'].split(' ###')[0].split(';')
+                proteins = [p for p in precursor['protein'].split(' ###')[0].split(';') if p != '']
+                if float(precursor['precursor_fdr']) < 1 and len(proteins) == 1 and 'Canonical' in precursor.get('protein_type',''):
                     precursor['hint_protein_fdr'] = min(hint_fdr_dict.get(proteins[0],1),1)
                     precursor['hpp_protein_fdr'] = min(hpp_fdr_dict.get(proteins[0],1),1)
                 else:
@@ -712,6 +713,10 @@ def main():
                     found = sequences_found[sequence]
                     if found.added.match:
                         compare_mappings['all'].update({sequence:mappings})
+                    if found.added.synthetic_match:
+                        compare_mappings['all_synthetic_match'].update({sequence:mappings})
+                    if found.added.synthetic_match_cosine:
+                        compare_mappings['all_synthetic_match_cosine'].update({sequence:mappings})
                     if found.hpp:
                         if found.comparison.match:
                             compare_mappings['comparison_match'].update({sequence:mappings})

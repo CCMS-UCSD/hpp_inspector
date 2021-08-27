@@ -17,6 +17,9 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
     already_seen = 0
     need_to_parse = 0
 
+    protein_hpp_fdr = {}
+    protein_hint_fdr = {}
+
     current_time = datetime.now()
 
     with open(protein_coverage_file) as f:
@@ -75,6 +78,8 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                         if len(protein_mapping.mismatches) == 0:
                             protein_mapping_out[protein_mapping.protein_accession][il_peptide].add((protein_mapping.start_pos,protein_mapping.end_pos,cosine,all_protein_fdr,hpp_protein_fdr,len(il_peptide) >= 9 and sp_matches_saav == 1))
                             match_obj['mapped_proteins'].append((protein_mapping.protein_accession,(protein_mapping.start_pos,protein_mapping.end_pos),protein_mapping.il_ambiguous))
+                            protein_hpp_fdr[protein_mapping.protein_accession] = min(protein_hpp_fdr.get(protein_mapping.protein_accession,1),hpp_protein_fdr)
+                            protein_hint_fdr[protein_mapping.protein_accession] = min(protein_hint_fdr.get(protein_mapping.protein_accession,1),all_protein_fdr)
                     for exon_mapping in exon_mappings:
                         for (complete, mapped) in zip(exon_mapping.complete_coordinates, exon_mapping.matched_coordinates):
                             peptide_to_exon_map[(chr,complete,exon_mapping.gene,','.join(exon_mapping.transcripts))].append((peptide,mapped,exon_mapping.matched_coordinates,exon_mapping.complete_coordinates))
@@ -88,4 +93,4 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
             
         print("Seen {}, need to parse {} mappings".format(already_seen,need_to_parse))
 
-    return protein_mapping_out,pep_info,peptide_to_exon_map,output_peptides
+    return protein_mapping_out,pep_info,peptide_to_exon_map,output_peptides,protein_hpp_fdr,protein_hint_fdr

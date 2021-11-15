@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <interface id="peptide_statistics_hpp" version="0.1.0">
 	<workflow-id>PEPTIDE_STATISTICS_HPP</workflow-id>
-	<workflow-label>Peptide Statistics (HPP Augment)</workflow-label>
+	<workflow-label>HPPInspector</workflow-label>
 	<parameters>
         <parameter name="desc" label="Description">
             <validator type="length" maximum="1000"/>
@@ -50,14 +50,24 @@
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
-		<parameter name="hint_protein_fdr" label="Canonical Protein FDR">
+		<parameter name="hint_protein_fdr" label="Leftover Protein FDR">
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
-		<parameter name="hpp_protein_fdr" label="HPP 2+ Protein FDR">
+		<parameter name="hpp_protein_fdr" label="HPP Protein FDR">
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
+
+		<parameter name="hint_protein_fdr_comparison" label="Leftover Protein Comparison FDR">
+			<default value="0.01"/>
+			<validator type="float" minimum="0"/>
+		</parameter>
+		<parameter name="hpp_protein_fdr_comparison" label="HPP Protein Comparison FDR">
+			<default value="0.01"/>
+			<validator type="float" minimum="0"/>
+		</parameter>
+
 
 		<parameter name="filter_rows_fdr" label="Filter Output Rows by FDR">
 			<options>
@@ -67,16 +77,25 @@
 			<default value="0" />
 			<validator type="set" />
 		</parameter>
-<!-- 
-		<parameter name="use_all_canonical" label="Use All Peptides in Canonical FDR">
-			<options>
-				<option label="Yes" value="1" />
-				<option label="No" value="0" />
-			</options>
-			<default value="1" />
-			<validator type="set" />
-		</parameter> -->
 
+		<parameter name="main_fdr" label="FDR for HPP proteins">
+			<options>
+				<option label="Common HPP" value="common_hpp" />
+				<option label="Picked HPP" value="picked_hpp" />
+				<option label="Traditional" value="traditional" />
+			</options>
+			<default value="common_hpp" />
+			<validator type="set" />
+		</parameter>
+
+		<parameter name="leftover_fdr" label="FDR for leftover proteins (if using non-traditional FDR for HPP stage)">
+			<options>
+				<option label="Common" value="common_leftover" />
+				<option label="Picked" value="picked_leftover" />
+			</options>
+			<default value="picked_leftover" />
+			<validator type="set" />
+		</parameter>
 
 		<parameter name="parallel_cosine.parallel_cosine" label="Parallelism (For Cosine Calculations)">
 			<default value="10"/>
@@ -88,12 +107,22 @@
 			<validator type="integer"/>
 		</parameter>
 
+		<parameter name="snr" label="Mininum SNR">
+			<default value="2"/>
+			<validator type="integer"/>
+		</parameter>
+
+		<parameter name="min_mz" label="Minimum m/z">
+			<default value="232"/>
+			<validator type="float" minimum="0"/>
+		</parameter>
+
 		<parameter name="export_psms" label="Export PSMs">
 			<options>
 				<option label="Yes" value="1" />
 				<option label="No" value="0" />
 			</options>
-			<default value="0" />
+			<default value="1" />
 			<validator type="set" />
 		</parameter>
 
@@ -208,6 +237,22 @@
 		            <cell colspan="3">
 		                <input type="text" parameter="peak_tolerance"/>
 		            </cell>
+															<cell>
+												<label>
+														<content parameter="snr"/>
+												</label>
+										</cell>
+										<cell colspan="3">
+												<input type="text" parameter="snr"/>
+										</cell>			
+										<cell>
+												<label>
+														<content parameter="min_mz"/>
+												</label>
+										</cell>
+										<cell colspan="3">
+												<input type="text" parameter="min_mz"/>
+										</cell>
 					</row>
 					<row>
 							<cell>
@@ -272,17 +317,24 @@
 					<cell colspan="3">
 						<input type="select" parameter="filter_rows_fdr"/>
 					</cell>
-										<!-- <cell>
+					<cell>
 						<label>
-							<content parameter="use_all_canonical"/>
+							<content parameter="main_fdr"/>
 						</label>
 					</cell>
 					<cell colspan="3">
-						<input type="select" parameter="use_all_canonical"/>
-					</cell> -->
+						<input type="select" parameter="main_fdr"/>
+					</cell>
+					<cell>
+						<label>
+							<content parameter="leftover_fdr"/>
+						</label>
+					</cell>
+					<cell colspan="3">
+						<input type="select" parameter="leftover_fdr"/>
+					</cell>
 				</row>
 
-				use_all_canonical
 	</block>
 	<block label="Comparison">
 		<row>
@@ -296,7 +348,24 @@
 										<property name="label">peptide_coverage_comparisons</property>
 								</module>
 						</cell>
+																<cell>
+												<label>
+														<content parameter="hpp_protein_fdr_comparison"/>
+												</label>
+										</cell>
+										<cell colspan="3">
+												<input type="text" parameter="hpp_protein_fdr_comparison"/>
+										</cell>			
+										<cell>
+												<label>
+														<content parameter="hint_protein_fdr_comparison"/>
+												</label>
+										</cell>
+										<cell colspan="3">
+												<input type="text" parameter="hint_protein_fdr_comparison"/>
+										</cell>
 				</row>
+
 	</block>
 	<block label="Advanced Exon Mapping Options">
 		<row>

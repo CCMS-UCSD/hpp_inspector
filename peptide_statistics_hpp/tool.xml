@@ -11,6 +11,7 @@
     <pathVar name="merge_kb_coverage.script" path="merge_kb_coverage.py" />
     <pathVar name="cosine_to_synthetic.script" path="cosine_to_synthetics.py" />
     <pathVar name="peptide_protein_cosine.script" path="peptide_protein_cosine.py" />
+    <pathVar name="generate_summary.script" path="generate_summary.py" />
 </pathSet>
 
 <pathSet base="extract_peaks_pypkl/0.1">
@@ -24,6 +25,7 @@
     <toolPath tool="peptide_protein_cosine" path="bin/python3.5" />
     <toolPath tool="calculate_cosine" path="bin/python3.5" />
     <toolPath tool="split_identifications" path="bin/python3.5" />
+    <toolPath tool="generate_summary" path="bin/python3.5" />
 </pathSet>
 
     <tool name="extract_from_mztab">
@@ -102,6 +104,8 @@
           <arg option="-peak_tolerance"   valueRef="@peak_tolerance"/>
           <arg option="-cosine_threshold"    valueRef="@cosine_threshold"/>
           <arg option="-explained_intensity"        valueRef="@explained_intensity_threshold"/>
+          <arg option="-low_mass_filter"        valueRef="@min_mz"/>
+          <arg option="-min_snr"        valueRef="@snr"/>
       </execution>
   </tool>
 
@@ -148,7 +152,11 @@
           <arg option="-precursor_fdr"        valueRef="@precursor_fdr"/>
           <arg option="-hpp_protein_fdr"        valueRef="@hpp_protein_fdr"/>
           <arg option="-hint_protein_fdr"        valueRef="@hint_protein_fdr"/>
+          <arg option="-hpp_protein_fdr_comparison"        valueRef="@hpp_protein_fdr_comparison"/>
+          <arg option="-hint_protein_fdr_comparison"        valueRef="@hint_protein_fdr_comparison"/>
           <arg option="-filter_rows_fdr"        valueRef="@filter_rows_fdr"/>
+          <arg option="-main_fdr"        valueRef="@main_fdr"/>
+          <arg option="-leftover_fdr"        valueRef="@leftover_fdr"/>
           <arg option="-nextprot_releases" pathRef="nextprot_releases"/>
           <arg option="-msv_to_pxd_mapping" pathRef="msv_to_pxd_mapping"/>
           <arg option="-external_provenance"  valueRef="external_provenance"/>
@@ -160,6 +168,19 @@
       </execution>
   </tool>
   
+    <tool name="generate_summary">
+        <require name="novel_proteins_w_cosine"    type="file"/>
+        <produce name="summary" type="file" naming="explicit"  extension="html"/>
+        <execution env="binary" argConvention="adhoc">
+            <arg pathRef="generate_summary.script"/>
+            <arg option="-input_file"        valueRef="novel_proteins_w_cosine"/>
+            <arg option="-output_file"       valueRef="summary"/>
+            <arg option="-taskid"            valueRef="@task"/>
+            <arg option="-input_fdr"         valueRef="@hpp_protein_fdr"/>
+        </execution>
+    </tool>
+
+
   <!-- Exon Mappings -->
 
   <pathSet base="$base/exon_aux_scripts">

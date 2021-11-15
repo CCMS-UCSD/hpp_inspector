@@ -12,13 +12,14 @@ def arguments():
     parser.add_argument('-c','--comparisons', type = Path, help='Comparison Jobs')
     parser.add_argument('-f','--proteome_fasta', type = Path, help='FASTA File')
     parser.add_argument('-b','--backup_kb_pep', type = Path, help='Backup KB Peptides')
+    parser.add_argument('-t','--use_job_level_thresholds', type = bool, help='Use job level thresholds',default=True)
     parser.add_argument('-k','--kb_pep', type = Path, help='Output KB Peptides')
     if len(sys.argv) < 2:
         parser.print_help()
         sys.exit(1)
     return parser.parse_args()
 
-def read_coverage_folder(input_folder,proteome):
+def read_coverage_folder(input_folder,proteome, job_level_threshold):
     
     protein_mapping_out_combined = {}
 
@@ -29,7 +30,7 @@ def read_coverage_folder(input_folder,proteome):
     all_proteins = []
 
     for protein_coverage_file in input_folder.glob('*'):
-        protein_mapping_out,_,_,_,protein_hpp_fdr,protein_hint_fdr = read_mappings.read_protein_coverage(protein_coverage_file,set(),proteome,True,False)
+        protein_mapping_out,_,_,_,protein_hpp_fdr,protein_hint_fdr = read_mappings.read_protein_coverage(protein_coverage_file,set(),proteome,True,False,job_level_threshold)
         protein_mapping_out_per_file.append(protein_mapping_out)
         protein_hpp_fdr_per_file.append(protein_hpp_fdr)
         protein_hint_fdr_per_file.append(protein_hint_fdr)
@@ -69,7 +70,7 @@ def main():
             with open(args.kb_pep, 'w') as w:
                 r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)
                 r.writeheader()
-                protein_mapping_out = read_coverage_folder(args.comparisons, proteome)
+                protein_mapping_out = read_coverage_folder(args.comparisons, proteome, args.use_job_level_thresholds)
                 for protein, peptide_mappings in protein_mapping_out.items():
                     for peptide, mappings in peptide_mappings.items():
                         for (start, end, cosine, all_protein_fdr, hpp_protein_fdr, is_hpp) in mappings:

@@ -100,6 +100,11 @@
     
     <!-- Exon mapping -->
 
+    <bind action="generate_summary" tool="generate_summary">
+        <inputAsRequirement port="novel_proteins_w_cosine"             requirement="novel_proteins_w_cosine"/>
+        <productionToOutput port="summary"      production="summary"/>
+    </bind>
+
     <bind action="make_fasta_from_gff" tool="make_fasta_from_gff">
         <inputAsRequirement port="dna"             requirement="dna"/>
         <inputAsRequirement port="gff"             requirement="gff"/>
@@ -161,6 +166,9 @@
         </upload>
         <upload port="explorer_export" type="folder">
             <query name="resource" value="explorer_export"/>
+        </upload>
+        <upload port="summary" type="file">
+            <query name="resource" value="summary"/>
         </upload>
         <!-- <upload port="log" type="file">
             <query name="resource" value="log"/>

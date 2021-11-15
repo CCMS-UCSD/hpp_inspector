@@ -51,7 +51,7 @@ def main():
                     break
 
             try:
-                ids = mztab.read(mztab_file, ids, mztab_task, "psm_search_engine_score[{}]".format())
+                ids = mztab.read(mztab_file, ids, mztab_task, "psm_search_engine_score[{}]".format(1))
             except:
                 ids = mztab.read_lib(mztab_file, ids, mztab_task)
 

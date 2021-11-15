@@ -5,6 +5,17 @@
         <source type="folder" name="library_coverage_summary_statistics/"/>
     </download>
 
+  <view id="result_summary" label="Result Summary">
+    <blockRef id="main" type="summary_report_html" />
+  </view>
+  <block id="summary_report_html" type="stream">
+    <data>
+      <source name="summary/" type="file" />
+      <parsers>
+        <parser contentType="text/html" type="stream" />
+      </parsers>
+    </data>
+  </block>
     <view id="view_added" label="View Protein Evidence">
         <blockRef id="main" type="view_added"/>
     </view>
@@ -58,6 +69,7 @@
             <column type="expandable" field="supporting_peptides" label="Previously-known Peptides" width="20"/>
             <column type="expandable" field="novel_peptides" label="Novel Peptides" width="20"/>
             <column type="integer" field="combined_hpp" label="#HPP Peptides (Combined)" width="5"/>
+            <column type="integer" field="combined_fdr_hpp" label="#HPP Peptides (Combined, Pass FDR)" width="5"/>
             <column type="integer" field="comparison_hpp_allfdr" label="#HPP Peptides (Reference Common FDR)" width="2"/>
             <column type="integer" field="comparison_hpp_hppfdr" label="#HPP Peptides (Reference HPP FDR)" width="2"/>
 
@@ -136,7 +148,8 @@
             <!-- <column type="text" field="filename" label="Filename" width="20"/>
             <column type="integer" field="scan" label="Scan" width="4"/> -->
             <column type="float" field="score" label="-log10(EValue)" width="6"/>
-            <column type="float" field="explained_intensity" label="Explained Intensity" width="6"/>
+            <column type="float" precision="3" field="explained_intensity" label="Explained Intensity" width="6"/>
+            <column type="integer" field="matched_ions" label="Matched Ions" width="6"/>
             <column type="text" field="pass" label="Above Library Threshold" width="6"/>
             <column type="text" field="parent_mass" label="Precursor Mass" width="20"/>
             <column autoHideSentinel="true" type="text" field="synthetic_usi" label="Synthetic Match" width="20"/>

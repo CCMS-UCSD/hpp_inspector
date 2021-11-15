@@ -120,6 +120,13 @@
 			<output  port="task_proteins_all" object="task_proteins_all"/>
 			<output  port="explorer_export"   					collection="explorer_export"/>
 		</action>
+		
+		<object name="summary"/>
+
+		<action name="generate_summary">
+			<input  port="novel_proteins_w_cosine"      object="novel_proteins_w_cosine"/>
+			<output  port="summary"      object="summary"/>
+		</action>
 <!-- 
 		<object name="log"/>
 
@@ -158,6 +165,8 @@
 		<input port="task_proteins_hpp" object="task_proteins_hpp"/>
 		<input port="task_proteins_all" object="task_proteins_all"/>
 		<input port="explorer_export" collection="explorer_export"/>
+		<input port="summary" object="summary"/>
+
 		<!-- <input port="log" collection="log"/> -->
 	</action>
 </flow>

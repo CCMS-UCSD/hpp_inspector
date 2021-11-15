@@ -7,7 +7,7 @@ from datetime import datetime
 
 csv.field_size_limit(sys.maxsize)
 
-def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter = None, output_representatives = True):
+def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter = None, output_representatives = True, use_job_level_thresholds = False):
 
     pep_info = {}
     protein_mapping_out = defaultdict(lambda: defaultdict(set))
@@ -49,6 +49,9 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                     pass_annotated_ions = float(l.get('matched_ions',1000)) >= float(l.get('matched_ions_cutoff',0))
                     # print(pass_precursor_fdr,pass_cosine,pass_expl_intensity,pass_annotated_ions)
                     pass_filters = pass_precursor_fdr and pass_annotated_ions and (pass_cosine or pass_expl_intensity)
+
+                if use_job_level_thresholds:
+                    cosine = 1 if cosine >= float(l.get('cosine_cutoff',-1)) else cosine
 
                 protein_mappings = mapping.string_to_protein_mappings(mapped_protein_str)
                 exon_mappings = mapping.string_to_exon_mappings(mapped_exon_str)

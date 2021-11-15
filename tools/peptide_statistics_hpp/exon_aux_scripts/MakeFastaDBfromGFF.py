@@ -317,13 +317,13 @@ if __name__ == '__main__':
         gff_file = sys.argv[2]
         output_file = sys.argv[3]
         input_parameters_filename = sys.argv[4]
-
-    x = GTFtoFASTA()
-    with open(input_parameters_filename) as f:
-        params_map = ming_proteosafe_library.get_mangled_file_mapping(ming_proteosafe_library.parse_xml_file(f))
-    dna = x.read_dna_trie(dna_folder, params_map)
-    print dna.keys(),len(dna[dna.keys()[0]])
-    x.GFFtoFASTA(gff_file,output_file,'transcript')
+    if gff_file != '': 
+        x = GTFtoFASTA()
+        with open(input_parameters_filename) as f:
+            params_map = ming_proteosafe_library.get_mangled_file_mapping(ming_proteosafe_library.parse_xml_file(f))
+        dna = x.read_dna_trie(dna_folder, params_map)
+        print dna.keys(),len(dna[dna.keys()[0]])
+        x.GFFtoFASTA(gff_file,output_file,'transcript')
 #     x.GFFtoFASTA(gff_file,output_file,'start_codon')
 
 #     x.remove_known_seq(known_file,output_file,remove_known_output_file)

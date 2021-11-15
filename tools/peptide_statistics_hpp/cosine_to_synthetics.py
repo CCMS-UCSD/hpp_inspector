@@ -8,6 +8,20 @@ import pickle
 from datetime import datetime
 from python_ms_utilities import processing
 
+def PathList(argument_string):
+    output_pathlist = []
+    if argument_string is None:
+        pass
+    elif argument_string.rstrip() == '':
+        pass
+    elif Path(argument_string).exists():
+        input_path = Path(argument_string)
+        if input_path.is_dir():
+            output_pathlist = list(input_path.glob('*'))
+        else:
+            output_pathlist = [input_path]
+    return output_pathlist
+
 def make_usi(filename, scan, sequence, charge):
     filename_path = Path(filename.replace('f.',''))
     dataset = filename_path.parts[0]
@@ -29,6 +43,8 @@ def arguments():
     parser.add_argument('-e','--explained_intensity', type = str, help='Explained Intensity Filter')
     parser.add_argument('-l','--labeled', type = str, help='Labeled data')
     parser.add_argument('-c','--cosine_threshold', type = str, help='Cosine Threshold')
+    parser.add_argument('-m','--low_mass_filter', type = float, help='Minimum m/z to retain', default=232)
+    parser.add_argument('-s','--min_snr', type = float, help='SNR threshold', default=2)
 
     if len(sys.argv) < 4:
         parser.print_help()
@@ -70,45 +86,45 @@ def get_mzxml_spectrum(mzxml_object, scan):
     spectrum = mzxml_object.get_by_id(scan)
     return read_mzxml_spectrum(spectrum)
 
-def extract_annotated_peaks(spectrum, fragment_tolerance):
+def extract_annotated_peaks(spectrum, fragment_tolerance, low_mass_filter, min_snr):
     spectrum, explained_intensity, ion_vector, b_y_peaks = processing.process_spectrum(
             spectrum,
             fragment_tolerance,
             precursor_filter_window=1.5,
-            low_mass_filter=232,
+            low_mass_filter=low_mass_filter,
             isobaric_tag_type=None,
-            min_snr=2
+            min_snr=min_snr
     )
     ion_vector = spectrum._replace(peaks = ion_vector)
     ion_vector = processing.normalize_spectrum(ion_vector)
     return (explained_intensity,b_y_peaks), ion_vector
 
-def find_ei_and_intensity(spectrum, psm, synthetic_scans):
+def find_ei_and_intensity(spectrum, psm, synthetic_scans, tol, low_mass_filter, min_snr):
     best_cosine = None
     sequence = psm['sequence']
     charge = psm['charge']
     tolerance = psm['tolerance'] if psm['tolerance'] else tol
     spectrum = spectrum._replace(precursor_z = int(charge), annotation = processing.Annotation(sequence, None))
     matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
-    spectrum_ei, spectrum_ion_vector = extract_annotated_peaks(spectrum, tolerance)
+    spectrum_ei, spectrum_ion_vector = extract_annotated_peaks(spectrum, tolerance, low_mass_filter, min_snr)
     for synthetic_filescan, synthetic_ion_vector in matching_synthetics:
         cosine = processing.match_peaks(spectrum_ion_vector, synthetic_ion_vector, tolerance)
         if not best_cosine or cosine > best_cosine[0]:
             best_cosine = (cosine,synthetic_filescan)
     return spectrum_ei, best_cosine
 
-def process_spectrum(psms_to_consider, filename, synthetic_scans, tol, threshold, peaks_obj, spectrum_select_func):
+def process_spectrum(psms_to_consider, filename, synthetic_scans, tol, low_mass_filter, min_snr, threshold, peaks_obj, spectrum_select_func):
     cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
     explained_intensity_per_spectrum = {}
     for scan in psms_to_consider[filename].keys():
         spectrum = spectrum_select_func(peaks_obj,scan)
-        spectrum_ei, cosine_w_file = find_ei_and_intensity(spectrum,psms_to_consider[filename][scan],synthetic_scans)
+        spectrum_ei, cosine_w_file = find_ei_and_intensity(spectrum,psms_to_consider[filename][scan],synthetic_scans, tol, low_mass_filter, min_snr)
         explained_intensity_per_spectrum[(filename,scan)] = spectrum_ei
         if cosine_w_file:
             cosine_to_synthetic[(filename,scan)] = cosine_w_file
     return cosine_to_synthetic, explained_intensity_per_spectrum
 
-def process_spectrum_read_file(psms_to_consider, filename, synthetic_scans, tol, threshold, reader, spectrum_select_func,read_scan):
+def process_spectrum_read_file(psms_to_consider, filename, synthetic_scans, tol, low_mass_filter, min_snr, threshold, reader, spectrum_select_func,read_scan):
     start_time = datetime.now()
     cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
     explained_intensity_per_spectrum = {}
@@ -130,7 +146,7 @@ def process_spectrum_read_file(psms_to_consider, filename, synthetic_scans, tol,
                 rate = int(spectra_to_process/elapsed_time) if elapsed_time != 0 else int(spectra_to_process)
                 print("{}: Processed {} scans ({}/second)".format(datetime.now().strftime("%H:%M:%S"),spectra_to_process,rate))
             spectrum = spectrum_select_func(s)
-            spectrum_ei, cosine_w_file = find_ei_and_intensity(spectrum,psms_to_consider[filename][scan],synthetic_scans)
+            spectrum_ei, cosine_w_file = find_ei_and_intensity(spectrum,psms_to_consider[filename][scan],synthetic_scans, tol, low_mass_filter, min_snr)
             explained_intensity_per_spectrum[(filename,scan)] = spectrum_ei
             if cosine_w_file:
                 cosine_to_synthetic[(filename,scan)] = cosine_w_file
@@ -180,8 +196,8 @@ def main():
                     # print(peptide, str(charge))
                     if (peptide, str(charge)) in synthetic_keys:
                         synthetics_loaded += 1
-                        filename = s['params'].get('originalfile_filename')
-                        scan = s['params'].get('originalfile_scan')
+                        filename = s['params'].get('originalfile_filename',s['params'].get('provenance_filename'))
+                        scan = s['params'].get('originalfile_scan',s['params'].get('provenance_scan'))
                         precursor_mz = s['params'].get('pepmass')[0]
                         mz = s['m/z array']
                         intn = s['intensity array']
@@ -193,7 +209,7 @@ def main():
                             None,
                             processing.Annotation(peptide, None)
                         )
-                        _, synthetic_ion_vector = extract_annotated_peaks(spectrum, 0.05)
+                        _, synthetic_ion_vector = extract_annotated_peaks(spectrum, 0.05, args.low_mass_filter, args.min_snr)
                         synthetic_scans[(peptide, str(charge))].append(((filename,scan),synthetic_ion_vector))
         print("{}: Loaded {} synthetics".format(datetime.now().strftime("%H:%M:%S"),synthetics_loaded))
     else:
@@ -252,10 +268,11 @@ def main():
 
                 if file:
                     if file_object and get_spectrum_func:
+                        print("{}: Opened file {}, ready to load".format(datetime.now().strftime("%H:%M:%S"),filename))
                         if len(psms_to_consider[filename]) >= min_spectra_to_load_file:
-                            file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum_read_file(psms_to_consider,filename,synthetic_scans,tol,threshold,file_object,get_spectrum_func,read_scan)
+                            file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum_read_file(psms_to_consider,filename,synthetic_scans,tol,args.low_mass_filter,args.min_snr,threshold,file_object,get_spectrum_func,read_scan)
                         else:
-                            file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum(psms_to_consider,filename,synthetic_scans,tol,threshold,file_object,get_spectrum_func)
+                            file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum(psms_to_consider,filename,synthetic_scans,tol,args.low_mass_filter,args.min_snr,threshold,file_object,get_spectrum_func)
                         cosine_to_synthetic.update(file_cosine_to_synthetic)
                         explained_intensity_per_spectrum.update(file_explained_intensity_per_spectrum)
                     file.close()

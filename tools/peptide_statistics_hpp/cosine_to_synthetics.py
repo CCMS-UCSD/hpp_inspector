@@ -165,126 +165,126 @@ def main():
     all_psms = []
     psms_header = []
 
-    print("{}: Reading psms".format(datetime.now().strftime("%H:%M:%S")))
-    with open(args.jobs) as f:
-        r = csv.DictReader(f, delimiter='\t')
-        psms_header = r.fieldnames
-        for l in r:
-            synthetic_keys.add((l['sequence'].replace('+229.163','').replace('+229.162932',''),l['charge']))
-            all_psms.append(l)
-            try:
-                tolerance = float(l['frag_tol'])
-            except:
-                tolerance = None
-            psms_to_consider[l['filename']][l['scan']] = {'sequence':l['sequence'],'charge':l['charge'], 'tolerance':tolerance}
-    print("{}: Finished reading psms".format(datetime.now().strftime("%H:%M:%S")))
+    # print("{}: Reading psms".format(datetime.now().strftime("%H:%M:%S")))
+    # with open(args.jobs) as f:
+    #     r = csv.DictReader(f, delimiter='\t')
+    #     psms_header = r.fieldnames
+    #     for l in r:
+    #         synthetic_keys.add((l['sequence'].replace('+229.163','').replace('+229.162932',''),l['charge']))
+    #         all_psms.append(l)
+    #         try:
+    #             tolerance = float(l['frag_tol'])
+    #         except:
+    #             tolerance = None
+    #         psms_to_consider[l['filename']][l['scan']] = {'sequence':l['sequence'],'charge':l['charge'], 'tolerance':tolerance}
+    # print("{}: Finished reading psms".format(datetime.now().strftime("%H:%M:%S")))
 
 
-    tol = float(args.peak_tolerance)
-    threshold = float(args.cosine_threshold)
-    explained_intensity = float(args.explained_intensity)
+    # tol = float(args.peak_tolerance)
+    # threshold = float(args.cosine_threshold)
+    # explained_intensity = float(args.explained_intensity)
 
-    if len(synthetic_keys) > 0 and args.synthetics:
-        start_synthetic_read = datetime.now()
-        print("{}: Loading synthetics".format(start_synthetic_read.strftime("%H:%M:%S")))
-        synthetics_loaded = 0
-        with open(args.synthetics) as synthetics_file:
-            with mgf.read(synthetics_file) as reader:
-                for i,s in enumerate(reader):
-                    peptide = s['params'].get('seq')
-                    charge = int(s['params'].get('charge')[0])
-                    # print(peptide, str(charge))
-                    if (peptide, str(charge)) in synthetic_keys:
-                        synthetics_loaded += 1
-                        filename = s['params'].get('originalfile_filename',s['params'].get('provenance_filename'))
-                        scan = s['params'].get('originalfile_scan',s['params'].get('provenance_scan'))
-                        precursor_mz = s['params'].get('pepmass')[0]
-                        mz = s['m/z array']
-                        intn = s['intensity array']
-                        peaks = [processing.Peak(float(mz[i]),float(intn[i])) for i in range(len(mz))]
-                        spectrum = processing.Spectrum(
-                            peaks,
-                            precursor_mz,
-                            charge,
-                            None,
-                            processing.Annotation(peptide, None)
-                        )
-                        _, synthetic_ion_vector = extract_annotated_peaks(spectrum, 0.05, args.low_mass_filter, args.min_snr)
-                        synthetic_scans[(peptide, str(charge))].append(((filename,scan),synthetic_ion_vector))
-        print("{}: Loaded {} synthetics".format(datetime.now().strftime("%H:%M:%S"),synthetics_loaded))
-    else:
-        print("Not loading synthetics")
+    # if len(synthetic_keys) > 0 and args.synthetics:
+    #     start_synthetic_read = datetime.now()
+    #     print("{}: Loading synthetics".format(start_synthetic_read.strftime("%H:%M:%S")))
+    #     synthetics_loaded = 0
+    #     with open(args.synthetics) as synthetics_file:
+    #         with mgf.read(synthetics_file) as reader:
+    #             for i,s in enumerate(reader):
+    #                 peptide = s['params'].get('seq')
+    #                 charge = int(s['params'].get('charge')[0])
+    #                 # print(peptide, str(charge))
+    #                 if (peptide, str(charge)) in synthetic_keys:
+    #                     synthetics_loaded += 1
+    #                     filename = s['params'].get('originalfile_filename',s['params'].get('provenance_filename'))
+    #                     scan = s['params'].get('originalfile_scan',s['params'].get('provenance_scan'))
+    #                     precursor_mz = s['params'].get('pepmass')[0]
+    #                     mz = s['m/z array']
+    #                     intn = s['intensity array']
+    #                     peaks = [processing.Peak(float(mz[i]),float(intn[i])) for i in range(len(mz))]
+    #                     spectrum = processing.Spectrum(
+    #                         peaks,
+    #                         precursor_mz,
+    #                         charge,
+    #                         None,
+    #                         processing.Annotation(peptide, None)
+    #                     )
+    #                     _, synthetic_ion_vector = extract_annotated_peaks(spectrum, 0.05, args.low_mass_filter, args.min_snr)
+    #                     synthetic_scans[(peptide, str(charge))].append(((filename,scan),synthetic_ion_vector))
+    #     print("{}: Loaded {} synthetics".format(datetime.now().strftime("%H:%M:%S"),synthetics_loaded))
+    # else:
+    #     print("Not loading synthetics")
 
     cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
     explained_intensity_per_spectrum = {}
 
-    min_spectra_to_load_file = 20
+    # min_spectra_to_load_file = 20
 
-    for filename in psms_to_consider:
-        print("{}: Looking at {}".format(datetime.now().strftime("%H:%M:%S"),filename))
-        exts = Path(filename).suffixes
-        if 'MSV' in filename:
-            filepath = filename.replace('f.','/data/massive/')
-            if filepath[0] == 'M':
-                filepath = '/data/massive/' + filepath
-        else:
-            filepath = filename
+    # for filename in psms_to_consider:
+    #     print("{}: Looking at {}".format(datetime.now().strftime("%H:%M:%S"),filename))
+    #     exts = Path(filename).suffixes
+    #     if 'MSV' in filename:
+    #         filepath = filename.replace('f.','/data/massive/')
+    #         if filepath[0] == 'M':
+    #             filepath = '/data/massive/' + filepath
+    #     else:
+    #         filepath = filename
 
-        if threshold > 0 or explained_intensity > 0:
-            if not Path(filepath).exists():
-                print("File {} likely moved or doesn't exist.".format(filepath))
-            else:
-                print("{}: About to read {} ({} PSMs)".format(datetime.now().strftime("%H:%M:%S"),filename,len(psms_to_consider[filename])))
+    #     if threshold > 0 or explained_intensity > 0:
+    #         if not Path(filepath).exists():
+    #             print("File {} likely moved or doesn't exist.".format(filepath))
+    #         else:
+    #             print("{}: About to read {} ({} PSMs)".format(datetime.now().strftime("%H:%M:%S"),filename,len(psms_to_consider[filename])))
 
-                file = None
-                file_object = None
-                get_spectrum_func = None
-                read_scan = None
+    #             file = None
+    #             file_object = None
+    #             get_spectrum_func = None
+    #             read_scan = None
 
-                if len(psms_to_consider[filename]) >= min_spectra_to_load_file:
-                    if exts[0] == '.mzML':
-                        file = open(filepath, 'rb')
-                        file_object = mzml.MzML(file)
-                        get_spectrum_func = read_mzml_spectrum
-                        read_scan = lambda s: str(s['id'].split('scan=')[1])
-                    if exts[0] == '.mgf':
-                        pass
-                    if exts[0] == '.mzXML':
-                        file = open(filepath, 'rb')
-                        file_object = mzxml.MzXML(file)
-                        get_spectrum_func = read_mzxml_spectrum
-                        read_scan = lambda s: str(s['id'])
-                else:
-                    if exts[0] == '.mzML':
-                        file = open(filepath, 'rb')
-                        file_object = mzml.PreIndexedMzML(file)
-                        get_spectrum_func = get_mzml_spectrum
-                    if exts[0] == '.mgf':
-                        pass
-                    if exts[0] == '.mzXML':
-                        file = open(filepath, 'rb')
-                        file_object = mzxml.MzXML(file,use_index = True)
-                        get_spectrum_func = get_mzxml_spectrum
+    #             if len(psms_to_consider[filename]) >= min_spectra_to_load_file:
+    #                 if exts[0] == '.mzML':
+    #                     file = open(filepath, 'rb')
+    #                     file_object = mzml.MzML(file)
+    #                     get_spectrum_func = read_mzml_spectrum
+    #                     read_scan = lambda s: str(s['id'].split('scan=')[1])
+    #                 if exts[0] == '.mgf':
+    #                     pass
+    #                 if exts[0] == '.mzXML':
+    #                     file = open(filepath, 'rb')
+    #                     file_object = mzxml.MzXML(file)
+    #                     get_spectrum_func = read_mzxml_spectrum
+    #                     read_scan = lambda s: str(s['id'])
+    #             else:
+    #                 if exts[0] == '.mzML':
+    #                     file = open(filepath, 'rb')
+    #                     file_object = mzml.PreIndexedMzML(file)
+    #                     get_spectrum_func = get_mzml_spectrum
+    #                 if exts[0] == '.mgf':
+    #                     pass
+    #                 if exts[0] == '.mzXML':
+    #                     file = open(filepath, 'rb')
+    #                     file_object = mzxml.MzXML(file,use_index = True)
+    #                     get_spectrum_func = get_mzxml_spectrum
 
-                if file:
-                    if file_object and get_spectrum_func:
-                        print("{}: Opened file {}, ready to load".format(datetime.now().strftime("%H:%M:%S"),filename))
-                        if len(psms_to_consider[filename]) >= min_spectra_to_load_file:
-                            file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum_read_file(psms_to_consider,filename,synthetic_scans,tol,args.low_mass_filter,args.min_snr,threshold,file_object,get_spectrum_func,read_scan)
-                        else:
-                            file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum(psms_to_consider,filename,synthetic_scans,tol,args.low_mass_filter,args.min_snr,threshold,file_object,get_spectrum_func)
-                        cosine_to_synthetic.update(file_cosine_to_synthetic)
-                        explained_intensity_per_spectrum.update(file_explained_intensity_per_spectrum)
-                    file.close()
-        else:
-            for scan in psms_to_consider[filename].keys():
-                sequence = psms_to_consider[filename][scan]['sequence']
-                charge = psms_to_consider[filename][scan]['charge']
-                matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
-                for synthetic_filescan, _ in matching_synthetics:
-                    cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
+    #             if file:
+    #                 if file_object and get_spectrum_func:
+    #                     print("{}: Opened file {}, ready to load".format(datetime.now().strftime("%H:%M:%S"),filename))
+    #                     if len(psms_to_consider[filename]) >= min_spectra_to_load_file:
+    #                         file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum_read_file(psms_to_consider,filename,synthetic_scans,tol,args.low_mass_filter,args.min_snr,threshold,file_object,get_spectrum_func,read_scan)
+    #                     else:
+    #                         file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum(psms_to_consider,filename,synthetic_scans,tol,args.low_mass_filter,args.min_snr,threshold,file_object,get_spectrum_func)
+    #                     cosine_to_synthetic.update(file_cosine_to_synthetic)
+    #                     explained_intensity_per_spectrum.update(file_explained_intensity_per_spectrum)
+    #                 file.close()
+    #     else:
+    #         for scan in psms_to_consider[filename].keys():
+    #             sequence = psms_to_consider[filename][scan]['sequence']
+    #             charge = psms_to_consider[filename][scan]['charge']
+    #             matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
+    #             for synthetic_filescan, _ in matching_synthetics:
+    #                 cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
 
-    print("{}: About to write out PSMs".format(datetime.now().strftime("%H:%M:%S")))
+    # print("{}: About to write out PSMs".format(datetime.now().strftime("%H:%M:%S")))
 
     with open(args.output_psms.joinpath(args.jobs.name), 'w') as fw_psm:
         header = psms_header + ['usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','explained_intensity','matched_ions']

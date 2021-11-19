@@ -58,7 +58,7 @@
         <productionToOutput port="kb_pep"    production="kb_pep"/>
     </bind>
 
-    <bind action="map_peptides" tool="map_peptides">
+    <bind action="high_mem_map_peptides" tool="map_peptides">
         <inputAsRequirement port="peptide_list"             requirement="peptide_list"/>
         <inputAsRequirement port="fastadb"                  requirement="fastadb"/>
         <inputAsRequirement port="exon_fasta"               requirement="exon_fasta"/>

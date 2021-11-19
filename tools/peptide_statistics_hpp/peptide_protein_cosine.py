@@ -86,14 +86,17 @@ def msv_to_pxd(msv, msv_mapping):
     return output_mapping
 
 def correct_usi(usi_input, msv_mapping):
-    if '[' in usi_input or 'PXD' in usi_input:
-        return usi_input
-    else:
-        split_usi = usi_input.split(':')
-        split_usi[1] = msv_to_pxd(split_usi[1], msv_mapping)
-        split_usi[5] = '/'.join([add_brackets(split_usi[5].split('/')[0]),split_usi[5].split('/')[1]])
-        return ':'.join(split_usi)
-
+    try:
+        if '[' in usi_input or 'PXD' in usi_input:
+            return usi_input
+        else:
+            split_usi = usi_input.split(':')
+            split_usi[1] = msv_to_pxd(split_usi[1], msv_mapping)
+            split_usi[5] = '/'.join([add_brackets(split_usi[5].split('/')[0]),split_usi[5].split('/')[1]])
+            return ':'.join(split_usi)
+    # allow for "blank" USIs
+    except:
+        return ''
 
 def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, name, max_seq_output = 10, pass_this_hint_fdr = False, pass_this_hpp_fdr = False, pass_comparison_hint_fdr = False, pass_comparison_hpp_fdr = False):
     comparison_pos = set([sorted(positions, key = lambda x: x[0])[0] for positions in existing_peptides.values()])
@@ -396,7 +399,7 @@ def main():
                         il_peptide = ''.join([p.replace('I','L') for p in l['sequence'] if p.isalpha()])
 
                         l['usi'] = correct_usi(l['usi'], msv_mapping)
-                        l['datasets'] = l['usi'].split(':')[1]
+                        l['datasets'] = l['usi'].split(':')[1] if l['usi'] != '' else ''
                         # if float(l['explained_intensity']) >= args.explained_intensity_cutoff:
                         #     sequences_per_dataset[l['usi'].split(':')[1]].add(il_peptide)
                         l['synthetic_usi'] = correct_usi(l['synthetic_usi'], msv_mapping) if (l['synthetic_usi'] != 'N/A' and l['synthetic_usi'] != '') else 'N/A'

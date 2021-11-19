@@ -28,8 +28,14 @@ def load_peptide_list(input_peptide_filename):
 def main():
     args = arguments()
 
+    already_has_decoys = False
     proteome = mapping.read_uniprot(args.proteome_fasta)
-    proteome_with_decoys = mapping.add_decoys(proteome)
+    for protein in proteome:
+        if 'XXX_' in protein:
+            already_has_decoys = True
+            break
+    if not already_has_decoys:
+        proteome_with_decoys = mapping.add_decoys(proteome)
     peptide_list = load_peptide_list(args.peptide_list)
 
     # peptide_to_exon_map = exon_mapping.map_peptides_to_exons(args.exon_fasta,peptide_list)

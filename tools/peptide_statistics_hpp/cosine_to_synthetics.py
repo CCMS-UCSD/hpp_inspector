@@ -254,11 +254,11 @@ def main():
                 depth -= 1
                 potential_matches = potential_match_update
             filepath = potential_matches[0]
-        else:
+        elif len(potential_matches) == 1:
             filepath = potential_matches[0]
 
         if not Path(filepath).exists():
-            print("File {} likely moved or doesn't exist. Checking uploaded files".format(filepath))
+            print("File {} likely moved or doesn't exist, please upload the file in the input file.".format(filepath))
         else:
             print("{}: About to read {} ({} PSMs)".format(datetime.now().strftime("%H:%M:%S"),filename,len(psms_to_consider[filename])))
             file_exists = True

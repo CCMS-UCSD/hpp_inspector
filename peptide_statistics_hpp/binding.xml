@@ -65,7 +65,7 @@
 		    <productionToOutput port="peptide_coverage"         production="peptide_coverage"/>
     </bind>
 
-    <bind action="demangle_collection" tool="demangle_collection">
+    <bind action="demangle_spec_on_server" tool="demangle_spec_on_server">
         <inputAsRequirement port="input" requirement="input"/>
         <inputAsRequirement port="params" requirement="params"/>
         <productionToOutput port="output" production="output"/>

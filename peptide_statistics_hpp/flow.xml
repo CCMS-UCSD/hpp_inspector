@@ -73,6 +73,13 @@
         <output port="peptide_coverage"       	collection="peptide_coverage"/>
     </action>
 
+    <collection name="spec_on_server_demangled"/>
+    <action name="demangle_spec_on_server">
+        <input  port="input" collection="spec_on_server"/>
+        <input  port="params" object="workflowParameters"/>
+        <output port="output"  collection="spec_on_server_demangled"/>
+    </action>
+
 		<collection name="novel_psms_p"/>
 		<collection name="jobs"/>
 
@@ -89,6 +96,7 @@
 			<input   port="jobs"          							object="jobs"  transformation="unfolding"/>
 			<input   port="novel_psms_p"          			collection="novel_psms_p"/>
 			<input   port="synthetics"          				object="synthetics"/>
+			<input   port="spectrum_files"          				collection="spec_on_server_demangled"/>
 			<output  port="novel_psms_w_cosine"         collection="novel_psms_w_cosine"/>
 		</action>
 

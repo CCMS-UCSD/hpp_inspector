@@ -26,7 +26,26 @@
     <toolPath tool="calculate_cosine" path="bin/python3.5" />
     <toolPath tool="split_identifications" path="bin/python3.5" />
     <toolPath tool="generate_summary" path="bin/python3.5" />
+    <toolPath tool="demangle_spec_on_server" path="bin/python3.5" />
 </pathSet>
+
+<pathSet base="generate_spectrum_index/1.1">
+        <pathVar name="demangle_collection.script" path="demangle_collection.py"/>
+    </pathSet>
+    
+    <tool name="demangle_spec_on_server">
+        <require name="input" type="folder"/>
+        <require name="params" type="file"/>
+        <produce name="output" type="folder"/>
+
+        <execution env="binary" argConvention="adhoc">
+            <arg pathRef="demangle_collection.script"/>
+            <arg option="-params" valueRef="params"/>
+            <arg option="-input_folder" valueRef="input"/>
+            <arg option="-input_mangled_prefix" value="spec_on_server"/>
+            <arg option="-output_folder" valueRef="output"/>
+        </execution>
+    </tool>
 
     <tool name="extract_from_mztab">
         <require name="mztab"    type="folder"/>
@@ -92,6 +111,7 @@
 
   <tool name="calculate_cosine">
       <require name="novel_psms_p"          type="folder"/>
+      <require name="spectrum_files"         type="folder"/>
       <require name="jobs"                  type="file"/>
       <require name="synthetics"            type="file"/>
       <produce name="novel_psms_w_cosine"   type="folder"/>
@@ -99,6 +119,7 @@
           <arg pathRef="cosine_to_synthetic.script"/>
           <arg option="-synthetics"       valueRef="synthetics"/>
           <arg option="-jobs"             valueRef="jobs"/>
+          <arg option="-spectrum_files"   valueRef="spectrum_files"/>
           <arg option="-input_psms"       valueRef="novel_psms_p"/>
           <arg option="-output_psms"      valueRef="novel_psms_w_cosine"/>
           <arg option="-peak_tolerance"   valueRef="@peak_tolerance"/>

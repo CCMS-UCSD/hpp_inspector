@@ -73,6 +73,13 @@
         <output port="peptide_coverage"       	collection="peptide_coverage"/>
     </action>
 
+    <collection name="spec_on_server_demangled"/>
+    <action name="demangle_spec_on_server">
+        <input  port="input" collection="spec_on_server"/>
+        <input  port="params" object="params"/>
+        <output port="output"  collection="spec_on_server_demangled"/>
+    </action>
+
 		<collection name="novel_psms_p"/>
 		<collection name="jobs"/>
 

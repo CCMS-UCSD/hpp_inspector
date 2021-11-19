@@ -65,6 +65,12 @@
 		    <productionToOutput port="peptide_coverage"         production="peptide_coverage"/>
     </bind>
 
+    <bind action="demangle_collection" tool="demangle_collection">
+        <inputAsRequirement port="input" requirement="input"/>
+        <inputAsRequirement port="params" requirement="params"/>
+        <productionToOutput port="output" production="output"/>
+    </bind>
+
     <bind action="calculate_cosine_p" tool="split_identifications">
         <inputAsRequirement port="novel_psms"       requirement="novel_psms"/>
         <productionToOutput port="novel_psms_p"     production="novel_psms_p"/>
@@ -75,6 +81,7 @@
         <inputAsRequirement port="jobs"       requirement="jobs"/>
         <inputAsRequirement port="novel_psms_p"       requirement="novel_psms_p"/>
         <inputAsRequirement port="synthetics"       requirement="synthetics"/>
+        <inputAsRequirement port="spectrum_files"       requirement="spectrum_files"/>
         <productionToOutput port="novel_psms_w_cosine"     production="novel_psms_w_cosine"/>
     </bind>
 

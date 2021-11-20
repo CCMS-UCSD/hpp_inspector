@@ -39,6 +39,7 @@ def arguments():
     parser.add_argument('-j','--jobs', type = Path, help='Jobs for parallelism')
     parser.add_argument('-i','--input_psms', type = Path, help='Input PSMs')
     parser.add_argument('-o','--output_psms', type = Path, help='Output PSMs')
+    parser.add_argument('-p','--spectrum_files', type = Path, help='Spectrum Files (if not public)')
     parser.add_argument('-t','--peak_tolerance', type = str, help='Peak Tolerance for Matching')
     parser.add_argument('-e','--explained_intensity', type = str, help='Explained Intensity Filter')
     parser.add_argument('-l','--labeled', type = str, help='Labeled data')
@@ -227,14 +228,43 @@ def main():
             filepath = filename.replace('f.','/data/massive/')
             if filepath[0] == 'M':
                 filepath = '/data/massive/' + filepath
+        elif 'f.' in filename:
+            # checking uploads directory
+            filepath = filename.replace('f.','/data/ccms-data/uploads/')
         else:
             filepath = filename
 
+        file_exists = False
+
+
+        potential_matches = []
+        if not Path(filepath).exists():
+            for potential_file in args.spectrum_files.glob('**'):
+                if potential_file.name == Path(filename).name:
+                    potential_matches.append(potential_file)
+        
+        if len(potential_matches) > 1:
+            depth = -1
+            filename_parts = Path(filename).parts
+            while len(potential_matches) > 1:
+                potential_match_update = []
+                for match in potential_matches:
+                    if match.parts[depth] == filename_parts[depth]:
+                        potential_match_update.append(match)
+                depth -= 1
+                potential_matches = potential_match_update
+            filepath = potential_matches[0]
+        elif len(potential_matches) == 1:
+            filepath = potential_matches[0]
+
+        if not Path(filepath).exists():
+            print("File {} likely moved or doesn't exist, please upload the file in the input file.".format(filepath))
+        else:
+            print("{}: About to read {} ({} PSMs)".format(datetime.now().strftime("%H:%M:%S"),filename,len(psms_to_consider[filename])))
+            file_exists = True
+
         if threshold > 0 or explained_intensity > 0:
-            if not Path(filepath).exists():
-                print("File {} likely moved or doesn't exist.".format(filepath))
-            else:
-                print("{}: About to read {} ({} PSMs)".format(datetime.now().strftime("%H:%M:%S"),filename,len(psms_to_consider[filename])))
+            if file_exists:
 
                 file = None
                 file_object = None

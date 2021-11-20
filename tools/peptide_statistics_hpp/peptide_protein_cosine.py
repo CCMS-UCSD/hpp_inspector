@@ -545,7 +545,7 @@ def main():
     if len(hpp_protein_w_scores) > 0:
         hpp_fdr_dict = fdr.calculate_fdr(hpp_protein_w_scores, fdr.default_decoy_to_target_function if args.main_fdr == 'picked_hpp' else None)
     
-    transform_protein = lambda p: p.replace('XXX_','') if args.leftover_fdr == 'picked' else p
+    transform_protein = lambda p: p.replace('XXX_','') if args.leftover_fdr == 'picked_leftover' else p
 
     for protein, fdr_val in hpp_fdr_dict.items():
         if fdr_val <= 0.01:
@@ -565,7 +565,7 @@ def main():
     hint_fdr_dict = {}
     if len(hint_protein_w_scores) > 0:
         #do proteomicsDB style FDR for canonical FDR
-        hint_fdr_dict = fdr.calculate_fdr(hint_protein_w_scores, fdr.default_decoy_to_target_function if args.leftover_fdr == 'picked' else None)
+        hint_fdr_dict = fdr.calculate_fdr(hint_protein_w_scores, fdr.default_decoy_to_target_function if args.leftover_fdr == 'picked_leftover' else None)
 
     common_fdr_dict = {}
     if len(common_protein_w_scores) > 0:

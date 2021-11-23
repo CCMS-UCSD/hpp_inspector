@@ -89,7 +89,7 @@ def read_mgf_spectrum(spectrum):
         peaks,
         precursor,
         None,
-        spectrum['params']['title'],
+        "scan={}".format(spectrum['params']['scans']),
         None
     )
 
@@ -242,6 +242,8 @@ def main():
         elif 'f.' in filename:
             # checking uploads directory
             filepath = filename.replace('f.','/data/ccms-data/uploads/')
+            if not Path(filepath).exists():
+                filepath = filename.replace('f.','/data/ccms-data/tasks/')
         else:
             filepath = filename
 

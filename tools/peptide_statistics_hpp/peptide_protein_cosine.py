@@ -1,4 +1,5 @@
 import argparse
+import re
 import sys
 import csv
 from collections import defaultdict, namedtuple
@@ -54,13 +55,27 @@ def arguments():
         sys.exit(1)
     return parser.parse_args()
 
-aa_weights = [71, 156, 114, 115, 103, 129, 128, 57, 137, 113, 113, 128, 131, 147, 97, 87, 101, 186, 163, 99]
-aa_characters = ['A', 'R', 'N', 'D', 'C', 'E', 'K', 'G', 'H', 'L', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V']
+aa_weights =    [71,  156, 114, 115, 103, 129, 128, 57,  137, 113, 113, 128, 131, 147, 97,  87,  101, 186, 163, 99]
+aa_characters = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V']
 
 aa_dict = dict(zip(aa_characters,aa_weights))
 
 def unit_delta(aa1, aa2):
     return (aa_dict.get(aa2,0) - aa_dict.get(aa1,0))
+
+theoretical_mass = lambda xs: sum([aa_dict[x] for x in xs]) + 18.010564686
+
+no_mod_il = lambda pep: ''.join([p.replace('I','L') for p in pep if p.isalpha()])
+
+def theoretical_mz(sequence,charge):
+    aa = ''.join([a for a in sequence if a.isalpha()])
+    mods = ''.join([m for m in sequence if not m.isalpha()])
+    if len(mods) > 0:
+        mods = eval(mods)
+    else:
+        mods = 0
+    return (theoretical_mass(aa) + mods + (int(charge)*1.007276035))/int(charge)
+
 
 def add_brackets(pep):
     aa_breakpoints = []
@@ -342,8 +357,13 @@ def main():
                 protein_str = ';'.join(cannonical_proteins) + " ###" + ';'.join(noncannonical_proteins)
             else:
                 protein_str = ';'.join(output_proteins)
+            if len(cannonical_proteins) > 0 and len(noncannonical_proteins) > 0:
+                protein_str_full = ';'.join([mapping.protein_to_full_uniprot_string(proteome.proteins[p]) for p in cannonical_proteins]) + " ###" + ';'.join([mapping.protein_to_full_uniprot_string(proteome.proteins[p]) for p in noncannonical_proteins])
+            else:
+                protein_str_full = ';'.join([mapping.protein_to_full_uniprot_string(proteome.proteins[p]) for p in output_proteins])
             outdict.update({
                 'protein': protein_str,
+                'protein_full': protein_str_full,
                 'gene': ';'.join(output_genes),
                 'protein_type':';'.join(sorted(list(output_types))),
                 'all_proteins': ';'.join(proteins)
@@ -386,7 +406,7 @@ def main():
 
     if args.output_psms:
         with open(args.output_psms,'w') as w:
-            header = ['protein','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
+            header = ['protein','protein_full','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
 
             o = csv.DictWriter(w, delimiter='\t',fieldnames = header, restval='N/A')
             o.writeheader()
@@ -441,9 +461,9 @@ def main():
     if len(all_hpp_precursors) > 0:
         precursor_fdr = fdr.calculate_fdr(all_hpp_precursors)
 
-    precursors_per_protein_all = defaultdict(lambda: defaultdict(float))
-    precursors_per_protein_hpp = defaultdict(lambda: defaultdict(float))
-    precursors_per_protein_non_unique = defaultdict(lambda: defaultdict(float))
+    precursors_per_protein_all = defaultdict(lambda: defaultdict(list))
+    precursors_per_protein_hpp = defaultdict(lambda: defaultdict(list))
+    precursors_per_protein_non_unique = defaultdict(lambda: defaultdict(list))
 
 
     def output_protein_level_results(best_psm):
@@ -456,13 +476,10 @@ def main():
             if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1 and 'Canonical' in best_psm.get('protein_type',''):
                 pos = (int(best_psm['aa_start']),int(best_psm['aa_end']))
                 if best_psm.get('hpp_match','') == 'True':
-                    prev_score_hpp = precursors_per_protein_hpp[proteins[0]][pos]
-                    precursors_per_protein_hpp[proteins[0]][pos] = max(float(best_psm['score']),prev_score_hpp)
-                prev_score = precursors_per_protein_all[proteins[0]][pos]
-                precursors_per_protein_all[proteins[0]][pos] = max(float(best_psm['score']),prev_score)
+                    precursors_per_protein_hpp[proteins[0]][pos].append((float(best_psm['score']),theoretical_mz(best_psm['sequence'],int(best_psm['charge']))))
+                precursors_per_protein_all[proteins[0]][pos].append((float(best_psm['score']),theoretical_mz(best_psm['sequence'],int(best_psm['charge']))))
             for protein in proteins:
-                prev_score_non_unique = precursors_per_protein_all[protein][sequence_il]
-                precursors_per_protein_non_unique[protein][sequence_il] = max(float(best_psm['score']),prev_score_non_unique)
+                precursors_per_protein_non_unique[protein][sequence_il].append((float(best_psm['score']),theoretical_mz(best_psm['sequence'],int(best_psm['charge']))))
 
         proteins = peptide_to_protein.get(sequence_il,[])
         cannonical_proteins = [protein for protein in proteins if proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso]
@@ -537,8 +554,19 @@ def main():
 
     seen_picked = set()
 
+    def greedy_sequence_precursor_score(precursor_list, mz_distance = 2.5):
+        used_precursors = []
+        for precursor in sorted(precursor_list, key = lambda x: x[0], reverse = True):
+            found = False
+            for seen_precursor in used_precursors:
+                if abs(precursor[1]-seen_precursor[1]) <= mz_distance:
+                    found = True
+            if not found:
+                used_precursors.append(precursor)
+        return sum([p[0] for p in used_precursors])
+
     for protein, precursors in precursors_per_protein_hpp.items():
-        score, count = mapping.non_nested_score([(*k,v) for k,v in precursors.items()])
+        score, count = mapping.non_nested_score([(*k,greedy_sequence_precursor_score(v)) for k,v in precursors.items()])
         if score != 0:
             hpp_protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
             hpp_score_dict[protein] = score
@@ -554,7 +582,7 @@ def main():
             seen_picked.add(transform_protein(protein))
 
     for protein, precursors in precursors_per_protein_all.items():
-        score = sum([v for k,v in precursors.items()])
+        score = sum([greedy_sequence_precursor_score(v) for k,v in precursors.items()])
         #remove corresponding found targets/decoys before running the picked FDR
         if hpp_fdr_dict.get(protein,1) > 0.01 and transform_protein(protein) not in seen_picked:
             if score != 0:
@@ -576,7 +604,7 @@ def main():
 
     if args.output_peptides:
         with open(args.output_peptides,'w') as w:
-            header = ['hint_protein_fdr','hpp_protein_fdr','precursor_fdr','psm_fdr','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
+            header = ['hint_protein_fdr','hpp_protein_fdr','precursor_fdr','psm_fdr','protein_full','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
             header += ['precursor_fdr_cutoff', 'hint_protein_fdr_cutoff', 'hpp_protein_fdr_cutoff', 'cosine_cutoff', 'explained_intensity_cutoff', 'annotated_ions_cutoff']
             r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
             r.writeheader()
@@ -599,7 +627,7 @@ def main():
                 r.writerow(precursor)
 
     with open(args.output_mappings, 'w') as w:
-        header = ['sequence','protein','protein_type','gene','start_aa','end_aa','mismatch_position','protein_aa','peptide_aa','delta_mass','precursor_count','psm_count','best_precursor_usi','best_precursor_filename','best_precursor_scan','best_precursor_charge','best_precursor_sequence']
+        header = ['sequence','protein','protein_full','protein_type','gene','start_aa','end_aa','mismatch_position','protein_aa','peptide_aa','delta_mass','precursor_count','psm_count','best_precursor_usi','best_precursor_filename','best_precursor_scan','best_precursor_charge','best_precursor_sequence']
         r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
         r.writeheader()
         # ProteinMapping = namedtuple('ProteinMapping','protein_accession, start_pos, end_pos, il_ambiguous, mismatches')
@@ -659,6 +687,7 @@ def main():
 
         fieldnames = [
             'protein',
+            'protein_full',
             'protein_type',
             'gene',
             'pe',
@@ -695,6 +724,7 @@ def main():
 
             protein_dict = {
                 'protein': protein,
+                'protein_full':mapping.protein_to_full_uniprot_string(proteome.proteins[protein]),
                 'protein_type':protein_type(protein, proteome),
                 'pe': nextprot_pe.get(protein_entry.id,0) if is_canonical else 0,
                 'aa_total':protein_entry.length,
@@ -795,6 +825,7 @@ def main():
 
         common_fieldnames = [
             'protein',
+            'protein_full',
             'protein_type',
             'gene',
             'pe',
@@ -832,6 +863,7 @@ def main():
 
                 protein_dict = {
                     'protein': protein,
+                    'protein_full':mapping.protein_to_full_uniprot_string(proteome.proteins[protein]),
                     'protein_type':protein_type(protein, proteome),
                     'pe': nextprot_pe.get(protein_entry.id,0) if is_canonical else 0,
                     'aa_total':protein_entry.length,

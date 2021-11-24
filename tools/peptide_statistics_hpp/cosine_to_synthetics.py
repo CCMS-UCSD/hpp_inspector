@@ -82,6 +82,17 @@ def read_mzxml_spectrum(spectrum):
         None
     )
 
+def read_mgf_spectrum(spectrum):
+    peaks = [processing.Peak(float(p[0]),float(p[1])) for p in zip(spectrum['m/z array'],spectrum['intensity array'])]
+    precursor = float(spectrum['params']['pepmass'][0])
+    return processing.Spectrum(
+        peaks,
+        precursor,
+        None,
+        "scan={}".format(spectrum['params']['scans']),
+        None
+    )
+
 def get_mzxml_spectrum(mzxml_object, scan):
     #thermo only for now
     spectrum = mzxml_object.get_by_id(scan)
@@ -231,6 +242,8 @@ def main():
         elif 'f.' in filename:
             # checking uploads directory
             filepath = filename.replace('f.','/data/ccms-data/uploads/')
+            if not Path(filepath).exists():
+                filepath = filename.replace('f.','/data/ccms-data/tasks/')
         else:
             filepath = filename
 
@@ -271,14 +284,19 @@ def main():
                 get_spectrum_func = None
                 read_scan = None
 
-                if len(psms_to_consider[filename]) >= min_spectra_to_load_file:
+                read_full_file = len(psms_to_consider[filename]) >= min_spectra_to_load_file or exts[0] == '.mgf'
+
+                if read_full_file:
                     if exts[0] == '.mzML':
                         file = open(filepath, 'rb')
                         file_object = mzml.MzML(file)
                         get_spectrum_func = read_mzml_spectrum
                         read_scan = lambda s: str(s['id'].split('scan=')[1])
                     if exts[0] == '.mgf':
-                        pass
+                        file = open(filepath, 'r')
+                        file_object = mgf.MGF(file)
+                        get_spectrum_func = read_mgf_spectrum
+                        read_scan = lambda s: s['params']['scans']
                     if exts[0] == '.mzXML':
                         file = open(filepath, 'rb')
                         file_object = mzxml.MzXML(file)
@@ -289,8 +307,6 @@ def main():
                         file = open(filepath, 'rb')
                         file_object = mzml.PreIndexedMzML(file)
                         get_spectrum_func = get_mzml_spectrum
-                    if exts[0] == '.mgf':
-                        pass
                     if exts[0] == '.mzXML':
                         file = open(filepath, 'rb')
                         file_object = mzxml.MzXML(file,use_index = True)
@@ -299,7 +315,7 @@ def main():
                 if file:
                     if file_object and get_spectrum_func:
                         print("{}: Opened file {}, ready to load".format(datetime.now().strftime("%H:%M:%S"),filename))
-                        if len(psms_to_consider[filename]) >= min_spectra_to_load_file:
+                        if read_full_file:
                             file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum_read_file(psms_to_consider,filename,synthetic_scans,tol,args.low_mass_filter,args.min_snr,threshold,file_object,get_spectrum_func,read_scan)
                         else:
                             file_cosine_to_synthetic, file_explained_intensity_per_spectrum = process_spectrum(psms_to_consider,filename,synthetic_scans,tol,args.low_mass_filter,args.min_snr,threshold,file_object,get_spectrum_func)

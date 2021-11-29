@@ -584,18 +584,16 @@ def main():
     for protein, precursors in precursors_per_protein_all.items():
         score = sum([greedy_sequence_precursor_score(v) for k,v in precursors.items()])
         #remove corresponding found targets/decoys before running the picked FDR
-        if hpp_fdr_dict.get(protein,1) > 0.01 and transform_protein(protein) not in seen_picked:
-            if score != 0:
-                hint_protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
-                hint_score_dict[protein] = score
         if score != 0:
+            hint_protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
+            hint_score_dict[protein] = score
             common_protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
             common_score_dict[protein] = score
 
     hint_fdr_dict = {}
     if len(hint_protein_w_scores) > 0:
         #do proteomicsDB style FDR for canonical FDR
-        hint_fdr_dict = fdr.calculate_fdr(hint_protein_w_scores, fdr.default_decoy_to_target_function if args.leftover_fdr == 'picked_leftover' else None)
+        hint_fdr_dict = fdr.calculate_fdr(hint_protein_w_scores, fdr.default_decoy_to_target_function)
 
     common_fdr_dict = {}
     if len(common_protein_w_scores) > 0:

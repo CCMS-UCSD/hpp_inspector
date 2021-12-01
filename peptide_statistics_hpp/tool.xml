@@ -172,9 +172,9 @@
           <arg option="-annotated_ions_cutoff"        valueRef="@annotated_ions_threshold"/>
           <arg option="-precursor_fdr"        valueRef="@precursor_fdr"/>
           <arg option="-hpp_protein_fdr"        valueRef="@hpp_protein_fdr"/>
-          <arg option="-hint_protein_fdr"        valueRef="@hint_protein_fdr"/>
+          <arg option="-picked_protein_fdr"        valueRef="@picked_protein_fdr"/>
           <arg option="-hpp_protein_fdr_comparison"        valueRef="@hpp_protein_fdr_comparison"/>
-          <arg option="-hint_protein_fdr_comparison"        valueRef="@hint_protein_fdr_comparison"/>
+          <arg option="-picked_protein_fdr_comparison"        valueRef="@picked_protein_fdr_comparison"/>
           <arg option="-filter_rows_fdr"        valueRef="@filter_rows_fdr"/>
           <arg option="-main_fdr"        valueRef="@main_fdr"/>
           <arg option="-leftover_fdr"        valueRef="@leftover_fdr"/>

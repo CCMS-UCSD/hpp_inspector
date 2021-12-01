@@ -25,15 +25,15 @@ def read_coverage_folder(input_folder,proteome, job_level_threshold):
 
     protein_mapping_out_per_file = []
     protein_hpp_fdr_per_file = []
-    protein_hint_fdr_per_file = []
+    protein_picked_fdr_per_file = []
 
     all_proteins = []
 
     for protein_coverage_file in input_folder.glob('*'):
-        protein_mapping_out,_,_,_,protein_hpp_fdr,protein_hint_fdr = read_mappings.read_protein_coverage(protein_coverage_file,set(),proteome,True,False,job_level_threshold)
+        protein_mapping_out,_,_,_,protein_hpp_fdr,protein_picked_fdr = read_mappings.read_protein_coverage(protein_coverage_file,set(),proteome,True,False,job_level_threshold)
         protein_mapping_out_per_file.append(protein_mapping_out)
         protein_hpp_fdr_per_file.append(protein_hpp_fdr)
-        protein_hint_fdr_per_file.append(protein_hint_fdr)
+        protein_picked_fdr_per_file.append(protein_picked_fdr)
         all_proteins.extend(list(protein_mapping_out.keys()))
 
     all_proteins = set(all_proteins)
@@ -41,16 +41,16 @@ def read_coverage_folder(input_folder,proteome, job_level_threshold):
     for protein in all_proteins:
         file_to_consider_per_protein = -1
         best_hpp_fdr_per_protein = 1
-        best_hint_fdr_per_protein = 1
+        best_picked_fdr_per_protein = 1
         files_pass_hpp_fdr = [(i,fdr.get(protein,1)) for i,fdr in enumerate(protein_hpp_fdr_per_file) if float(fdr.get(protein,1)) <= 0.01]
-        files_pass_hint_fdr = [(i,fdr.get(protein,1)) for i,fdr in enumerate(protein_hint_fdr_per_file) if float(fdr.get(protein,1)) <= 0.01]
+        files_pass_picked_fdr = [(i,fdr.get(protein,1)) for i,fdr in enumerate(protein_picked_fdr_per_file) if float(fdr.get(protein,1)) <= 0.01]
         if len(files_pass_hpp_fdr) > 0:
             best_hpp_fdr_per_protein = min([f[1] for f in files_pass_hpp_fdr])
             file_to_consider_per_protein = [f[0] for f in files_pass_hpp_fdr if f[1] == best_hpp_fdr_per_protein][0]
-        elif len(files_pass_hint_fdr) > 0:
+        elif len(files_pass_picked_fdr) > 0:
             #if only hints, just keep lowest FDR set
-            best_hint_fdr_per_protein = min([f[1] for f in files_pass_hint_fdr])
-            file_to_consider_per_protein = [f[0] for f in files_pass_hint_fdr if f[1] == best_hint_fdr_per_protein][0]
+            best_picked_fdr_per_protein = min([f[1] for f in files_pass_picked_fdr])
+            file_to_consider_per_protein = [f[0] for f in files_pass_picked_fdr if f[1] == best_picked_fdr_per_protein][0]
         if file_to_consider_per_protein >= 0:
             protein_mapping_out_combined[protein] = protein_mapping_out_per_file[file_to_consider_per_protein][protein]
 

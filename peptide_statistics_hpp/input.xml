@@ -50,7 +50,7 @@
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
-		<parameter name="hint_protein_fdr" label="Leftover Protein FDR">
+		<parameter name="picked_protein_fdr" label="Picked Protein FDR">
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
@@ -59,7 +59,7 @@
 			<validator type="float" minimum="0"/>
 		</parameter>
 
-		<parameter name="hint_protein_fdr_comparison" label="Leftover Protein Comparison FDR">
+		<parameter name="picked_protein_fdr_comparison" label="Picked Protein Comparison FDR">
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
@@ -299,11 +299,11 @@
 										</cell>			
 										<cell>
 												<label>
-														<content parameter="hint_protein_fdr"/>
+														<content parameter="picked_protein_fdr"/>
 												</label>
 										</cell>
 										<cell colspan="3">
-												<input type="text" parameter="hint_protein_fdr"/>
+												<input type="text" parameter="picked_protein_fdr"/>
 										</cell>
 							
 								</row>
@@ -358,11 +358,11 @@
 										</cell>			
 										<cell>
 												<label>
-														<content parameter="hint_protein_fdr_comparison"/>
+														<content parameter="picked_protein_fdr_comparison"/>
 												</label>
 										</cell>
 										<cell colspan="3">
-												<input type="text" parameter="hint_protein_fdr_comparison"/>
+												<input type="text" parameter="picked_protein_fdr_comparison"/>
 										</cell>
 				</row>
 

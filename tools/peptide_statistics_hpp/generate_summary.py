@@ -194,7 +194,8 @@ def main():
                             headers[reference_text][fdr_text][synthetic_text][pe_text]['Orphans']['combined_fdr_hpp_w_synthetic_cosine_lowerinput'] = synthetic_match
                         else:
                             headers[reference_text][fdr_text][synthetic_text][pe_text]['Orphans'][leftover_fdr] = '0.01'
-                            headers[reference_text][fdr_text][synthetic_text][pe_text]['Orphans'][reject_hpp_fdr] = '0.01'
+                            if reject_hpp_fdr != reject_picked_fdr:
+                                headers[reference_text][fdr_text][synthetic_text][pe_text]['Orphans'][reject_hpp_fdr] = '0.01'
                             headers[reference_text][fdr_text][synthetic_text][pe_text]['Orphans']['combined_hpp_just_current_lowerinput'] = '1'
                             headers[reference_text][fdr_text][synthetic_text][pe_text]['Orphans']['combined_hpp_w_synthetic_cosine_lowerinput'] = synthetic_match
 
@@ -205,9 +206,9 @@ def main():
                                 'protein_full_input': '^XXX_',
                                 'combined_hpp_just_current_upperinput': '0',
                                 leftover_fdr: '0.01',
-                                reject_hpp_fdr: '0.01',
-
                             }
+                            if reject_hpp_fdr != reject_picked_fdr:
+                                headers[reference_text][fdr_text][synthetic_text][pe_text]['Hints'][reject_hpp_fdr] = 0.01
                             headers[reference_text][fdr_text][synthetic_text][pe_text]['Hints'].update(reference_dict)
 
                             headers[reference_text][fdr_text][synthetic_text][pe_text]['Rejects'] = {

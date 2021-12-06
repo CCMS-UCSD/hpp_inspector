@@ -403,12 +403,14 @@ def main():
             outdict['hpp_match'] = 'False'
         return outdict, output_proteins
 
+    row_pass_filters = lambda best_psm: (float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff or float(best_psm['cosine']) >= args.cosine_cutoff) and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff
 
     if args.output_psms:
+        all_psms_with_score = []
+        all_psm_rows = []
         with open(args.output_psms,'w') as w:
-            header = ['protein','protein_full','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
-
-            o = csv.DictWriter(w, delimiter='\t',fieldnames = header, restval='N/A')
+            header = ['protein','protein_full','psm_fdr','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
+            o = csv.DictWriter(w, delimiter='\t',fieldnames = header, restval='N/A', extrasaction='ignore')
             o.writeheader()
             for input_psm in args.input_psms.glob('*'):
                 with open(input_psm) as f:
@@ -435,20 +437,24 @@ def main():
                         l.update(protein_info_dict)
                         proteins = l['protein'].split(' ###')[0].split(';')
                         # PSM-level FDR was inefficient at this scale - need to rethink
-                        # if 'Canonical' in l.get('protein_type','') and len(proteins) == 1 and l.get('hpp_match','') == 'True' and float(l['explained_intensity']) >= args.explained_intensity_cutoff:
-                        #     all_psms_with_score.append(fdr.ScoredElement(l['usi'],'XXX_' in proteins[0],l['score']))
+                        if row_pass_filters(l):
+                            all_psms_with_score.append(fdr.ScoredElement(l['usi'],'XXX_' in proteins[0],l['score']))
                         l.pop('mapped_proteins')
                         l.pop('hpp')
                         l.pop('len')
-                        if args.output_psms_flag == 1:
-                            o.writerow(l)
-                        update_precursor_representative(l)
+                        all_psm_rows.append(l)
 
-    # psm_fdr = fdr.calculate_fdr(all_psms_with_score)
+            psm_fdr = fdr.calculate_fdr(all_psms_with_score)
+
+            for l in all_psm_rows:
+                l['psm_fdr'] = psm_fdr.get(l['usi'],1)
+                if args.output_psms_flag == 1:
+                    o.writerow(l)
+                if l['psm_fdr'] <= 0.01:
+                    update_precursor_representative(l)
+
 
     print("About to calculate precursor FDR")
-
-    row_pass_filters = lambda best_psm: (float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff or float(best_psm['cosine']) >= args.cosine_cutoff) and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff
 
     all_hpp_precursors = []
 
@@ -616,7 +622,7 @@ def main():
         with open(args.output_peptides,'w') as w:
             header = ['picked_protein_fdr','hpp_protein_fdr','precursor_fdr','psm_fdr','protein_full','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
             header += ['precursor_fdr_cutoff', 'picked_protein_fdr_cutoff', 'hpp_protein_fdr_cutoff', 'cosine_cutoff', 'explained_intensity_cutoff', 'annotated_ions_cutoff']
-            r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
+            r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A', extrasaction='ignore')
             r.writeheader()
             for precursor in all_precursors:
                 proteins = [p for p in precursor['protein'].split(' ###')[0].split(';') if p != '']
@@ -638,7 +644,7 @@ def main():
 
     with open(args.output_mappings, 'w') as w:
         header = ['sequence','protein','protein_full','protein_type','gene','start_aa','end_aa','mismatch_position','protein_aa','peptide_aa','delta_mass','precursor_count','psm_count','best_precursor_usi','best_precursor_filename','best_precursor_scan','best_precursor_charge','best_precursor_sequence']
-        r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A')
+        r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A', extrasaction='ignore')
         r.writeheader()
         # ProteinMapping = namedtuple('ProteinMapping','protein_accession, start_pos, end_pos, il_ambiguous, mismatches')
         for sequence, mapping_info in pep_mapping_info.items():
@@ -656,40 +662,41 @@ def main():
                         mapped_precursors_at_pos.append(precursor)
                         mapped_psms_at_pos += count
 
-                if len(mapped_precursors_at_pos) > 0:
+                if len(mapped_precursors_at_pos) > 0 and mapped_precursors_at_pos[0] in representative_per_precursor:
                     best_precursor = representative_per_precursor[mapped_precursors_at_pos[0]]
                     for precursor_sequence_charge in mapped_precursors_at_pos[1:]:
-                        precursor = representative_per_precursor[precursor_sequence_charge]
-                        if precursor['score'] > best_precursor['score']:
-                            best_precursor = precursor
+                        if precursor_sequence_charge in representative_per_precursor:
+                            precursor = representative_per_precursor[precursor_sequence_charge]
+                            if precursor['score'] > best_precursor['score']:
+                                best_precursor = precursor
 
-                delta_mass = 0
-                mismatch_string = ''
+                    delta_mass = 0
+                    mismatch_string = ''
 
-                if len(pmapping.mismatches) > 0:
-                    mismatch = pmapping.mismatches[0]
-                else:
-                    mismatch = mapping.Mismatch(None,'N/A','N/A')
+                    if len(pmapping.mismatches) > 0:
+                        mismatch = pmapping.mismatches[0]
+                    else:
+                        mismatch = mapping.Mismatch(None,'N/A','N/A')
 
-                r.writerow({
-                    'sequence':sequence,
-                    'protein':pmapping.protein_accession,
-                    'protein_type':protein_type(pmapping.protein_accession, proteome),
-                    'gene':proteome.proteins[pmapping.protein_accession].gene,
-                    'start_aa':pmapping.start_pos,
-                    'end_aa': pmapping.end_pos,
-                    'mismatch_position':int(mismatch.position)+int(pmapping.start_pos) if mismatch.position else 'N/A',
-                    'protein_aa':mismatch.protein_aa,
-                    'peptide_aa':mismatch.peptide_aa,
-                    'delta_mass':unit_delta(mismatch.peptide_aa,mismatch.protein_aa),
-                    'precursor_count':len(mapped_precursors_at_pos),
-                    'psm_count':mapped_psms_at_pos,
-                    'best_precursor_usi':best_precursor['database_usi'] if best_precursor else 'N/A',
-                    'best_precursor_filename':best_precursor['database_filename'] if best_precursor else 'N/A',
-                    'best_precursor_scan':best_precursor['database_scan'] if best_precursor else 'N/A',
-                    'best_precursor_charge':best_precursor['charge'] if best_precursor else 'N/A',
-                    'best_precursor_sequence':best_precursor['sequence'] if best_precursor else 'N/A'
-                })
+                    r.writerow({
+                        'sequence':sequence,
+                        'protein':pmapping.protein_accession,
+                        'protein_type':protein_type(pmapping.protein_accession, proteome),
+                        'gene':proteome.proteins[pmapping.protein_accession].gene,
+                        'start_aa':pmapping.start_pos,
+                        'end_aa': pmapping.end_pos,
+                        'mismatch_position':int(mismatch.position)+int(pmapping.start_pos) if mismatch.position else 'N/A',
+                        'protein_aa':mismatch.protein_aa,
+                        'peptide_aa':mismatch.peptide_aa,
+                        'delta_mass':unit_delta(mismatch.peptide_aa,mismatch.protein_aa),
+                        'precursor_count':len(mapped_precursors_at_pos),
+                        'psm_count':mapped_psms_at_pos,
+                        'best_precursor_usi':best_precursor['database_usi'] if best_precursor else 'N/A',
+                        'best_precursor_filename':best_precursor['database_filename'] if best_precursor else 'N/A',
+                        'best_precursor_scan':best_precursor['database_scan'] if best_precursor else 'N/A',
+                        'best_precursor_charge':best_precursor['charge'] if best_precursor else 'N/A',
+                        'best_precursor_sequence':best_precursor['sequence'] if best_precursor else 'N/A'
+                    })
 
     with open(args.output_proteins, 'w') as fo:
 
@@ -724,7 +731,7 @@ def main():
         for overlap_suffix in ['','_w_synthetic','_w_synthetic_cosine','_just_current','_just_current_iso_unique']:
             fieldnames.extend(['{}{}'.format(k,overlap_suffix) for k in overlap_keys])
 
-        w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames)
+        w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames, extrasaction='ignore')
         w.writeheader()
 
         hpp_per_protein = {}
@@ -859,16 +866,16 @@ def main():
         dataset_fieldnames = common_fieldnames + [dataset_header(d) for d in all_datasets]
         task_fieldnames = common_fieldnames + [task_header(t) for t in all_tasks]
 
-        w_dataset_hpp = csv.DictWriter(f_dataset_hpp, delimiter = '\t', fieldnames = dataset_fieldnames, restval=0)
+        w_dataset_hpp = csv.DictWriter(f_dataset_hpp, delimiter = '\t', fieldnames = dataset_fieldnames, restval=0, extrasaction='ignore')
         w_dataset_hpp.writeheader()
 
-        w_dataset_all = csv.DictWriter(f_dataset_all, delimiter = '\t', fieldnames = dataset_fieldnames, restval=0)
+        w_dataset_all = csv.DictWriter(f_dataset_all, delimiter = '\t', fieldnames = dataset_fieldnames, restval=0, extrasaction='ignore')
         w_dataset_all.writeheader()
 
-        w_task_hpp = csv.DictWriter(f_task_hpp, delimiter = '\t', fieldnames = task_fieldnames, restval=0)
+        w_task_hpp = csv.DictWriter(f_task_hpp, delimiter = '\t', fieldnames = task_fieldnames, restval=0, extrasaction='ignore')
         w_task_hpp.writeheader()
 
-        w_task_all = csv.DictWriter(f_task_all, delimiter = '\t', fieldnames = task_fieldnames, restval=0)
+        w_task_all = csv.DictWriter(f_task_all, delimiter = '\t', fieldnames = task_fieldnames, restval=0, extrasaction='ignore')
         w_task_all.writeheader()
 
         for i,(protein,protein_entry) in enumerate(proteome.proteins.items()):
@@ -962,7 +969,7 @@ def main():
             '#junction_peptides_novel'
         ]
 
-        w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames)
+        w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames, extrasaction='ignore')
         w.writeheader()
 
         for exon, peptide_mappings in peptide_to_exon_map.items():

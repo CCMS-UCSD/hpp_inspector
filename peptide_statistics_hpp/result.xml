@@ -31,7 +31,8 @@
           <!-- <column type="float" field="comparison_coverage" label="Coverage (KB Only)" width="2"/>
           <column type="float" field="new_coverage" label="Coverage (Added Only)" width="2"/> -->
           <column type="text" field="protein_full" label="Protein" width="4"/>
-          
+                      <column type="text" field="protein" label="Protein Accession" width="4"/>
+
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
           <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
@@ -140,6 +141,8 @@
         </data>
         <row>
             <column type="slideExpandableHidden" field="protein_full" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+            <column type="slideExpandableHidden" field="protein" label="Protein Accession" width="4"/>
+            <column type="float" precision="3" field="psm_fdr" label="PSM-level FDR" width="20"/>
             <column type="text" field="gene" label="Gene" width="4"/>
             <column type="text" field="protein_type" label="Protein Type" width="4"/>
             <column type="integer" field="aa_start" label="AA Start" width="1"/>
@@ -210,6 +213,8 @@
             </data>
             <row>
                 <column type="slideExpandableHidden" characterhidelimit="18" buttontext="Show all proteins" field="protein_full" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+                           <column type="slideExpandableHidden" characterhidelimit="18" field="protein" label="Protein Accession" width="4"/>
+
                 <column type="float" precision="4" field="precursor_fdr" label="Precursor FDR" width="4" tooltip=""/>
                 <column type="float" precision="4" field="picked_protein_fdr" label="Protein FDR (Canonical)" width="4" tooltip=""/>
                 <column type="float" precision="4"  field="hpp_protein_fdr" label="Protein FDR (HPP 2+)" width="4" tooltip=""/>
@@ -328,6 +333,8 @@
                     <row>
                       <column type="text" field="sequence" label="Demodified Sequence" width="4"/>
                         <column type="text" field="protein_full" label="Protein" width="4" tooltip="Primary (citable) accession number for the protein."/>
+                        <column type="text" field="protein" label="Protein Accession" width="4"/>
+
                         <column type="text" field="gene" label="Gene" width="4" tooltip="Gene for the protein"/>
                         <column type="text" field="protein_type" label="Protein Type" width="4"/>
                         <column type="integer" field="start_aa" label="AA Start" width="1" tooltip="Start location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
@@ -391,6 +398,8 @@
           </data>
           <row>
             <column type="text" field="protein_full" label="Protein" width="4"/>
+                        <column type="text" field="protein" label="Protein Accession" width="4"/>
+
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
          <column type="integer" field="hpp_sequences" label="HPP Sequences" width="1"/>
@@ -421,6 +430,8 @@
           </data>
           <row>
             <column type="text" field="protein_full" label="Protein" width="4"/>
+                        <column type="text" field="protein" label="Protein Accession" width="4"/>
+
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
                    <column type="integer" field="hpp_sequences" label="HPP Sequences" width="1"/>
@@ -451,6 +462,8 @@
           </data>
           <row>
             <column type="text" field="protein_full" label="Protein" width="4"/>
+            <column type="text" field="protein" label="Protein Accession" width="4"/>
+
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
          <column type="integer" field="hpp_sequences" label="HPP Sequences" width="1"/>
@@ -481,6 +494,7 @@
           </data>
           <row>
             <column type="text" field="protein_full" label="Protein" width="4"/>
+                        <column type="text" field="protein" label="Protein Accession" width="4"/>
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
                    <column type="integer" field="hpp_sequences" label="HPP Sequences" width="1"/>

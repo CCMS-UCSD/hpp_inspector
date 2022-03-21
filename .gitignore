@@ -2,3 +2,5 @@
 *.pyc
 *.log
 validation.log
+/.project
+/.pydevproject

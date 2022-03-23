@@ -117,7 +117,7 @@ def table_from_dataset_proteins(dataset_protein_dict, library_id, library_versio
     dataset_protein_rows = []
     for ((dataset,protein),d) in dataset_protein_dict.items():
         dataset_protein_rows.append([
-            '#library_dataset_id:' + '.'.join([library_id,library_version]),
+            "#library_dataset_id:{}.{}".format(library_id,library_version),
             dataset,
             "#protein_id:" + protein,
             str(len(d['unique_peptides'])),
@@ -133,8 +133,8 @@ def table_from_proteins(protein_dict, hupo_mapping, unique_mapping, library_id, 
     protein_rows = []
     for (protein,d) in protein_dict.items():
         protein_rows.append([
-            '#library_dataset_id:' + '.'.join([library_id,library_version]),
-            '#protein_id:' + protein,
+            "#library_dataset_id:{}.{}".format(library_id,library_version),
+            "#protein_id:" + protein,
             str(unique_mapping.get(protein,0)),
             str(len(d['exon_unique'].intersection(d['unique_peptides']))),
             str(len(d['splice_junction'].intersection(d['unique_peptides']))),
@@ -172,8 +172,8 @@ def representatives_to_representatives_and_variants(representatives_table, libra
     for (sequence, charge), representative in representatives_table.items():
         just_sequence = "".join([p for p in sequence if p.isalpha()])
         representatives.append([
-            "#library_dataset_id:" + ".".join([library_id,library_version]),
-            "#variant_id:" + ".".join([sequence,charge]),
+            "#library_dataset_id:{}.{}".format(library_id,library_version),
+            "#variant_id:{}.{}".format(sequence,charge),
             "#psm_id:f.{}.scan={}".format(representative['database_filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW"),representative['database_scan']),
             representative['score']
         ])
@@ -274,8 +274,8 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
                 #    get_sequence(l)
                 #]]) + '\n')
                 w_provenance_representatives.write(','.join(["\"{}\"".format(r) for r in [
-                    '#library_dataset_id:' + '.'.join([library_id,library_version]),
-                    '#variant_id:' + '.'.join([get_sequence(l),get_charge(l)]),
+                    "#library_dataset_id:{}.{}".format(library_id,library_version),
+                    "#variant_id:{}.{}".format(get_sequence(l),get_charge(l)),
                     '#psm_id:f.{}.scan={}'.format(get_filename(l),get_scan(l))
                 ]]) + '\n')
     if Path(input_provenance).is_file():

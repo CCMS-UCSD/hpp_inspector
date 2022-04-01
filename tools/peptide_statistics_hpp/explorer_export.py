@@ -174,7 +174,7 @@ def representatives_to_representatives_and_variants(representatives_table, libra
         representatives.append([
             "#library_dataset_id:{}.{}".format(library_id,library_version),
             "#variant_id:{}.{}".format(sequence,charge),
-            "#psm_id:f.{}.scan={}".format(representative['database_filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW"),representative['database_scan']),
+            "#psm_id:f.{}.scan={}.{}".format(representative['database_filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW"),representative['database_scan'],representative['proteosafe_task']),
             representative['score']
         ])
         variants.append([
@@ -276,7 +276,7 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
                 w_provenance_representatives.write(','.join(["\"{}\"".format(r) for r in [
                     "#library_dataset_id:{}.{}".format(library_id,library_version),
                     "#variant_id:{}.{}".format(get_sequence(l),get_charge(l)),
-                    '#psm_id:f.{}.scan={}'.format(get_filename(l),get_scan(l))
+                    '#psm_id:f.{}.scan={}.{}'.format(get_filename(l),get_scan(l),get_proteosafe_task(l))
                 ]]) + '\n')
     if Path(input_provenance).is_file():
         provenance_file.close()

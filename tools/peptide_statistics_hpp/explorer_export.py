@@ -167,14 +167,15 @@ def mapping_to_peptides_and_mapping(input_mapping, library_id):
             ])
     return peptides, mappings
 
-def representatives_to_representatives_and_variants(representatives_table, library_id, library_version):
+def representatives_to_representatives_and_variants(representatives_table, library_id, library_version, task_for_filescan):
     representatives, variants = [], []
     for (sequence, charge), representative in representatives_table.items():
-        just_sequence = "".join([p for p in sequence if p.isalpha()])
+        spectrum_file_descriptor = "f.{}".format(representative["database_filename"].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW"))
+        nativeid = "scan={}".format(representative["database_scan"])
         representatives.append([
             "#library_dataset_id:{}.{}".format(library_id,library_version),
             "#variant_id:{}.{}".format(sequence,charge),
-            "#psm_id:f.{}.scan={}.{}".format(representative['database_filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW"),representative['database_scan'],representative['proteosafe_task']),
+            "#psm_id:{}.{}.{}".format(spectrum_file_descriptor,nativeid,task_for_filescan[(spectrum_file_descriptor,nativeid)]),
             representative['score']
         ])
         variants.append([
@@ -201,6 +202,7 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
         }
     )
     dataset_proteins = defaultdict(lambda : {'exon_unique':set(),'splice_junction':set(),'exon_mapped':set(), 'unique_peptides':set(), 'psms_unique':0, 'psms_shared':0})
+    task_for_filescan = {}
 
     provenance_file = None
     provenance_generator = None
@@ -278,19 +280,22 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
                     "#variant_id:{}.{}".format(get_sequence(l),get_charge(l)),
                     '#psm_id:f.{}.scan={}.{}'.format(get_filename(l),get_scan(l),get_proteosafe_task(l))
                 ]]) + '\n')
+                representative = input_representatives[(get_sequence(l),get_charge(l))]
+                if get_filename(l) == representative["database_filename"] and get_scan(l) == representative["database_scan"]:
+                    task_for_filescan[("f.{}".format(get_filename(l)),"scan={}".format(get_scan(l)))] = get_proteosafe_task(l)
     if Path(input_provenance).is_file():
         provenance_file.close()
-    return dataset_proteins, proteins_stats
+    return dataset_proteins, proteins_stats, task_for_filescan
 
 
 def output_for_explorer(output_folder, input_mappings, input_representatives, input_provenance, hupo_mapping, unique_mapping, library_id, library_version):
-    peptides, mappings = mapping_to_peptides_and_mapping(input_mappings, library_id)
-    representatives, variants = representatives_to_representatives_and_variants(input_representatives, library_id, library_version)
     # need to stream provenance
     output_provenance = output_folder.joinpath("{}_{}.tsv".format(8,'psm_provenance'))
     output_provenance_representatives = output_folder.joinpath("{}_{}.tsv".format(5,'library_variant_psms'))
+    dataset_protein_dict, proteins_stats_dict, task_for_filescan_dict = update_provenance(input_provenance, input_representatives, input_mappings, library_id, library_version, output_provenance, output_provenance_representatives)
 
-    dataset_protein_dict, proteins_stats_dict = update_provenance(input_provenance, input_representatives, input_mappings, library_id, library_version, output_provenance, output_provenance_representatives)
+    peptides, mappings = mapping_to_peptides_and_mapping(input_mappings, library_id)
+    representatives, variants = representatives_to_representatives_and_variants(input_representatives, library_id, library_version, task_for_filescan_dict)
 
     dataset_proteins = table_from_dataset_proteins(dataset_protein_dict, library_id, library_version)
     protein_stats = table_from_proteins(proteins_stats_dict, hupo_mapping, unique_mapping, library_id, library_version)

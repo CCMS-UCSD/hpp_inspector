@@ -50,7 +50,7 @@
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
-		<parameter name="hint_protein_fdr" label="Leftover Protein FDR">
+		<parameter name="picked_protein_fdr" label="Picked Protein FDR">
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
@@ -59,7 +59,7 @@
 			<validator type="float" minimum="0"/>
 		</parameter>
 
-		<parameter name="hint_protein_fdr_comparison" label="Leftover Protein Comparison FDR">
+		<parameter name="picked_protein_fdr_comparison" label="Picked Protein Comparison FDR">
 			<default value="0.01"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
@@ -173,6 +173,32 @@
 
 		<parameter name="external_provenance" label="Unprocessed Provenance">
 			<fileGenerator type="upload" purpose="external_provenance" target="external_provenance"/>
+		</parameter>
+
+		<parameter name="mztab_score_select" label="mzTab PSM Score Column">
+			<options>
+				<option label="search_engine_score[1]" value="search_engine_score[1]" />
+				<option label="search_engine_score[2]" value="search_engine_score[2]" />
+				<option label="search_engine_score[3]" value="search_engine_score[3]" />
+				<option label="search_engine_score[4]" value="search_engine_score[4]" />
+				<option label="search_engine_score[5]" value="search_engine_score[5]" />
+				<option label="other" value="other" />
+			</options>
+			<default value="search_engine_score[1]" />
+			<validator type="set" />
+		</parameter>
+
+		<parameter name="mztab_score_input" label="mzTab PSM Score Column - Other">
+			<default value=""/>
+		</parameter>
+
+		<parameter name="mztab_score_increasing" label="mzTab PSM Score Column Is Increasing">
+			<options>
+				<option label="Yes, higher values are better scores." value="True" />
+				<option label="No, lower values are better scores" value="False" />
+			</options>
+			<default value="True" />
+			<validator type="set" />
 		</parameter>
 
 </parameters>
@@ -299,11 +325,11 @@
 										</cell>			
 										<cell>
 												<label>
-														<content parameter="hint_protein_fdr"/>
+														<content parameter="picked_protein_fdr"/>
 												</label>
 										</cell>
 										<cell colspan="3">
-												<input type="text" parameter="hint_protein_fdr"/>
+												<input type="text" parameter="picked_protein_fdr"/>
 										</cell>
 							
 								</row>
@@ -358,14 +384,44 @@
 										</cell>			
 										<cell>
 												<label>
-														<content parameter="hint_protein_fdr_comparison"/>
+														<content parameter="picked_protein_fdr_comparison"/>
 												</label>
 										</cell>
 										<cell colspan="3">
-												<input type="text" parameter="hint_protein_fdr_comparison"/>
+												<input type="text" parameter="picked_protein_fdr_comparison"/>
 										</cell>
 				</row>
 
+	</block>
+	<block label="Advanced mzTab Input Options">
+		<row>
+			<cell>
+				<label>
+				<content parameter="mztab_score_select"/>
+				</label>
+			</cell>
+			<cell colspan="2">
+				<input type="select" parameter="mztab_score_select"/>
+			</cell>
+			<cell>
+				<label>
+				<content parameter="mztab_score_input"/>
+				</label>
+			</cell>
+			<cell colspan="2">
+				<input type="text" parameter="mztab_score_input"/>
+			</cell>
+		</row>
+		<row>
+			<cell>
+				<label>
+				<content parameter="mztab_score_increasing"/>
+				</label>
+			</cell>
+			<cell colspan="2">
+				<input type="select" parameter="mztab_score_increasing"/>
+			</cell>
+		</row>
 	</block>
 	<block label="Advanced Exon Mapping Options">
 		<row>

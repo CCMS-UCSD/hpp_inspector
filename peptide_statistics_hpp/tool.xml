@@ -60,6 +60,9 @@
             <arg option="-peak_tolerance"  valueRef="@peak_tolerance"/>
             <arg option="-peptide_folder"  valueRef="peptide_list"/>
             <arg option="-mapping_parallelism"  valueRef="@parallel_mapping.parallel_mapping"/>
+            <arg option="-mztab_score_select"  valueRef="@mztab_score_select"/>
+            <arg option="-mztab_score_input"  valueRef="@mztab_score_input"/>
+            <arg option="-mztab_score_increasing"  valueRef="@mztab_score_increasing"/>
         </execution>
     </tool>
 
@@ -172,9 +175,9 @@
           <arg option="-annotated_ions_cutoff"        valueRef="@annotated_ions_threshold"/>
           <arg option="-precursor_fdr"        valueRef="@precursor_fdr"/>
           <arg option="-hpp_protein_fdr"        valueRef="@hpp_protein_fdr"/>
-          <arg option="-hint_protein_fdr"        valueRef="@hint_protein_fdr"/>
+          <arg option="-picked_protein_fdr"        valueRef="@picked_protein_fdr"/>
           <arg option="-hpp_protein_fdr_comparison"        valueRef="@hpp_protein_fdr_comparison"/>
-          <arg option="-hint_protein_fdr_comparison"        valueRef="@hint_protein_fdr_comparison"/>
+          <arg option="-picked_protein_fdr_comparison"        valueRef="@picked_protein_fdr_comparison"/>
           <arg option="-filter_rows_fdr"        valueRef="@filter_rows_fdr"/>
           <arg option="-main_fdr"        valueRef="@main_fdr"/>
           <arg option="-leftover_fdr"        valueRef="@leftover_fdr"/>

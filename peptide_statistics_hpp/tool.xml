@@ -60,6 +60,9 @@
             <arg option="-peak_tolerance"  valueRef="@peak_tolerance"/>
             <arg option="-peptide_folder"  valueRef="peptide_list"/>
             <arg option="-mapping_parallelism"  valueRef="@parallel_mapping.parallel_mapping"/>
+            <arg option="-mztab_score_select"  valueRef="@mztab_score_select"/>
+            <arg option="-mztab_score_input"  valueRef="@mztab_score_input"/>
+            <arg option="-mztab_score_increasing"  valueRef="@mztab_score_increasing"/>
         </execution>
     </tool>
 

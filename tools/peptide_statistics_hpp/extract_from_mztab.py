@@ -21,11 +21,14 @@ def arguments():
     parser.add_argument('-l','--mapping_parallelism', type = int, help='Parallelism for Mapping')
     parser.add_argument('-t','--peak_tolerance', type = float, help='Peak Tolerance for Matching')
     parser.add_argument('-s','--proteosafe_parameters', type = Path, help='ProteoSAFe Parameters')
-    parser.add_argument('-c','--mztab_score_column', type = float, help='Column in mzTab for Score')
-    parser.add_argument('-d','--score_decreasing', type = float, help='Score increasing or decreasing')
+    parser.add_argument('-c','--mztab_score_select', type = str, help='Column in mzTab for Score - Select')
+    parser.add_argument('-i','--mztab_score_input', type = str, help='Column in mzTab for Score - Input')
+    parser.add_argument('-d','--mztab_score_increasing', type = str, help='Score increasing',default="True")
+
     if len(sys.argv) < 3:
         parser.print_help()
         sys.exit(1)
+
     return parser.parse_args()
 
 def main():
@@ -51,7 +54,9 @@ def main():
                     break
 
             try:
-                ids = mztab.read(mztab_file, ids, mztab_task, "psm_search_engine_score[{}]".format(1))
+                score_transformation = lambda x: x if args.mztab_score_increasing=='True' else -x
+                score_column = args.mztab_score_select if args.mztab_score_select != 'other' else args.mztab_score_input
+                ids = mztab.read(mztab_file, ids, mztab_task, None, score_column, score_transformation)
             except:
                 ids = mztab.read_lib(mztab_file, ids, mztab_task)
 

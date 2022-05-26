@@ -116,7 +116,7 @@
       <require name="novel_psms_p"          type="folder"/>
       <require name="spectrum_files"         type="folder"/>
       <require name="jobs"                  type="file"/>
-      <require name="synthetics"            type="file"/>
+      <require name="synthetics"            type="folder"/>
       <produce name="novel_psms_w_cosine"   type="folder"/>
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="cosine_to_synthetic.script"/>

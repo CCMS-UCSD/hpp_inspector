@@ -286,8 +286,10 @@ def main():
             precursor_representative['database_scan'] = l['scan'] if from_psm else l['database_scan']
             precursor_representative['database_usi'] = l['usi'] if from_psm else l['database_usi']
             precursor_representative['score'] = float(l['score'])
-            precursor_representative['explained_intensity'] = float(l['explained_intensity'])
-            precursor_representative['matched_ions'] = int(l['matched_ions'])
+            #consider best EI And matched ions over all representatives
+            precursor_representative['explained_intensity'] = max(float(l['explained_intensity']),precursor_representative['explained_intensity'])
+            precursor_representative['matched_ions'] = max(int(l['matched_ions'],precursor_representative['matched_ions']))
+
         if best_cosine and float(l['cosine']) >= 0 and l['synthetic_usi'] != 'N/A':
             precursor_representative['cosine_filename'] = l['filename'] if from_psm else l['cosine_filename']
             precursor_representative['cosine_scan'] = l['scan'] if from_psm else l['cosine_scan']

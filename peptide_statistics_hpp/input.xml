@@ -119,7 +119,8 @@
 
 		<parameter name="export_psms" label="Export PSMs">
 			<options>
-				<option label="Yes" value="1" />
+				<option label="Yes - All PSMs" value="1" />
+				<option label="Yes - Only PSMs that pass filters" value="0.5" />
 				<option label="No" value="0" />
 			</options>
 			<default value="1" />

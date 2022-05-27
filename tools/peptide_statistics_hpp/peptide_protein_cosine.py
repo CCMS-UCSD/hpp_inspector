@@ -20,7 +20,7 @@ def arguments():
     parser.add_argument('--input_psms', type = Path, help='Input PSMs')
     parser.add_argument('--input_psms_external', type = Path, help='Input PSMs (External)')
     parser.add_argument('--input_peptides', type = Path, help='Input PSMs (External)')
-    parser.add_argument('--output_psms_flag', type = int, help='Output PSMs Flag')
+    parser.add_argument('--output_psms_flag', type = str, help='Output PSMs Flag')
     parser.add_argument('--output_psms', type = Path, help='Output PSMs')
     parser.add_argument('--output_peptides', type = Path, help='Output Peptides')
     parser.add_argument('--output_proteins', type = Path, help='Output Proteins')
@@ -456,7 +456,7 @@ def main():
 
             for l in all_psm_rows:
                 l['psm_fdr'] = psm_fdr.get(l['usi'],1)
-                if args.output_psms_flag == 1:
+                if args.output_psms_flag == "1" or (args.output_psms_flag == "0.5" and row_pass_filters(l)):
                     o.writerow(l)
                 if l['psm_fdr'] <= 0.01:
                     update_precursor_representative(l)

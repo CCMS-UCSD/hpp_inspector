@@ -46,7 +46,7 @@ def arguments():
     parser.add_argument('-c','--cosine_threshold', type = str, help='Cosine Threshold')
     parser.add_argument('-m','--low_mass_filter', type = float, help='Minimum m/z to retain', default=232)
     parser.add_argument('-s','--min_snr', type = float, help='SNR threshold', default=2)
-    parser.add_argument('-f','--filter_synthetics', type = str, help='Matched Synthetics', default='No')
+    parser.add_argument('-f','--filter_synthetics', type = str, help='Filter Matched Synthetics', default='No')
 
     if len(sys.argv) < 4:
         parser.print_help()

@@ -130,6 +130,7 @@
           <arg option="-explained_intensity"        valueRef="@explained_intensity_threshold"/>
           <arg option="-low_mass_filter"        valueRef="@min_mz"/>
           <arg option="-min_snr"        valueRef="@snr"/>
+          <arg option="-filter_synthetics" valueRef="@synthetic_filters"/>
       </execution>
   </tool>
 

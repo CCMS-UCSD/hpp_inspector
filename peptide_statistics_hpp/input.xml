@@ -127,6 +127,15 @@
 			<validator type="set" />
 		</parameter>
 
+		<parameter name="synthetic_filters" label="Apply Input Filters to Synthetics">
+			<options>
+				<option label="Yes" value="Yes" />
+				<option label="No" value="No" />
+			</options>
+			<default value="No" />
+			<validator type="set" />
+		</parameter>
+
 		<parameter name="peptide_coverage_merged_external" label="Coverage (External)">
 			<fileGenerator type="upload" purpose="peptide_coverage_merged_external" target="peptide_coverage_merged_external"/>
 		</parameter>
@@ -361,6 +370,16 @@
 					</cell>
 					<cell colspan="3">
 						<input type="select" parameter="leftover_fdr"/>
+					</cell>
+				</row>
+				<row>
+					<cell>
+						<label>
+							<content parameter="synthetic_filters"/>
+						</label>
+					</cell>
+					<cell colspan="2">
+						<input type="select" parameter="synthetic_filters"/>
 					</cell>
 				</row>
 

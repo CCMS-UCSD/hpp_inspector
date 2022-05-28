@@ -53,10 +53,22 @@ def main():
                     mztab_task = task
                     break
 
+            def _evalue_transform(input_evalue):
+                if float(input_evalue) > 0:
+                    score = -math.log10(float(input_evalue))
+                else:
+                    score = 100
+                return score
+
             try:
-                score_transformation = lambda x: x if args.mztab_score_increasing=='True' else -x
+                if args.mztab_score_increasing=='neglog10':
+                    score_transformation = lambda x: _evalue_transform(x)
+                else:
+                    score_transformation = lambda x: x if args.mztab_score_increasing=='True' else -x
                 score_column = args.mztab_score_select if args.mztab_score_select != 'other' else args.mztab_score_input
-                ids = mztab.read(mztab_file, ids, mztab_task, None, score_column, score_transformation)
+                ids = mztab.read(mztab_file, ids, mztab_task, None, score_column, score_transformation, None)
+            except mztab.MissingScoreColumn as e:
+                raise Exception("PSM score column does not exist in mzTab.  Please clone this job and check `mzTab PSM Score Column` in the input form under `Advanced mzTab Input Options`.")
             except:
                 ids = mztab.read_lib(mztab_file, ids, mztab_task)
 

@@ -8,7 +8,7 @@
 		<collection name="mztab"/>
 		<collection name="spec_on_server"/>
 		<collection name="library_output"/>
-		<object name="synthetics"/>
+		<collection name="synthetics"/>
 
 		<object name="kb_pep"/>
 
@@ -41,7 +41,7 @@
         <output port="mztab"       			 collection="mztab"/>
 				<output port="spec_on_server"       collection="spec_on_server"/>
         <output port="fastadb" 		  collection="fastadb"/>
-				<output port="synthetics" 		  object="synthetics"/>
+				<output port="synthetics" 		  collection="synthetics"/>
         <output port="params" object="workflowParameters"/>
 				<output port="peptide_coverage_merged_external"       			 collection="peptide_coverage_merged_external"/>
 				<output port="novel_psms_w_cosine_external"       collection="novel_psms_w_cosine_external"/>
@@ -95,7 +95,7 @@
 		<action name="calculate_cosine" multiplicity="multiple" type="parallel">
 			<input   port="jobs"          							object="jobs"  transformation="unfolding"/>
 			<input   port="novel_psms_p"          			collection="novel_psms_p"/>
-			<input   port="synthetics"          				object="synthetics"/>
+			<input   port="synthetics"          				collection="synthetics"/>
 			<input   port="spectrum_files"          				collection="spec_on_server_demangled"/>
 			<output  port="novel_psms_w_cosine"         collection="novel_psms_w_cosine"/>
 		</action>

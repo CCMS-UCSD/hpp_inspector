@@ -119,10 +119,20 @@
 
 		<parameter name="export_psms" label="Export PSMs">
 			<options>
-				<option label="Yes" value="1" />
+				<option label="Yes - All PSMs" value="1" />
+				<option label="Yes - Only PSMs that pass filters" value="0.5" />
 				<option label="No" value="0" />
 			</options>
 			<default value="1" />
+			<validator type="set" />
+		</parameter>
+
+		<parameter name="synthetic_filters" label="Apply Input Filters to Synthetics">
+			<options>
+				<option label="Yes" value="Yes" />
+				<option label="No" value="No" />
+			</options>
+			<default value="No" />
 			<validator type="set" />
 		</parameter>
 
@@ -182,9 +192,10 @@
 				<option label="search_engine_score[3]" value="search_engine_score[3]" />
 				<option label="search_engine_score[4]" value="search_engine_score[4]" />
 				<option label="search_engine_score[5]" value="search_engine_score[5]" />
+				<option label="opt_global_EValue" value="opt_global_EValue" />
 				<option label="other" value="other" />
 			</options>
-			<default value="search_engine_score[1]" />
+			<default value="opt_global_EValue" />
 			<validator type="set" />
 		</parameter>
 
@@ -194,10 +205,11 @@
 
 		<parameter name="mztab_score_increasing" label="mzTab PSM Score Column Is Increasing">
 			<options>
-				<option label="Yes, higher values are better scores." value="True" />
-				<option label="No, lower values are better scores" value="False" />
+				<option label="Yes, higher values are better scores, no transformation" value="True" />
+				<option label="No, lower values are better scores, no transformation" value="False" />
+				<option label="No, lower values are better scores, -log10 transformation" value="neglog10" />
 			</options>
-			<default value="True" />
+			<default value="neglog10" />
 			<validator type="set" />
 		</parameter>
 
@@ -358,6 +370,16 @@
 					</cell>
 					<cell colspan="3">
 						<input type="select" parameter="leftover_fdr"/>
+					</cell>
+				</row>
+				<row>
+					<cell>
+						<label>
+							<content parameter="synthetic_filters"/>
+						</label>
+					</cell>
+					<cell colspan="2">
+						<input type="select" parameter="synthetic_filters"/>
 					</cell>
 				</row>
 

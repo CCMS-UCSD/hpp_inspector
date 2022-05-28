@@ -20,7 +20,7 @@ def arguments():
     parser.add_argument('--input_psms', type = Path, help='Input PSMs')
     parser.add_argument('--input_psms_external', type = Path, help='Input PSMs (External)')
     parser.add_argument('--input_peptides', type = Path, help='Input PSMs (External)')
-    parser.add_argument('--output_psms_flag', type = int, help='Output PSMs Flag')
+    parser.add_argument('--output_psms_flag', type = str, help='Output PSMs Flag')
     parser.add_argument('--output_psms', type = Path, help='Output PSMs')
     parser.add_argument('--output_peptides', type = Path, help='Output Peptides')
     parser.add_argument('--output_proteins', type = Path, help='Output Proteins')
@@ -286,8 +286,11 @@ def main():
             precursor_representative['database_scan'] = l['scan'] if from_psm else l['database_scan']
             precursor_representative['database_usi'] = l['usi'] if from_psm else l['database_usi']
             precursor_representative['score'] = float(l['score'])
-            precursor_representative['explained_intensity'] = float(l['explained_intensity'])
-            precursor_representative['matched_ions'] = int(l['matched_ions'])
+            #consider best EI And matched ions over all representatives
+            if float(l['explained_intensity']) > float(precursor_representative.get('explained_intensity',0.0)):
+                precursor_representative['explained_intensity'] = l['explained_intensity']
+                precursor_representative['matched_ions'] = l['matched_ions']
+
         if best_cosine and float(l['cosine']) >= 0 and l['synthetic_usi'] != 'N/A':
             precursor_representative['cosine_filename'] = l['filename'] if from_psm else l['cosine_filename']
             precursor_representative['cosine_scan'] = l['scan'] if from_psm else l['cosine_scan']
@@ -334,7 +337,7 @@ def main():
     print("About to load PSMs")
 
 
-    def protein_info(peptide, peptide_to_protein, protein_mappings, sequences_found, proteome, nextprot_pe):
+    def protein_info(peptide, peptide_to_protein, protein_mappings, sequences_found, proteome, nextprot_pe, spectrum_quality_pass):
         outdict = {}
 
         il_peptide = peptide.replace('I','L')
@@ -397,10 +400,16 @@ def main():
                     outdict['type'] = 'New protein evidence (hint in reference)'
             else:
                 outdict['type'] = 'New protein evidence'
-            outdict['hpp_match'] = 'True'
+            if spectrum_quality_pass:
+                outdict['hpp_match'] = 'Yes'
+            else:
+                outdict['hpp_match'] = 'No - failed quality thresholds'
         else:
             outdict['type'] = 'Not HPP compliant'
-            outdict['hpp_match'] = 'False'
+            if spectrum_quality_pass:
+                outdict['hpp_match'] = 'No - 2+ SAAV protein matches'
+            else:
+                outdict['hpp_match'] = 'No - failed quality thresholds'
         return outdict, output_proteins
 
     row_pass_filters = lambda best_psm: (float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff or float(best_psm['cosine']) >= args.cosine_cutoff) and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff
@@ -430,15 +439,15 @@ def main():
 
                         l.update(pep_mapping_info.get(peptide,{}))
 
-                        protein_info_dict, output_proteins = protein_info(peptide, peptide_to_protein, protein_mapping, sequences_found, proteome, nextprot_pe)
+                        protein_info_dict, output_proteins = protein_info(peptide, peptide_to_protein, protein_mapping, sequences_found, proteome, nextprot_pe, row_pass_filters(l))
                         for protein in output_proteins:
                             aa_start,aa_end,_,_,_,_ = next(iter(protein_mapping[protein][il_peptide]))
                             frequency[protein][(aa_start,aa_end)][(l['sequence'],l['charge'])] += 1
                         l.update(protein_info_dict)
                         proteins = l['protein'].split(' ###')[0].split(';')
                         # PSM-level FDR was inefficient at this scale - need to rethink
-                        if row_pass_filters(l):
-                            all_psms_with_score.append(fdr.ScoredElement(l['usi'],'XXX_' in proteins[0],l['score']))
+                        #if row_pass_filters(l):
+                        all_psms_with_score.append(fdr.ScoredElement(l['usi'],'XXX_' in proteins[0],l['score']))
                         l.pop('mapped_proteins')
                         l.pop('hpp')
                         l.pop('len')
@@ -448,7 +457,7 @@ def main():
 
             for l in all_psm_rows:
                 l['psm_fdr'] = psm_fdr.get(l['usi'],1)
-                if args.output_psms_flag == 1:
+                if args.output_psms_flag == "1" or (args.output_psms_flag == "0.5" and row_pass_filters(l)):
                     o.writerow(l)
                 if l['psm_fdr'] <= 0.01:
                     update_precursor_representative(l)
@@ -481,7 +490,7 @@ def main():
         if row_pass_filters(best_psm):
             if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1 and 'Canonical' in best_psm.get('protein_type',''):
                 pos = (int(best_psm['aa_start']),int(best_psm['aa_end']))
-                if best_psm.get('hpp_match','') == 'True':
+                if best_psm.get('hpp_match','') == 'Yes':
                     precursors_per_protein_hpp[proteins[0]][pos].append((float(best_psm['score']),theoretical_mz(best_psm['sequence'],int(best_psm['charge']))))
                 precursors_per_protein_all[proteins[0]][pos].append((float(best_psm['score']),theoretical_mz(best_psm['sequence'],int(best_psm['charge']))))
             for protein in proteins:
@@ -491,7 +500,7 @@ def main():
         cannonical_proteins = [protein for protein in proteins if proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso]
         output_genes = set([proteome.proteins[protein].gene if proteome.proteins[protein].gene else 'N/A' for protein in proteins])
 
-        if len(cannonical_proteins) <= 1 and best_psm.get('hpp_match','') == 'True':
+        if len(cannonical_proteins) <= 1 and best_psm.get('hpp_match','') == 'Yes':
             is_hpp = pep_mapping_info[sequence]['hpp']
             match = False
             has_synthetic = False
@@ -531,7 +540,7 @@ def main():
         for (sequence, charge), best_psm in representative_per_precursor.items():
             sequence_nomod = ''.join([p for p in sequence if p.isalpha()])
             best_psm.update(pep_mapping_info.get(sequence_nomod,{}))
-            best_psm.update(protein_info(sequence_nomod, peptide_to_protein, protein_mapping, sequences_found, proteome, nextprot_pe)[0])
+            best_psm.update(protein_info(sequence_nomod, peptide_to_protein, protein_mapping, sequences_found, proteome, nextprot_pe, row_pass_filters(best_psm))[0])
             best_psm.pop('mapped_proteins')
             best_psm.pop('hpp')
             best_psm.pop('len')

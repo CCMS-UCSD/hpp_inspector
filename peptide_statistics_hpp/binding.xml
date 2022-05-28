@@ -20,7 +20,7 @@
         <download port="peptide_coverage_merged_external" type="folder">
                 <query name="resource" value="peptide_coverage_merged_external"/>
         </download>
-        <download port="synthetics" type="file">
+        <download port="synthetics" type="folder">
                 <query name="resource" value="synthetics"/>
         </download>
         <download port="peptide_coverage_comparisons" type="folder">

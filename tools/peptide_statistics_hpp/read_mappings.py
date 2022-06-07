@@ -85,7 +85,7 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                             protein_picked_fdr[protein_mapping.protein_accession] = min(protein_picked_fdr.get(protein_mapping.protein_accession,1),all_protein_fdr)
                     for exon_mapping in exon_mappings:
                         for (complete, mapped) in zip(exon_mapping.complete_coordinates, exon_mapping.matched_coordinates):
-                            peptide_to_exon_map[(chr,complete,exon_mapping.gene,','.join(exon_mapping.transcripts))].append((peptide,mapped,exon_mapping.matched_coordinates,exon_mapping.complete_coordinates))
+                            peptide_to_exon_map[(exon_mapping.chromosome,complete,exon_mapping.gene,','.join(exon_mapping.transcripts))].append((peptide,mapped,exon_mapping.matched_coordinates,exon_mapping.complete_coordinates))
 
                     pep_info[peptide] = match_obj
             else:

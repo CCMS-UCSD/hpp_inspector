@@ -971,11 +971,11 @@ def main():
             'gene',
             '#transcripts',
             '#peptides',
-            '#peptides_novel',
+            # '#peptides_novel',
             'coverage',
-            'coverage_novel',
+            # 'coverage_novel',
             '#junction_peptides',
-            '#junction_peptides_novel'
+            # '#junction_peptides_novel'
         ]
 
         w = csv.DictWriter(fo, delimiter = '\t', fieldnames = fieldnames, extrasaction='ignore')
@@ -984,13 +984,15 @@ def main():
         for exon, peptide_mappings in peptide_to_exon_map.items():
             chromosome, location, gene, transcripts = exon
             peptides = set([p[0] for p in peptide_mappings])
-            junction_peptides = set([p[0] for p in peptide_mappings if len(p[0]) > 1])
+            junction_peptides = set([p[0] for p in peptide_mappings if len(p[2]) > 1])
 
             mapped_coordinates = []
             for peptide_mapping in peptide_mappings:
+                print(peptide_mapping)
                 for i,reference_mapping in enumerate(peptide_mapping[3]):
                     if reference_mapping == location:
                         mapped_coordinates.append(peptide_mapping[2][i])
+
             w.writerow({
                 'chromosome':chromosome,
                 'start_location':location[0],
@@ -999,10 +1001,10 @@ def main():
                 '#transcripts':len(transcripts),
                 '#peptides':len(peptides),
                 '#junction_peptides':len(junction_peptides),
-                'coverage':mapping.find_coverage([mapped_coordinates],[],location[1],location[0]),
-                '#peptides_novel':0,
-                'coverage_novel':0,
-                '#junction_peptides_novel':0
+                'coverage':mapping.find_coverage([],[mapped_coordinates],location[1],location[0])/(location[1]-location[0]),
+                # '#peptides_novel':0,
+                # 'coverage_novel':0,
+                # '#junction_peptides_novel':0
             })
 
     if args.export_explorers and args.export_explorers == 1:

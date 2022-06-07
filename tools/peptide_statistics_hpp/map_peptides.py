@@ -32,8 +32,7 @@ def main():
     proteome_with_decoys = mapping.add_decoys(proteome)
     peptide_list = load_peptide_list(args.peptide_list)
 
-    # peptide_to_exon_map = exon_mapping.map_peptides_to_exons(args.exon_fasta,peptide_list)
-    peptide_to_exon_map = {}
+    peptide_to_exon_map = exon_mapping.map_peptides_to_exons(args.exon_fasta,peptide_list)
     kmer_proteome_hashes = mapping.prepare_proteome_for_mapping(proteome_with_decoys, peptide_list)
 
     output_dict = defaultdict(list)

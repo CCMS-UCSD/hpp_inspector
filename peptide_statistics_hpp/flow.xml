@@ -69,7 +69,7 @@
 	<action name="map_peptides" multiplicity="multiple" type="parallel">
         <input  port="peptide_list"             collection="peptide_list"  transformation="unfolding"/>
         <input  port="fastadb"             			object="fastadb"/>
-				<input  port="exon_fasta"             	object="exon_fasta"/>
+		<input  port="exon_fasta"             	object="exon_fasta"/>
         <output port="peptide_coverage"       	collection="peptide_coverage"/>
     </action>
 

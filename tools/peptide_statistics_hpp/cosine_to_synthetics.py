@@ -46,6 +46,7 @@ def arguments():
     parser.add_argument('-c','--cosine_threshold', type = str, help='Cosine Threshold')
     parser.add_argument('-m','--low_mass_filter', type = float, help='Minimum m/z to retain', default=232)
     parser.add_argument('-s','--min_snr', type = float, help='SNR threshold', default=2)
+    parser.add_argument('-f','--filter_synthetics', type = str, help='Filter Matched Synthetics', default='No')
 
     if len(sys.argv) < 4:
         parser.print_help()
@@ -189,29 +190,31 @@ def main():
         start_synthetic_read = datetime.now()
         print("{}: Loading synthetics".format(start_synthetic_read.strftime("%H:%M:%S")))
         synthetics_loaded = 0
-        with open(args.synthetics) as synthetics_file:
-            with mgf.read(synthetics_file) as reader:
-                for i,s in enumerate(reader):
-                    peptide = s['params'].get('seq')
-                    charge = int(s['params'].get('charge')[0])
-                    # print(peptide, str(charge))
-                    if (peptide, str(charge)) in synthetic_keys:
-                        synthetics_loaded += 1
-                        filename = s['params'].get('originalfile_filename',s['params'].get('provenance_filename'))
-                        scan = s['params'].get('originalfile_scan',s['params'].get('provenance_scan'))
-                        precursor_mz = s['params'].get('pepmass')[0]
-                        mz = s['m/z array']
-                        intn = s['intensity array']
-                        peaks = [processing.Peak(float(mz[i]),float(intn[i])) for i in range(len(mz))]
-                        spectrum = processing.Spectrum(
-                            peaks,
-                            precursor_mz,
-                            charge,
-                            None,
-                            processing.Annotation(peptide, None)
-                        )
-                        _, synthetic_ion_vector = extract_annotated_peaks(spectrum, 0.05, args.low_mass_filter, args.min_snr)
-                        synthetic_scans[(peptide, str(charge))].append(((filename,scan),synthetic_ion_vector))
+        for synthetics_path in args.synthetics.glob('*'):
+            with open(synthetics_path) as synthetics_file:
+                with mgf.read(synthetics_file) as reader:
+                    for i,s in enumerate(reader):
+                        peptide = s['params'].get('seq')
+                        charge = int(s['params'].get('charge')[0])
+                        # print(peptide, str(charge))
+                        if (peptide, str(charge)) in synthetic_keys:
+                            synthetics_loaded += 1
+                            filename = s['params'].get('originalfile_filename',s['params'].get('provenance_filename'))
+                            scan = s['params'].get('originalfile_scan',s['params'].get('provenance_scan'))
+                            precursor_mz = s['params'].get('pepmass')[0]
+                            mz = s['m/z array']
+                            intn = s['intensity array']
+                            peaks = [processing.Peak(float(mz[i]),float(intn[i])) for i in range(len(mz))]
+                            spectrum = processing.Spectrum(
+                                peaks,
+                                precursor_mz,
+                                charge,
+                                None,
+                                processing.Annotation(peptide, None)
+                            )
+                            synthetic_low_mass, synthetic_min_snr = (args.low_mass_filter, args.min_snr) if args.filter_synthetics == 'Yes' else (0,0)
+                            _, synthetic_ion_vector = extract_annotated_peaks(spectrum, 0.05, synthetic_low_mass, synthetic_min_snr)
+                            synthetic_scans[(peptide, str(charge))].append(((filename,scan),synthetic_ion_vector))
         print("{}: Loaded {} synthetics".format(datetime.now().strftime("%H:%M:%S"),synthetics_loaded))
     else:
         print("Not loading synthetics")

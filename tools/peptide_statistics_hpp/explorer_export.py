@@ -214,7 +214,7 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
         get_sequence = lambda l: l['annotation']
         get_charge = lambda l: l['charge']
         # replace is because a symlink was used in construction of KB 2.0.1
-        get_filename = lambda l: l['filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW")
+        get_filename = lambda l: l['filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW").replace('ccms/ccms_output/ccms/PXD026440/IPX0003098000/IPX0003098001','MSV000088554/ccms_peak').replace('ccms/ccms_output/ccms/bioplex_3.0/BioPlex_293T_3.0_RAW_Files/archive','MSV000088555/ccms_peak')
         get_scan = lambda l: l['scan']
         get_proteosafe_task = lambda l: l['proteosafe_task']
         get_workflow = lambda l, a: l.get('workflow',a)
@@ -223,7 +223,7 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
         provenance_lines = input_provenance.values()
         get_sequence = lambda l: l['sequence']
         get_charge = lambda l: l['charge']
-        get_filename = lambda l: l['filename']
+        get_filename = lambda l: l['filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW").replace('ccms/ccms_output/ccms/PXD026440/IPX0003098000/IPX0003098001','MSV000088554/ccms_peak').replace('ccms/ccms_output/ccms/bioplex_3.0/BioPlex_293T_3.0_RAW_Files/archive','MSV000088555/ccms_peak')
         get_scan = lambda l: l['scan']
         get_proteosafe_task = lambda l: l['proteosafe_task']
         get_workflow = lambda l, a: l.get('workflow',a)

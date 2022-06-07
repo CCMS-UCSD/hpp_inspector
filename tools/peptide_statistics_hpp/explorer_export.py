@@ -117,7 +117,7 @@ def table_from_dataset_proteins(dataset_protein_dict, library_id, library_versio
     dataset_protein_rows = []
     for ((dataset,protein),d) in dataset_protein_dict.items():
         dataset_protein_rows.append([
-            "#library_dataset_id:{}.{}".format(library_id,library_version),
+            library_id,
             dataset,
             "#protein_id:" + protein,
             str(len(d['unique_peptides'])),
@@ -133,7 +133,7 @@ def table_from_proteins(protein_dict, hupo_mapping, unique_mapping, library_id, 
     protein_rows = []
     for (protein,d) in protein_dict.items():
         protein_rows.append([
-            "#library_dataset_id:{}.{}".format(library_id,library_version),
+            library_id,
             "#protein_id:" + protein,
             str(unique_mapping.get(protein,0)),
             str(len(d['exon_unique'].intersection(d['unique_peptides']))),
@@ -173,7 +173,7 @@ def representatives_to_representatives_and_variants(representatives_table, libra
         spectrum_file_descriptor = "f.{}".format(representative["database_filename"].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW"))
         nativeid = "scan={}".format(representative["database_scan"])
         representatives.append([
-            "#library_dataset_id:{}.{}".format(library_id,library_version),
+            library_id,
             "#variant_id:{}.{}".format(sequence,charge),
             "#psm_id:{}.{}.{}".format(spectrum_file_descriptor,nativeid,task_for_filescan[(spectrum_file_descriptor,nativeid)]),
             representative['score']
@@ -305,6 +305,6 @@ def output_for_explorer(output_folder, input_mappings, input_representatives, in
     table_output(3, 'peptide_proteins', output_folder, mappings)
     table_output(4, 'library_variants', output_folder, representatives, 'a')
     # table_output(5, 'library_variant_psms', output_folder, provenance_representatives, 'b')
-    table_output(6, 'dataset_proteins', output_folder, protein_stats)
+    table_output(6, 'library_proteins', output_folder, protein_stats)
     table_output(7, 'library_dataset_proteins', output_folder, dataset_proteins)
     # table_output(8, 'psm_provenance', args.output_folder, provenance)

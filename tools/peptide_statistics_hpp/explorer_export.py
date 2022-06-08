@@ -170,7 +170,7 @@ def mapping_to_peptides_and_mapping(input_mapping, library_id):
 def representatives_to_representatives_and_variants(representatives_table, library_id, library_version, task_for_filescan):
     representatives, variants = [], []
     for (sequence, charge), representative in representatives_table.items():
-        spectrum_file_descriptor = "f.{}".format(representative["database_filename"].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW"))
+        spectrum_file_descriptor = "f.{}".format(representative["database_filename"].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW").replace('ccms/ccms_output/ccms/bioplex_3.0/BioPlex_293T_3.0_RAW_Files/archive','MSV000088555/ccms_peak'))
         nativeid = "scan={}".format(representative["database_scan"])
         representatives.append([
             library_id,

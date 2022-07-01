@@ -16,7 +16,8 @@ import requests
 def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
     parser.add_argument('--comparison_pep', type = Path, help='Peptides to Compare')
-    parser.add_argument('--fasta', type = Path, help='Input FASTA')
+    parser.add_argument('--proteome_fasta', type = Path, help='Input Proteome FASTA')
+    parser.add_argument('--contaminants_fasta', type = Path, help='Input Contaminants FASTA')
     parser.add_argument('--input_psms', type = Path, help='Input PSMs')
     parser.add_argument('--input_psms_external', type = Path, help='Input PSMs (External)')
     parser.add_argument('--input_peptides', type = Path, help='Input PSMs (External)')
@@ -92,7 +93,7 @@ def add_brackets(pep):
         pep = pep[:breakpoint] + end_bracket + pep[breakpoint:]
     return pep
 
-protein_type = lambda protein, proteome: 'TrEMBL' if proteome.proteins[protein].db == 'tr' else ('Canonical' if proteome.proteins[protein].iso == None else 'Isoform')
+protein_type = lambda protein, proteome: 'Contaminant' if proteome.proteins[protein].db == 'con' else ('TrEMBL' if proteome.proteins[protein].db == 'tr' else ('Canonical' if proteome.proteins[protein].iso == None else 'Isoform'))
 
 def msv_to_pxd(msv, msv_mapping):
     output_mapping = msv_mapping.get(msv,{}).get('px_accession')
@@ -164,8 +165,9 @@ def main():
     args = arguments()
 
     representative_per_precursor = {}
+    variant_to_precursors = defaultdict(list)
 
-    proteome = mapping.add_decoys(mapping.read_uniprot(args.fasta))
+    proteome = mapping.add_decoys(mapping.merge_proteomes([mapping.read_uniprot(args.proteome_fasta),mapping.read_fasta(args.contaminants_fasta)]))
 
     all_datasets = set()
     datasets_per_sequence= defaultdict(set)
@@ -237,6 +239,10 @@ def main():
         datasets = set([d for d in l.get('datasets','').split(';') if d != ''])
         tasks = set([t for t in l.get('tasks','').split(';') if t != ''])
         sequence, charge = l['sequence'],l['charge']
+        precursor_theoretical_mz = theoretical_mz(sequence, charge)
+        aa_seq = ''.join([a for a in sequence if a.isalpha()])
+        variant = (aa_seq, charge, int(precursor_theoretical_mz))
+        
         if not (sequence, charge) in representative_per_precursor:
             representative_per_precursor[(sequence, charge)] = l.copy()
             precursor_representative = representative_per_precursor[(sequence, charge)]
@@ -287,7 +293,7 @@ def main():
             precursor_representative['database_usi'] = l['usi'] if from_psm else l['database_usi']
             precursor_representative['score'] = float(l['score'])
             #consider best EI And matched ions over all representatives
-            if float(l['explained_intensity']) > float(precursor_representative.get('explained_intensity',0.0)):
+            if potential_psm_gain or float(l['explained_intensity']) > float(precursor_representative.get('explained_intensity',0.0)):
                 precursor_representative['explained_intensity'] = l['explained_intensity']
                 precursor_representative['matched_ions'] = l['matched_ions']
 
@@ -447,7 +453,8 @@ def main():
                         proteins = l['protein'].split(' ###')[0].split(';')
                         # PSM-level FDR was inefficient at this scale - need to rethink
                         #if row_pass_filters(l):
-                        all_psms_with_score.append(fdr.ScoredElement(l['usi'],'XXX_' in proteins[0],l['score']))
+                        all_targets = [p for p in proteins if 'XXX_' not in p]
+                        all_psms_with_score.append(fdr.ScoredElement(l['usi'],len(all_targets)==0,l['score']))
                         l.pop('mapped_proteins')
                         l.pop('hpp')
                         l.pop('len')
@@ -488,7 +495,7 @@ def main():
 
         proteins = [p for p in best_psm['protein'].split(' ###')[0].split(';') if p != '']
         if row_pass_filters(best_psm):
-            if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1 and 'Canonical' in best_psm.get('protein_type',''):
+            if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1 and ('Canonical' in best_psm.get('protein_type','') or 'Contaminant' in best_psm.get('protein_type','')):
                 pos = (int(best_psm['aa_start']),int(best_psm['aa_end']))
                 if best_psm.get('hpp_match','') == 'Yes':
                     precursors_per_protein_hpp[proteins[0]][pos].append((float(best_psm['score']),theoretical_mz(best_psm['sequence'],int(best_psm['charge']))))
@@ -497,7 +504,7 @@ def main():
                 precursors_per_protein_non_unique[protein][sequence_il].append((float(best_psm['score']),theoretical_mz(best_psm['sequence'],int(best_psm['charge']))))
 
         proteins = peptide_to_protein.get(sequence_il,[])
-        cannonical_proteins = [protein for protein in proteins if proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso]
+        cannonical_proteins = [protein for protein in proteins if (proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso) or proteome.proteins[protein].db == 'con']
         output_genes = set([proteome.proteins[protein].gene if proteome.proteins[protein].gene else 'N/A' for protein in proteins])
 
         if len(cannonical_proteins) <= 1 and best_psm.get('hpp_match','') == 'Yes':
@@ -635,7 +642,7 @@ def main():
             r.writeheader()
             for precursor in all_precursors:
                 proteins = [p for p in precursor['protein'].split(' ###')[0].split(';') if p != '']
-                if float(precursor['precursor_fdr']) < 1 and len(proteins) == 1 and 'Canonical' in precursor.get('protein_type',''):
+                if float(precursor['precursor_fdr']) < 1 and len(proteins) == 1 and ('Canonical' in precursor.get('protein_type','') or 'Contaminant' in precursor.get('protein_type','')):
                     precursor['picked_protein_fdr'] = min(picked_fdr_dict.get(proteins[0],1),1)
                     precursor['hpp_protein_fdr'] = min(hpp_fdr_dict.get(proteins[0],1),1)
                 else:

@@ -10,7 +10,8 @@ def arguments():
     parser = argparse.ArgumentParser(description='mzTab to list of peptides')
     parser.add_argument('-p','--params', type = str, help='Input Parameters')
     parser.add_argument('-c','--comparisons', type = Path, help='Comparison Jobs')
-    parser.add_argument('-f','--proteome_fasta', type = Path, help='FASTA File')
+    parser.add_argument('-f','--proteome_fasta', type = Path, help='Input FASTA Protein Database')
+    parser.add_argument('-m','--contaminants_fasta', type = Path, help='Input FASTA Protein Contaminants Database')
     parser.add_argument('-b','--backup_kb_pep', type = Path, help='Backup KB Peptides')
     parser.add_argument('-t','--use_job_level_thresholds', type = bool, help='Use job level thresholds',default=True)
     parser.add_argument('-k','--kb_pep', type = Path, help='Output KB Peptides')
@@ -65,7 +66,7 @@ def main():
 
         try:
 
-            proteome = mapping.add_decoys(mapping.read_uniprot(args.proteome_fasta))
+            proteome = mapping.merge_proteomes([mapping.read_uniprot(args.proteome_fasta),mapping.read_fasta(args.contaminants_fasta)])
 
             with open(args.kb_pep, 'w') as w:
                 r = csv.DictWriter(w, delimiter = '\t', fieldnames = header)

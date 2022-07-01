@@ -13,6 +13,10 @@
 		<parameter name="fastadb" label="Proteome DB">
 			<fileGenerator type="upload" purpose="fasta" target="fastadb"/>
 		</parameter>
+        <!-- Search file parameters -->
+		<parameter name="con_fastadb" label="Proteome DB - Contaminants">
+			<fileGenerator type="upload" purpose="con_fasta" target="con_fastadb"/>
+		</parameter>
 
 		<parameter name="mztab" label="Search mzTab Files">
 			<fileGenerator type="upload" purpose="mztab" target="mztab"/>
@@ -226,6 +230,16 @@
             <cell colspan="3">
                 <module id="fastadb" type="fileSelector">
                     <property name="label">Proteome DB</property>
+                </module>
+            </cell>
+			<cell>
+                <label>
+                    <content parameter="con_fastadb"/>
+                </label>
+            </cell>
+            <cell colspan="3">
+                <module id="con_fastadb" type="fileSelector">
+                    <property name="label">Proteome DB - Contaminants</property>
                 </module>
             </cell>
         </row>

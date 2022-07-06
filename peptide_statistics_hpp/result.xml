@@ -147,7 +147,7 @@
             <column type="text" field="protein_type" label="Protein Type" width="4"/>
             <column type="integer" field="aa_start" label="AA Start" width="1"/>
             <column type="integer" field="aa_end" label="AA End" width="1"/>
-            <column type="integer" field="pe" label="PE" width="5"/>
+            <column type="integer" field="pe" label="PE" width="5" nonNumericCheckbox="true"/>
             <column type="text" field="hpp_match" label="HPP Compliant" width="2"/>
             <column type="text" field="usi" label="USI" width="20"/>
             <!-- <column type="text" field="filename" label="Filename" width="20"/>
@@ -222,7 +222,7 @@
                 <column type="text" field="protein_type" label="Protein Type" width="4"/>
                 <column type="integer" field="aa_start" label="AA Start" width="1" tooltip="Start location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
                 <column type="integer" field="aa_end" label="AA End" width="1" tooltip="End location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
-                <column type="integer" field="pe" label="Protein Existence (PE) Level" width="5" tooltip="Protein Existence (PE) Level from neXtProt 2020 release."/>
+                <column type="integer" field="pe" label="Protein Existence (PE) Level" width="5" tooltip="Protein Existence (PE) Level from latest neXtProt release." nonNumericCheckbox="true" />
                 <column type="text" field="sequence" label="Sequence" width="20"/>
                 <column type="text" field="sequence_unmodified" label="Demodified Sequence" width="20"/>
                 <column type="text" field="sequence_unmodified_il" label="IL Demodified Sequence" width="20"/>

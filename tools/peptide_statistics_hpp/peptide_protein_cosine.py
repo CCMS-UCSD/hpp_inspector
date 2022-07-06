@@ -77,6 +77,10 @@ def theoretical_mz(sequence,charge):
         mods = 0
     return (theoretical_mass(aa) + mods + (int(charge)*1.007276035))/int(charge)
 
+def integer_mod_mass(sequence):
+    mods = ''.join([m for m in sequence if not m.isalpha()])
+    mods = [int(round(float(m))) if i == 0 else -int(round(float(m))) for ms in mods.split('+') for i,m in enumerate(ms.split('-')) if m != '' ]
+    return sum(mods)
 
 def add_brackets(pep):
     aa_breakpoints = []
@@ -235,14 +239,15 @@ def main():
     latest_nextprot_release = sorted(list(nextprot_releases_pe.keys()))[-1]
     nextprot_pe = nextprot_releases_pe[latest_nextprot_release]
 
-    def update_precursor_representative(l,from_psm = True):
+    def update_precursor_representative(l,from_psm = True, variant_level = False):
         datasets = set([d for d in l.get('datasets','').split(';') if d != ''])
         tasks = set([t for t in l.get('tasks','').split(';') if t != ''])
         sequence, charge = l['sequence'],l['charge']
         precursor_theoretical_mz = theoretical_mz(sequence, charge)
+        integer_mods = integer_mod_mass(sequence)
         aa_seq = ''.join([a for a in sequence if a.isalpha()])
 
-        variant = (aa_seq, charge, int(precursor_theoretical_mz))
+        variant = (aa_seq, charge, integer_mods)
         update_peptidoform = False
 
         if not variant in variant_to_best_precursor:

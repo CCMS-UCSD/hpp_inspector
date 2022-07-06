@@ -165,7 +165,7 @@ def main():
     args = arguments()
 
     representative_per_precursor = {}
-    variant_to_precursors = defaultdict(list)
+    variant_to_best_precursor = {}
 
     proteome = mapping.add_decoys(mapping.merge_proteomes([mapping.read_uniprot(args.proteome_fasta),mapping.read_fasta(args.contaminants_fasta)]))
 
@@ -241,13 +241,17 @@ def main():
         sequence, charge = l['sequence'],l['charge']
         precursor_theoretical_mz = theoretical_mz(sequence, charge)
         aa_seq = ''.join([a for a in sequence if a.isalpha()])
+
         variant = (aa_seq, charge, int(precursor_theoretical_mz))
-        
-        if not (sequence, charge) in representative_per_precursor:
+        update_peptidoform = False
+
+        if not variant in variant_to_best_precursor:
+            variant_to_best_precursor[variant] = (sequence, charge)
             representative_per_precursor[(sequence, charge)] = l.copy()
             precursor_representative = representative_per_precursor[(sequence, charge)]
             precursor_representative['datasets'] = datasets
             precursor_representative['tasks'] = tasks
+            precursor_representative['parent_mass'] = precursor_theoretical_mz
             if from_psm:
                 precursor_representative['database_filename'] = l['filename']
                 precursor_representative['database_scan'] = l['scan']
@@ -259,7 +263,7 @@ def main():
                 precursor_representative.pop('scan')
                 precursor_representative.pop('usi')
 
-        precursor_representative = representative_per_precursor[(sequence, charge)]
+        precursor_representative = representative_per_precursor[variant_to_best_precursor[variant]]
 
         precursor_representative['datasets'] |= datasets
         precursor_representative['tasks'] |= tasks
@@ -292,6 +296,7 @@ def main():
             precursor_representative['database_scan'] = l['scan'] if from_psm else l['database_scan']
             precursor_representative['database_usi'] = l['usi'] if from_psm else l['database_usi']
             precursor_representative['score'] = float(l['score'])
+            update_peptidoform = True
             #consider best EI And matched ions over all representatives
             if potential_psm_gain or float(l['explained_intensity']) > float(precursor_representative.get('explained_intensity',0.0)):
                 precursor_representative['explained_intensity'] = l['explained_intensity']
@@ -310,6 +315,11 @@ def main():
             precursor_representative['cosine_score_match'] = 'Yes'
         else:
             precursor_representative['cosine_score_match'] = 'No'
+
+        if update_peptidoform:
+            representative_per_precursor[(sequence, charge)] = representative_per_precursor.pop(variant_to_best_precursor[variant])
+            variant_to_best_precursor[variant] = (sequence, charge)
+
 
     def update_mappings(protein_coverage_file,update_precursor_representatives):
         if(protein_coverage_file.is_file()):

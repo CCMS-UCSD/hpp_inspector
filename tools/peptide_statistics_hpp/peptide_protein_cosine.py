@@ -472,8 +472,8 @@ def main():
                         all_targets = [p for p in proteins if 'XXX_' not in p]
                         is_decoy = len(all_targets)==0
                         l['decoy'] = is_decoy
-                        # if row_pass_filters(l):
-                        all_psms_with_score.append(fdr.ScoredElement(l['usi'],is_decoy,l['score']))
+                        if row_pass_filters(l):
+                            all_psms_with_score.append(fdr.ScoredElement(l['usi'],is_decoy,l['score']))
                         l.pop('mapped_proteins')
                         l.pop('hpp')
                         l.pop('len')

@@ -268,6 +268,7 @@ def main():
                 precursor_representative['explained_intensity'] = float(l['explained_intensity'])
                 precursor_representative['cosine'] = float(l['cosine'])
                 precursor_representative['score'] = score
+                precursor_representative['best_overall_psm_score'] = score
                 precursor_representative.pop('filename')
                 precursor_representative.pop('scan')
                 precursor_representative.pop('usi')
@@ -325,6 +326,9 @@ def main():
             precursor_representative['cosine_score_match'] = 'Yes'
         else:
             precursor_representative['cosine_score_match'] = 'No'
+
+        if best_score:
+            precursor_representative['best_overall_psm_score'] = float(l['score'])
 
         if (this_pass_ei or this_pass_cos) and this_pass_by:
             precursor_representative['filtered_psms'] += l.get('filtered_psms',1)

@@ -94,7 +94,6 @@ def extract_annotated_peaks(spectrum, fragment_tolerance, low_mass_filter, min_s
             fragment_tolerance,
             precursor_filter_window=1.5,
             low_mass_filter=low_mass_filter,
-            isobaric_tag_type=None,
             min_snr=min_snr,
             num_top_unannotated_envelopes_to_remove=2,
             isobaric_tag_type='TMT 16-plex' #remove these peaks for all jobs
@@ -118,7 +117,7 @@ def find_ei_and_intensity(spectrum, psm, synthetic_scans, tol, low_mass_filter, 
     return spectrum_ei, best_cosine
 
 def process_spectrum(psms_to_consider, filename, synthetic_scans, tol, low_mass_filter, min_snr, threshold, peaks_obj, spectrum_select_func):
-    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
+    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A'),'N/A'))
     explained_intensity_per_spectrum = {}
     for scan in psms_to_consider[filename].keys():
         spectrum = spectrum_select_func(peaks_obj,scan)
@@ -130,7 +129,7 @@ def process_spectrum(psms_to_consider, filename, synthetic_scans, tol, low_mass_
 
 def process_spectrum_read_file(psms_to_consider, filename, synthetic_scans, tol, low_mass_filter, min_snr, threshold, reader, spectrum_select_func,read_scan):
     start_time = datetime.now()
-    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
+    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A'),'N/A'))
     explained_intensity_per_spectrum = {}
     all_spectra = []
     for i,s in enumerate(reader):
@@ -222,7 +221,7 @@ def main():
     else:
         print("Not loading synthetics")
 
-    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
+    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A'),'N/A'))
     explained_intensity_per_spectrum = {}
 
     min_spectra_to_load_file = 20
@@ -327,15 +326,13 @@ def main():
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
         for psm in all_psms:
-            cosine, best_synthetic = cosine_to_synthetic[(psm['filename'],psm['scan'])]
+            cosine, best_synthetic, synthetic_peptide = cosine_to_synthetic[(psm['filename'],psm['scan'])]
             if best_synthetic[0] != 'N/A':
                 synthetic_filename = 'f.' + best_synthetic[0].replace('/data/massive/','')
                 synthetic_scan = best_synthetic[1]
-                synthetic_peptide = best_synthetic[2]
             else:
                 synthetic_filename = best_synthetic[0]
                 synthetic_scan = best_synthetic[1]
-                synthetic_peptide = best_synthetic[2]
             psm['usi'] = make_usi(psm['filename'], psm['scan'], psm['sequence'], psm['charge'])
             psm['synthetic_filename'] = synthetic_filename
             psm['synthetic_scan'] = synthetic_scan

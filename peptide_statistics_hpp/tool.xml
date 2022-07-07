@@ -195,7 +195,7 @@
           <arg option="-library_name"         valueRef="@library_name"/>
           <arg option="-export_explorers"     valueRef="@export_explorers"/>
           <arg option="-explorers_output"     valueRef="explorer_export"/>
-
+          <arg option="-variant_output"     valueRef="@use_variants"/>
       </execution>
   </tool>
   

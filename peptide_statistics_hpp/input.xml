@@ -101,6 +101,15 @@
 			<validator type="set" />
 		</parameter>
 
+		<parameter name="use_variants" label="Variant-level analysis">
+			<options>
+				<option label="Peptidoforms" value="0" />
+				<option label="Variants" value="1" />
+			</options>
+			<default value="0" />
+			<validator type="set" />
+		</parameter>
+
 		<parameter name="parallel_cosine.parallel_cosine" label="Parallelism (For Cosine Calculations)">
 			<default value="10"/>
 			<validator type="integer"/>
@@ -394,6 +403,16 @@
 					</cell>
 					<cell colspan="2">
 						<input type="select" parameter="synthetic_filters"/>
+					</cell>
+				</row>
+				<row>
+					<cell>
+						<label>
+							<content parameter="use_variants"/>
+						</label>
+					</cell>
+					<cell colspan="2">
+						<input type="select" parameter="use_variants"/>
 					</cell>
 				</row>
 

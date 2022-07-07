@@ -51,6 +51,8 @@ def arguments():
     parser.add_argument('--library_name', type = int, help='Library Name')
     parser.add_argument('--export_explorers', type = int, help='Export Explorer Tables (0/1)')
     parser.add_argument('--explorers_output', type = Path, help='Tables for Explorers')
+    parser.add_argument('--variant_output', type = int, help='Variant level outputs',default=0)
+
     if len(sys.argv) < 4:
         parser.print_help()
         sys.exit(1)
@@ -171,7 +173,7 @@ def main():
     representative_per_precursor = {}
     variant_to_best_precursor = {}
     variant_to_all_precursors = defaultdict(set)
-    current_variant_number = 0
+    variant_number = {}
 
     proteome = mapping.add_decoys(mapping.merge_proteomes([mapping.read_uniprot(args.proteome_fasta),mapping.read_fasta(args.contaminants_fasta)]))
 
@@ -249,7 +251,10 @@ def main():
         integer_mods = integer_mod_mass(sequence)
         aa_seq = ''.join([a for a in sequence if a.isalpha()])
 
-        variant = (aa_seq, charge, integer_mods)
+        if variant_level:
+            variant = (aa_seq, charge, integer_mods)
+        else:
+            variant = (sequence, charge)
         update_peptidoform = False
 
         score = float(l['score']) if psm_fdr <= 0.01 else 0
@@ -257,6 +262,8 @@ def main():
         variant_to_all_precursors[variant].add((sequence, charge))
 
         if not variant in variant_to_best_precursor:
+            current_variant_number = len(variant_number)
+            variant_number[variant] = current_variant_number
             variant_to_best_precursor[variant] = (sequence, charge)
             representative_per_precursor[(sequence, charge)] = l.copy()
             precursor_representative = representative_per_precursor[(sequence, charge)]
@@ -265,6 +272,7 @@ def main():
             precursor_representative['parent_mass'] = precursor_theoretical_mz
             precursor_representative['filtered_psms'] = 0
             precursor_representative['total_psms'] = 0
+            precursor_representative['variant_number'] = current_variant_number
             if from_psm:
                 precursor_representative['database_filename'] = l['filename']
                 precursor_representative['database_scan'] = l['scan']
@@ -344,6 +352,7 @@ def main():
             representative_per_precursor[(sequence, charge)] = representative_per_precursor.pop(variant_to_best_precursor[variant])
             variant_to_best_precursor[variant] = (sequence, charge)
 
+        return variant_number[variant]
 
     def update_mappings(protein_coverage_file,update_precursor_representatives):
         if(protein_coverage_file.is_file()):
@@ -355,7 +364,7 @@ def main():
                 protein_mapping[protein].update(peptide_mapping)
             if update_precursor_representatives:
                 for l in output_peptides:
-                    update_precursor_representative(l,False)
+                    update_precursor_representative(l,False,variant_level=args.variant_output==1)
 
 
     start_time = datetime.now()
@@ -458,7 +467,7 @@ def main():
         all_psms_with_score = []
         all_psm_rows = []
         with open(args.output_psms,'w') as w:
-            header = ['protein','protein_full','psm_fdr','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
+            header = ['protein','protein_full','psm_fdr','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','variant_number','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
             o = csv.DictWriter(w, delimiter='\t',fieldnames = header, restval='N/A', extrasaction='ignore')
             o.writeheader()
             for input_psm in args.input_psms.glob('*'):
@@ -500,9 +509,10 @@ def main():
 
             for l in all_psm_rows:
                 l['psm_fdr'] = psm_fdr.get(l['usi'],1)
+                variant_number = update_precursor_representative(l, psm_fdr = l['psm_fdr'], variant_level=args.variant_output==1)
+                l['variant_number'] = variant_number
                 if args.output_psms_flag == "1" or (args.output_psms_flag == "0.5" and row_pass_filters(l)):
                     o.writerow(l)
-                update_precursor_representative(l, psm_fdr = l['psm_fdr'])
 
 
     print("About to calculate precursor FDR")

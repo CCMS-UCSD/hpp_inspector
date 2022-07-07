@@ -96,7 +96,8 @@ def extract_annotated_peaks(spectrum, fragment_tolerance, low_mass_filter, min_s
             low_mass_filter=low_mass_filter,
             isobaric_tag_type=None,
             min_snr=min_snr,
-            num_top_unannotated_envelopes_to_remove=2
+            num_top_unannotated_envelopes_to_remove=2,
+            isobaric_tag_type='TMT 16-plex' #remove these peaks for all jobs
     )
     ion_vector = spectrum._replace(peaks = ion_vector)
     ion_vector = processing.normalize_spectrum(ion_vector)

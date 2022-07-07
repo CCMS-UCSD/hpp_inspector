@@ -276,7 +276,6 @@ def main():
         precursor_representative['tasks'] |= tasks
 
         best_cosine = float(l['cosine']) >= float(precursor_representative['cosine'])
-        best_score = score >= float(precursor_representative['score'])
 
         this_pass_ei = float(l['explained_intensity']) >= args.explained_intensity_cutoff
         this_pass_cos = float(l['cosine']) >= args.cosine_cutoff
@@ -284,6 +283,8 @@ def main():
         best_pass_ei = float(precursor_representative['explained_intensity']) >= args.explained_intensity_cutoff
         best_pass_cos = float(precursor_representative['cosine']) >= args.cosine_cutoff
         best_pass_by = int(precursor_representative['matched_ions']) >= args.annotated_ions_cutoff
+
+        best_score =  float(l['explained_intensity']) >= float(precursor_representative['explained_intensity']) if score == float(precursor_representative['score']) else score > float(precursor_representative['score'])
 
         # we want to find the spectrum with the best score,
         # but sometimes the highest scoring spectrum does not pass the filters

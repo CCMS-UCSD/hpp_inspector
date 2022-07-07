@@ -170,6 +170,8 @@ def main():
 
     representative_per_precursor = {}
     variant_to_best_precursor = {}
+    variant_to_all_precursors = defaultdict(set)
+    current_variant_number = 0
 
     proteome = mapping.add_decoys(mapping.merge_proteomes([mapping.read_uniprot(args.proteome_fasta),mapping.read_fasta(args.contaminants_fasta)]))
 
@@ -251,6 +253,8 @@ def main():
         update_peptidoform = False
 
         score = float(l['score']) if psm_fdr <= 0.01 else 0
+
+        variant_to_all_precursors[variant].add((sequence, charge))
 
         if not variant in variant_to_best_precursor:
             variant_to_best_precursor[variant] = (sequence, charge)
@@ -334,7 +338,7 @@ def main():
             precursor_representative['filtered_psms'] += l.get('filtered_psms',1)
         precursor_representative['total_psms'] += l.get('total_psms',1)
 
-
+        precursor_representative['num_peptidoforms'] = len(variant_to_all_precursors[variant])
 
         if update_peptidoform:
             representative_per_precursor[(sequence, charge)] = representative_per_precursor.pop(variant_to_best_precursor[variant])

@@ -509,8 +509,7 @@ def main():
 
             for l in all_psm_rows:
                 l['psm_fdr'] = psm_fdr.get(l['usi'],1)
-                variant_number = update_precursor_representative(l, psm_fdr = l['psm_fdr'], variant_level=args.variant_output==1)
-                l['variant_number'] = variant_number
+                l['variant_number'] = update_precursor_representative(l, psm_fdr = l['psm_fdr'], variant_level=args.variant_output==1)
                 if args.output_psms_flag == "1" or (args.output_psms_flag == "0.5" and row_pass_filters(l)):
                     o.writerow(l)
 
@@ -543,10 +542,10 @@ def main():
             if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1 and ('Canonical' in best_psm.get('protein_type','') or 'Contaminant' in best_psm.get('protein_type','')):
                 pos = (int(best_psm['aa_start']),int(best_psm['aa_end']))
                 if best_psm.get('hpp_match','') == 'Yes':
-                    precursors_per_protein_hpp[proteins[0]][pos].append((float(best_psm['score']),theoretical_mz(best_psm['sequence'],int(best_psm['charge']))))
-                precursors_per_protein_all[proteins[0]][pos].append((float(best_psm['score']),theoretical_mz(best_psm['sequence'],int(best_psm['charge']))))
+                    precursors_per_protein_hpp[proteins[0]][pos].append((float(best_psm['score']),theoretical_mass(best_psm['sequence'])))
+                precursors_per_protein_all[proteins[0]][pos].append((float(best_psm['score']),theoretical_mass(best_psm['sequence'])))
             for protein in proteins:
-                precursors_per_protein_non_unique[protein][sequence_il].append((float(best_psm['score']),theoretical_mz(best_psm['sequence'],int(best_psm['charge']))))
+                precursors_per_protein_non_unique[protein][sequence_il].append((float(best_psm['score']),theoretical_mass(best_psm['sequence'])))
 
         proteins = peptide_to_protein.get(sequence_il,[])
         cannonical_proteins = [protein for protein in proteins if (proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso) or proteome.proteins[protein].db == 'con']

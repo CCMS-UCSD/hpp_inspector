@@ -259,6 +259,8 @@ def main():
             precursor_representative['datasets'] = datasets
             precursor_representative['tasks'] = tasks
             precursor_representative['parent_mass'] = precursor_theoretical_mz
+            precursor_representative['filtered_psms'] = 0
+            precursor_representative['total_psms'] = 0
             if from_psm:
                 precursor_representative['database_filename'] = l['filename']
                 precursor_representative['database_scan'] = l['scan']
@@ -284,7 +286,7 @@ def main():
         best_pass_cos = float(precursor_representative['cosine']) >= args.cosine_cutoff
         best_pass_by = int(precursor_representative['matched_ions']) >= args.annotated_ions_cutoff
 
-        best_score =  float(l['explained_intensity']) >= float(precursor_representative['explained_intensity']) if score == float(precursor_representative['score']) else score > float(precursor_representative['score'])
+        best_score = float(l['explained_intensity']) >= float(precursor_representative['explained_intensity']) if score == float(precursor_representative['score']) else score > float(precursor_representative['score'])
 
         # we want to find the spectrum with the best score,
         # but sometimes the highest scoring spectrum does not pass the filters
@@ -323,6 +325,12 @@ def main():
             precursor_representative['cosine_score_match'] = 'Yes'
         else:
             precursor_representative['cosine_score_match'] = 'No'
+
+        if (this_pass_ei or this_pass_cos) and this_pass_by:
+            precursor_representative['filtered_psms'] += l.get('filtered_psms',1)
+        precursor_representative['total_psms'] += l.get('total_psms',1)
+
+
 
         if update_peptidoform:
             representative_per_precursor[(sequence, charge)] = representative_per_precursor.pop(variant_to_best_precursor[variant])

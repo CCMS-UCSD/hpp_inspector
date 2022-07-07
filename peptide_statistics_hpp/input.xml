@@ -110,6 +110,16 @@
 			<validator type="set" />
 		</parameter>
 
+		<parameter name="hpp_aggregation_function" label="Sequence-level HPP Aggregation">
+			<options>
+				<option label="Sum of variants" value="sum" />
+				<option label="Max of variants" value="max" />
+			</options>
+			<default value="sum" />
+			<validator type="set" />
+		</parameter>
+		
+
 		<parameter name="parallel_cosine.parallel_cosine" label="Parallelism (For Cosine Calculations)">
 			<default value="10"/>
 			<validator type="integer"/>
@@ -413,6 +423,14 @@
 					</cell>
 					<cell colspan="2">
 						<input type="select" parameter="use_variants"/>
+					</cell>
+					<cell>
+						<label>
+							<content parameter="hpp_aggregation_function"/>
+						</label>
+					</cell>
+					<cell colspan="2">
+						<input type="select" parameter="hpp_aggregation_function"/>
 					</cell>
 				</row>
 

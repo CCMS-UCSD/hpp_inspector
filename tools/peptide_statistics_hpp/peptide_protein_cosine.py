@@ -52,6 +52,7 @@ def arguments():
     parser.add_argument('--export_explorers', type = int, help='Export Explorer Tables (0/1)')
     parser.add_argument('--explorers_output', type = Path, help='Tables for Explorers')
     parser.add_argument('--variant_output', type = int, help='Variant level outputs',default=0)
+    parser.add_argument('--hpp_protein_score_aggregation', type = str, help='HPP Protein Aggregation (max or sum')
 
     if len(sys.argv) < 4:
         parser.print_help()
@@ -169,6 +170,8 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
 
 def main():
     args = arguments()
+
+    hpp_score_aggregation = lambda xs: sum(xs) if args.hpp_protein_score_aggregation == 'sum' else max(xs)
 
     representative_per_precursor = {}
     variant_to_best_precursor = {}
@@ -542,10 +545,10 @@ def main():
             if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1 and ('Canonical' in best_psm.get('protein_type','') or 'Contaminant' in best_psm.get('protein_type','')):
                 pos = (int(best_psm['aa_start']),int(best_psm['aa_end']))
                 if best_psm.get('hpp_match','') == 'Yes':
-                    precursors_per_protein_hpp[proteins[0]][pos].append((float(best_psm['score']),theoretical_mass(best_psm['sequence'])))
-                precursors_per_protein_all[proteins[0]][pos].append((float(best_psm['score']),theoretical_mass(best_psm['sequence'])))
+                    precursors_per_protein_hpp[proteins[0]][pos].append((float(best_psm['score']),theoretical_mass(best_psm['sequence']),best_psm['charge']))
+                precursors_per_protein_all[proteins[0]][pos].append((float(best_psm['score']),theoretical_mass(best_psm['sequence']),best_psm['charge']))
             for protein in proteins:
-                precursors_per_protein_non_unique[protein][sequence_il].append((float(best_psm['score']),theoretical_mass(best_psm['sequence'])))
+                precursors_per_protein_non_unique[protein][sequence_il].append((float(best_psm['score']),theoretical_mass(best_psm['sequence']),best_psm['charge']))
 
         proteins = peptide_to_protein.get(sequence_il,[])
         cannonical_proteins = [protein for protein in proteins if (proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso) or proteome.proteins[protein].db == 'con']
@@ -623,19 +626,19 @@ def main():
 
     seen_picked = set()
 
-    def greedy_sequence_precursor_score(precursor_list, mz_distance = 2.5):
+    def greedy_sequence_precursor_score(precursor_list, distance = 2.5, score_aggregation_func = lambda xs: sum(xs)):
         used_precursors = []
         for precursor in sorted(precursor_list, key = lambda x: x[0], reverse = True):
             found = False
             for seen_precursor in used_precursors:
-                if abs(precursor[1]-seen_precursor[1]) <= mz_distance:
+                if precursor[2]==seen_precursor[2] and abs(precursor[1]-seen_precursor[1]) <= distance:
                     found = True
             if not found:
                 used_precursors.append(precursor)
-        return sum([p[0] for p in used_precursors])
+        return score_aggregation_func([p[0] for p in used_precursors])
 
     for protein, precursors in precursors_per_protein_hpp.items():
-        score, count = mapping.non_nested_score([(*k,greedy_sequence_precursor_score(v)) for k,v in precursors.items()])
+        score, count = mapping.non_nested_score([(*k,greedy_sequence_precursor_score(v,score_aggregation_func=hpp_score_aggregation)) for k,v in precursors.items()])
         if score != 0:
             hpp_protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
             hpp_score_dict[protein] = score

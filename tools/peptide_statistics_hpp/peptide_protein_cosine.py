@@ -239,7 +239,7 @@ def main():
     latest_nextprot_release = sorted(list(nextprot_releases_pe.keys()))[-1]
     nextprot_pe = nextprot_releases_pe[latest_nextprot_release]
 
-    def update_precursor_representative(l,from_psm = True, variant_level = False):
+    def update_precursor_representative(l,from_psm = True, variant_level = False, psm_fdr = 0):
         datasets = set([d for d in l.get('datasets','').split(';') if d != ''])
         tasks = set([t for t in l.get('tasks','').split(';') if t != ''])
         sequence, charge = l['sequence'],l['charge']
@@ -249,6 +249,8 @@ def main():
 
         variant = (aa_seq, charge, integer_mods)
         update_peptidoform = False
+
+        score = float(l['score']) if psm_fdr <= 0.01 else 0
 
         if not variant in variant_to_best_precursor:
             variant_to_best_precursor[variant] = (sequence, charge)
@@ -263,7 +265,7 @@ def main():
                 precursor_representative['database_usi'] = l['usi']
                 precursor_representative['explained_intensity'] = float(l['explained_intensity'])
                 precursor_representative['cosine'] = float(l['cosine'])
-                precursor_representative['score'] = float(l['score'])
+                precursor_representative['score'] = score
                 precursor_representative.pop('filename')
                 precursor_representative.pop('scan')
                 precursor_representative.pop('usi')
@@ -274,7 +276,7 @@ def main():
         precursor_representative['tasks'] |= tasks
 
         best_cosine = float(l['cosine']) >= float(precursor_representative['cosine'])
-        best_score = float(l['score']) >= float(precursor_representative['score'])
+        best_score = score >= float(precursor_representative['score'])
 
         this_pass_ei = float(l['explained_intensity']) >= args.explained_intensity_cutoff
         this_pass_cos = float(l['cosine']) >= args.cosine_cutoff
@@ -467,9 +469,11 @@ def main():
                         l.update(protein_info_dict)
                         proteins = l['protein'].split(' ###')[0].split(';')
                         # PSM-level FDR was inefficient at this scale - need to rethink
-                        #if row_pass_filters(l):
                         all_targets = [p for p in proteins if 'XXX_' not in p]
-                        all_psms_with_score.append(fdr.ScoredElement(l['usi'],len(all_targets)==0,l['score']))
+                        is_decoy = len(all_targets)==0
+                        l['decoy'] = is_decoy
+                        # if row_pass_filters(l):
+                        all_psms_with_score.append(fdr.ScoredElement(l['usi'],is_decoy,l['score']))
                         l.pop('mapped_proteins')
                         l.pop('hpp')
                         l.pop('len')
@@ -481,8 +485,7 @@ def main():
                 l['psm_fdr'] = psm_fdr.get(l['usi'],1)
                 if args.output_psms_flag == "1" or (args.output_psms_flag == "0.5" and row_pass_filters(l)):
                     o.writerow(l)
-                if l['psm_fdr'] <= 0.01:
-                    update_precursor_representative(l)
+                update_precursor_representative(l, psm_fdr = l['psm_fdr'])
 
 
     print("About to calculate precursor FDR")
@@ -491,7 +494,7 @@ def main():
 
     for (sequence, charge), best_psm in representative_per_precursor.items():
         all_targets = [p for ps in best_psm['protein'].split(' ###') for p in ps.split(';') if 'XXX_' not in p]
-        if best_psm['protein'] != '':
+        if best_psm['protein'] != '' and best_psm['score'] > 0:
             all_hpp_precursors.append(fdr.ScoredElement((sequence, charge),len(all_targets)==0,best_psm['score']))
     
     precursor_fdr = {}

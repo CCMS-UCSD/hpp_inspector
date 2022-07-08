@@ -71,6 +71,16 @@ theoretical_mass = lambda xs: sum([aa_dict[x] for x in xs]) + 18.010564686
 
 no_mod_il = lambda pep: ''.join([p.replace('I','L') for p in pep if p.isalpha()])
 
+def seq_theoretical_mass(sequence):
+    aa = ''.join([a for a in sequence if a.isalpha()])
+    mods = ''.join([m for m in sequence if not m.isalpha()])
+    if len(mods) > 0:
+        mods = eval(mods)
+    else:
+        mods = 0
+    return (theoretical_mass(aa) + mods + 1.007276035)
+
+
 def theoretical_mz(sequence,charge):
     aa = ''.join([a for a in sequence if a.isalpha()])
     mods = ''.join([m for m in sequence if not m.isalpha()])
@@ -346,8 +356,8 @@ def main():
             precursor_representative['best_overall_psm_score'] = float(l['score'])
 
         if (this_pass_ei or this_pass_cos) and this_pass_by:
-            precursor_representative['filtered_psms'] += l.get('filtered_psms',1)
-        precursor_representative['total_psms'] += l.get('total_psms',1)
+            precursor_representative['filtered_psms'] += int(l.get('filtered_psms',1))
+        precursor_representative['total_psms'] += int(l.get('total_psms',1))
 
         precursor_representative['num_peptidoforms'] = len(variant_to_all_precursors[variant])
 
@@ -545,10 +555,10 @@ def main():
             if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1 and ('Canonical' in best_psm.get('protein_type','') or 'Contaminant' in best_psm.get('protein_type','')):
                 pos = (int(best_psm['aa_start']),int(best_psm['aa_end']))
                 if best_psm.get('hpp_match','') == 'Yes':
-                    precursors_per_protein_hpp[proteins[0]][pos].append((float(best_psm['score']),theoretical_mass(best_psm['sequence']),best_psm['charge']))
-                precursors_per_protein_all[proteins[0]][pos].append((float(best_psm['score']),theoretical_mass(best_psm['sequence']),best_psm['charge']))
+                    precursors_per_protein_hpp[proteins[0]][pos].append((float(best_psm['score']),seq_theoretical_mass(best_psm['sequence']),best_psm['charge']))
+                precursors_per_protein_all[proteins[0]][pos].append((float(best_psm['score']),seq_theoretical_mass(best_psm['sequence']),best_psm['charge']))
             for protein in proteins:
-                precursors_per_protein_non_unique[protein][sequence_il].append((float(best_psm['score']),theoretical_mass(best_psm['sequence']),best_psm['charge']))
+                precursors_per_protein_non_unique[protein][sequence_il].append((float(best_psm['score']),seq_theoretical_mass(best_psm['sequence']),best_psm['charge']))
 
         proteins = peptide_to_protein.get(sequence_il,[])
         cannonical_proteins = [protein for protein in proteins if (proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso) or proteome.proteins[protein].db == 'con']
@@ -683,8 +693,9 @@ def main():
 
     if args.output_peptides:
         with open(args.output_peptides,'w') as w:
-            header = ['picked_protein_fdr','hpp_protein_fdr','precursor_fdr','psm_fdr','protein_full','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
+            header = ['picked_protein_fdr','hpp_protein_fdr','precursor_fdr','psm_fdr','protein_full','protein','protein_type','gene','decoy','all_proteins','pe','ms_evidence','aa_total','database_filename','database_scan','database_usi','sequence','sequence_unmodified','sequence_unmodified_il','charge','score','modifications','pass','type','parent_mass','cosine_filename','cosine_scan','cosine_usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','cosine_score_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end','frag_tol', 'total_unique_exons_covered', 'exons_covered_no_junction','exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
             header += ['precursor_fdr_cutoff', 'picked_protein_fdr_cutoff', 'hpp_protein_fdr_cutoff', 'cosine_cutoff', 'explained_intensity_cutoff', 'annotated_ions_cutoff']
+            header += ['num_peptidoforms','filtered_psms','total_psms','variant_number','best_overall_psm_score']
             r = csv.DictWriter(w, delimiter = '\t', fieldnames = header, restval='N/A', extrasaction='ignore')
             r.writeheader()
             for precursor in all_precursors:

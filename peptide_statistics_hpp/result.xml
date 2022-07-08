@@ -245,9 +245,14 @@
                 <column type="float" precision="3"  field="explained_intensity" label="Explained Intensity" width="6"/>
                 <column type="integer" field="matched_ions" label="Matched Ions" width="6"/>
                 <!-- <column type="text" field="pass" label="Above Library Threshold" width="6"/> -->
-                <column type="float" precision="3"  field="cosine" label="Best Annotated Cosine to Synthetic Spectrum Match" width="6" tooltip="Spectrum cosine using only annotated peaks from the input spectrum and closest matching synthetic."/>
+                <column type="float" precision="4"  field="best_overall_psm_score" label="Best PSM Score" width="4" tooltip=""/>
+                <column type="integer" field="filtered_psms" label="#PSMs - Passing Quality Filters" width="4" tooltip=""/>
+                <column type="integer" field="total_psms" label="#PSMs - All" width="4" tooltip=""/>
+                <column type="integer" field="num_peptidoforms" label="#Peptidoforms" width="4" tooltip=""/>
+                <column type="integer" field="variant_number" label="Variant Number" width="4" tooltip=""/>
                 <column type="integer" field="canonical_matches" label="#SAAP protein matches" width="1" tooltip = "Number of proteins the peptide matches to with a single amino acid variant."/>
                 <column type="text" field="gene_unique" label="Gene Unique" width="2" tooltip = "Peptide matches uniquely to a single gene with a single amino acid variant (True/False)."/>
+                <column type="text" field="decoy" label="Decoy" width="2" tooltip = ""/>
                 <column type="integer" field="exon_junctions_covered" label="Exon Junctions Covered" width="1"/>
                 <column type="integer" field="exons_covered_no_junction" label="Complete Exons Covered" width="1"/>
                 <column type="integer" field="total_unique_exons_covered" label="Total Exons Covered" width="1"/>

@@ -187,7 +187,7 @@
           <arg option="-picked_protein_fdr_comparison"        valueRef="@picked_protein_fdr_comparison"/>
           <arg option="-filter_rows_fdr"        valueRef="@filter_rows_fdr"/>
           <arg option="-main_fdr"        valueRef="@main_fdr"/>
-          <arg option="-leftover_fdr"        valueRef="@leftover_fdr"/>
+          <arg option="-leftover_fdr"        valueRef="picked_leftover"/>
           <arg option="-nextprot_releases" pathRef="nextprot_releases"/>
           <arg option="-msv_to_pxd_mapping" pathRef="msv_to_pxd_mapping"/>
           <arg option="-external_provenance"  valueRef="external_provenance"/>

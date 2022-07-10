@@ -45,8 +45,8 @@
 			<validator type="float" minimum="0"/>
 		</parameter>
 
-		<parameter name="annotated_ions_threshold" label="Annotated Ions Threshold">
-			<default value="6"/>
+		<parameter name="annotated_ions_threshold" label="Peptide Breaks Threshold">
+			<default value="5"/>
 			<validator type="integer" minimum="0"/>
 		</parameter>
 
@@ -84,22 +84,21 @@
 
 		<parameter name="main_fdr" label="FDR for HPP proteins">
 			<options>
-				<option label="Common HPP" value="common_hpp" />
-				<option label="Picked HPP" value="picked_hpp" />
-				<option label="Traditional" value="traditional" />
+				<option label="Traditional" value="common_hpp" />
+				<option label="Picked" value="picked_hpp" />
 			</options>
 			<default value="common_hpp" />
 			<validator type="set" />
 		</parameter>
 
-		<parameter name="leftover_fdr" label="FDR for leftover proteins (if using non-traditional FDR for HPP stage)">
+		<!--<parameter name="leftover_fdr" label="FDR for leftover proteins">
 			<options>
-				<option label="Common" value="common_leftover" />
+				<option label="Traditional" value="common_leftover" />
 				<option label="Picked" value="picked_leftover" />
 			</options>
 			<default value="picked_leftover" />
 			<validator type="set" />
-		</parameter>
+		</parameter>-->
 
 		<parameter name="use_variants" label="Variant-level analysis">
 			<options>
@@ -136,7 +135,7 @@
 		</parameter>
 
 		<parameter name="min_mz" label="Minimum m/z">
-			<default value="232"/>
+			<default value="0"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
 
@@ -396,14 +395,14 @@
 					<cell colspan="3">
 						<input type="select" parameter="main_fdr"/>
 					</cell>
-					<cell>
+					<!-- <cell>
 						<label>
 							<content parameter="leftover_fdr"/>
 						</label>
 					</cell>
 					<cell colspan="3">
 						<input type="select" parameter="leftover_fdr"/>
-					</cell>
+					</cell> -->
 				</row>
 				<row>
 					<cell>

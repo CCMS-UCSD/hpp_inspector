@@ -216,7 +216,7 @@
                            <column type="slideExpandableHidden" characterhidelimit="18" field="protein" label="Protein Accession" width="4"/>
 
                 <column type="float" precision="4" field="precursor_fdr" label="Precursor FDR" width="4" tooltip=""/>
-                <column type="float" precision="4" field="picked_protein_fdr" label="Protein FDR (Canonical)" width="4" tooltip=""/>
+                <column type="float" precision="4" field="picked_protein_fdr" label="Protein FDR (Leftover)" width="4" tooltip=""/>
                 <column type="float" precision="4"  field="hpp_protein_fdr" label="Protein FDR (HPP 2+)" width="4" tooltip=""/>
                 <column type="expandable" field="gene" label="Gene" width="4" tooltip="Gene for the protein"/>
                 <column type="text" field="protein_type" label="Protein Type" width="4"/>
@@ -413,8 +413,8 @@
           
           <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical old)" width="4" tooltip=""/> -->
-          <column type="float" precision="4"  field="picked_score" label="Score (Picked)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="picked_fdr" label="FDR (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="picked_score" label="Score (Canonical Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="picked_fdr" label="FDR (Canonical Picked)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="common_score" label="Score (Canonical)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
                    <column type="float" precision="4"  field="leftover_score" label="Score (Leftover)" width="4" tooltip=""/>

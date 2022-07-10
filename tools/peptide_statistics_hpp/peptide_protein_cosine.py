@@ -636,7 +636,7 @@ def main():
 
     seen_picked = set()
 
-    def greedy_sequence_precursor_score(precursor_list, distance = 2.5, score_aggregation_func = lambda xs: sum(xs)):
+    def greedy_sequence_precursor_score(precursor_list, distance = 3, score_aggregation_func = lambda xs: sum(xs)):
         used_precursors = []
         for precursor in sorted(precursor_list, key = lambda x: x[0], reverse = True):
             found = False
@@ -701,7 +701,7 @@ def main():
             for precursor in all_precursors:
                 proteins = [p for p in precursor['protein'].split(' ###')[0].split(';') if p != '']
                 if float(precursor['precursor_fdr']) < 1 and len(proteins) == 1 and ('Canonical' in precursor.get('protein_type','') or 'Contaminant' in precursor.get('protein_type','')):
-                    precursor['picked_protein_fdr'] = min(picked_fdr_dict.get(proteins[0],1),1)
+                    precursor['picked_protein_fdr'] = min(leftover_fdr_dict.get(proteins[0],1),1)
                     precursor['hpp_protein_fdr'] = min(hpp_fdr_dict.get(proteins[0],1),1)
                 else:
                     precursor['picked_protein_fdr'] = 1
@@ -835,7 +835,7 @@ def main():
             }
 
             pass_comparison_picked_fdr,pass_comparison_hpp_fdr = comparison_picked_fdr.get(protein,1) <= args.picked_protein_fdr_comparison, comparison_hpp_fdr.get(protein,1) <= args.hpp_protein_fdr_comparison 
-            pass_picked_fdr, pass_hpp_fdr = protein_dict['picked_fdr'] <= args.picked_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
+            pass_picked_fdr, pass_hpp_fdr = protein_dict['leftover_fdr'] <= args.picked_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
             if args.main_fdr == 'traditional':
                 pass_picked_fdr, pass_hpp_fdr = protein_dict['common_fdr'] <= args.picked_protein_fdr, protein_dict['common_fdr'] <= args.hpp_protein_fdr 
 

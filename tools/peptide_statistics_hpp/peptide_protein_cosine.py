@@ -1070,6 +1070,8 @@ def main():
                 '#junction_peptides_novel':0
             })
 
+    raise Exception
+
     if args.export_explorers and args.export_explorers == 1:
         hupo_mapping = {}
         unique_mapping = {}

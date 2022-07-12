@@ -35,14 +35,15 @@
 
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="leftover_score" label="Score (Leftover)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="leftover_fdr" label="FDR (Leftover)" width="4" tooltip=""/>
           <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical old)" width="4" tooltip=""/> -->
-          <column type="float" precision="4"  field="picked_score" label="Score (Picked)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="picked_fdr" label="FDR (Picked)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="common_score" label="Score (Canonical)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
-         <column type="float" precision="4"  field="leftover_score" label="Score (Leftover)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="leftover_fdr" label="FDR (Leftover)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="picked_score" label="Score (Canonical Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="picked_fdr" label="FDR (Canonical Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_score" label="Score (Canonical Traditional)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical Traditional)" width="4" tooltip=""/>
+
           <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/> -->
         <column type="float" precision="3"  field="coverage_incl_shared" label="Total Coverage" width="4" tooltip=""/>
@@ -73,7 +74,7 @@
             <column type="expandable" field="novel_peptides" label="Novel Peptides" width="20"/>
             <column type="integer" field="combined_hpp" label="#HPP Peptides (Combined)" width="5"/>
             <column type="integer" field="combined_fdr_hpp" label="#HPP Peptides (Combined, Pass FDR)" width="5"/>
-            <column type="integer" field="comparison_hpp_allfdr" label="#HPP Peptides (Reference Common FDR)" width="2"/>
+            <column type="integer" field="comparison_hpp_allfdr" label="#HPP Peptides (Reference Leftover FDR)" width="2"/>
             <column type="integer" field="comparison_hpp_hppfdr" label="#HPP Peptides (Reference HPP FDR)" width="2"/>
 
             <column type="integer" field="new_hpp" label="#HPP Peptides (Added Only)" width="2"/>
@@ -83,7 +84,7 @@
             <column type="expandable" field="supporting_peptides_w_synthetic" label="Previously-known Peptides (Synthetic)" width="20"/>
             <column type="expandable" field="novel_peptides_w_synthetic" label="Novel Peptides (Synthetic)" width="20"/>
             <column type="integer" field="combined_hpp_w_synthetic" label="#HPP Peptides (Combined) (Synthetic)" width="5"/>
-            <column type="integer" field="comparison_hpp_allfdr_w_synthetic" label="#HPP Peptides (Reference Common FDR) (Synthetic)" width="2"/>
+            <column type="integer" field="comparison_hpp_allfdr_w_synthetic" label="#HPP Peptides (Reference Leftover FDR) (Synthetic)" width="2"/>
             <column type="integer" field="comparison_hpp_hppfdr_w_synthetic" label="#HPP Peptides (Reference HPP FDR)(Synthetic)" width="2"/>
 
             <column type="integer" field="new_hpp_w_synthetic" label="#HPP Peptides (Added Only) (Synthetic)" width="2"/>
@@ -94,7 +95,7 @@
             <column type="expandable" field="supporting_peptides_w_synthetic_cosine" label="Previously-known Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
             <column type="expandable" field="novel_peptides_w_synthetic_cosine" label="Novel Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
                         <column type="integer" field="combined_hpp_w_synthetic_cosine" label="#HPP Peptides (Combined) (Synthetic + Pass Cosine Threshold)" width="5"/>
-            <column type="integer" field="comparison_hpp_allfdr_w_synthetic_cosine" label="#HPP Peptides (Reference Common FDR) (Synthetic + Pass Cosine Threshold)" width="2"/>
+            <column type="integer" field="comparison_hpp_allfdr_w_synthetic_cosine" label="#HPP Peptides (Reference Leftover FDR) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="integer" field="comparison_hpp_hppfdr_w_synthetic_cosine" label="#HPP Peptides (Reference HPP FDR) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="integer" field="new_hpp_w_synthetic_cosine" label="#HPP Peptides (Added Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="float" field="total_coverage_w_synthetic_cosine" label="Coverage (Total) (Synthetic + Pass Cosine Threshold)" width="2"/>

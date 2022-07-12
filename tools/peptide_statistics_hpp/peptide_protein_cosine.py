@@ -333,10 +333,16 @@ def main():
             precursor_representative['database_usi'] = l['usi'] if from_psm else l['database_usi']
             precursor_representative['score'] = float(l['score'])
             update_peptidoform = True
-            #consider best EI And matched ions over all representatives
-            if potential_psm_gain or float(l['explained_intensity']) > float(precursor_representative.get('explained_intensity',0.0)):
-                precursor_representative['explained_intensity'] = l['explained_intensity']
-                precursor_representative['matched_ions'] = l['matched_ions']
+        
+        #best EI does not pass #breaks threshold but current one does
+        if not best_pass_by and this_pass_by:
+            precursor_representative['explained_intensity'] = l['explained_intensity']
+            precursor_representative['matched_ions'] = l['matched_ions']
+        #two situations, either both pass #threshold or both fail #threshold
+        elif best_pass_by is this_pass_by and float(l['explained_intensity']) > float(precursor_representative.get('explained_intensity',0.0)):
+            precursor_representative['explained_intensity'] = l['explained_intensity']
+            precursor_representative['matched_ions'] = l['matched_ions']
+        #otherwise best already passed #threshold, so we skip it
 
         if best_cosine and float(l['cosine']) >= 0 and l['synthetic_usi'] != 'N/A':
             precursor_representative['cosine_filename'] = l['filename'] if from_psm else l['cosine_filename']

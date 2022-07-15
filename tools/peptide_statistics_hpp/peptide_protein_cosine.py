@@ -331,7 +331,7 @@ def main():
             precursor_representative['database_filename'] = l['filename'] if from_psm else l['database_filename']
             precursor_representative['database_scan'] = l['scan'] if from_psm else l['database_scan']
             precursor_representative['database_usi'] = l['usi'] if from_psm else l['database_usi']
-            precursor_representative['score'] = float(l['score'])
+            precursor_representative['score'] = score
             update_peptidoform = True
         
         #best EI does not pass #breaks threshold but current one does

@@ -94,7 +94,9 @@ def extract_annotated_peaks(spectrum, fragment_tolerance, low_mass_filter, min_s
             fragment_tolerance,
             precursor_filter_window=1.5,
             low_mass_filter=low_mass_filter,
-            min_snr=min_snr,
+            min_snr=0,
+            window_filter_size = 50,
+            window_filter_top_peaks = 8,
             num_top_unannotated_envelopes_to_remove=2,
             isobaric_tag_type='TMT 16-plex' #remove these peaks for all jobs
     )

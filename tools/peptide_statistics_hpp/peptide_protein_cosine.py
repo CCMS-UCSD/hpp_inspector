@@ -570,8 +570,17 @@ def main():
         cannonical_proteins = [protein for protein in proteins if (proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso) or proteome.proteins[protein].db == 'con']
         output_genes = set([proteome.proteins[protein].gene if proteome.proteins[protein].gene else 'N/A' for protein in proteins])
 
-        if len(cannonical_proteins) <= 1 and best_psm.get('hpp_match','') == 'Yes':
-            is_hpp = pep_mapping_info[sequence]['hpp']
+        if len(cannonical_proteins) <= 1:
+            if row_pass_filters(best_psm):
+                for dataset in best_psm['datasets']:
+                    all_datasets.add(dataset)
+                    datasets_per_sequence[sequence_il].add(dataset)
+                for task in best_psm['tasks']:
+                    all_tasks.add(task)
+                    tasks_per_sequence[sequence_il].add(task)
+
+        if len(cannonical_proteins) <= 1 :
+            is_hpp = pep_mapping_info[sequence]['hpp'] and best_psm.get('hpp_match','') == 'Yes'
             match = False
             has_synthetic = False
             has_synthetic_cosine = False
@@ -583,12 +592,12 @@ def main():
                         if float(best_psm['cosine']) >= args.cosine_cutoff:
                             has_synthetic_cosine = True
                     match = True
-                    for dataset in best_psm['datasets']:
-                        all_datasets.add(dataset)
-                        datasets_per_sequence[sequence_il].add(dataset)
-                    for task in best_psm['tasks']:
-                        all_tasks.add(task)
-                        tasks_per_sequence[sequence_il].add(task)
+                    # for dataset in best_psm['datasets']:
+                    #     all_datasets.add(dataset)
+                    #     datasets_per_sequence[sequence_il].add(dataset)
+                    # for task in best_psm['tasks']:
+                    #     all_tasks.add(task)
+                    #     tasks_per_sequence[sequence_il].add(task)
             if len(proteins) == 1:
                 if row_pass_filters(best_psm):
                     is_isoform_unique = True

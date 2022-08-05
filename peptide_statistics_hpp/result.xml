@@ -55,7 +55,7 @@
                 <parameter name="USETASK" value="True"/>
                 <parameter name="REQUESTPARAMETER=view" value="view_added_peptides"/>
                 <parameter name="HASHPARAMTER=protein_input" value="[protein]"/>
-                <parameter name="HASHPARAMTER=hpp_match_input" value="True"/>
+                <parameter name="HASHPARAMTER=hpp_match_input" value="Yes"/>
                 <parameter name="HASHPARAMTER=explained_intensity_lowerinput" value="[explained_intensity_cutoff]"/>
                 <parameter name="LABEL" value="View HPP Compliant Peptides"/>
                 <parameter name="PASS_URL" value="True"/>
@@ -161,6 +161,7 @@
             <column autoHideSentinel="true" type="text" field="synthetic_usi" label="Synthetic Match" width="20"/>
             <!-- <column type="text" field="synthetic_filename" label="Synthetic Filename" width="20"/>
             <column type="integer" field="synthetic_scan" label="Synthetic Scan" width="4"/> -->
+            <column type="float" precision="4"  field="cosine" label="Cosine to Synthetic" width="4" tooltip=""/>
             <column type="integer" field="canonical_matches" label="#SAAP protein matches" width="1"/>
             <column type="text" field="gene_unique" label="Gene Unique" width="2"/>
             <column type="integer" field="exon_junctions_covered" label="Exon Junctions Covered" width="1"/>
@@ -246,6 +247,7 @@
                 <column type="float" precision="3"  field="explained_intensity" label="Explained Intensity" width="6"/>
                 <column type="integer" field="matched_ions" label="Matched Ions" width="6"/>
                 <!-- <column type="text" field="pass" label="Above Library Threshold" width="6"/> -->
+                <column type="float" precision="4"  field="cosine" label="Cosine to Synthetic" width="4" tooltip=""/>
                 <column type="float" precision="4"  field="best_overall_psm_score" label="Best PSM Score" width="4" tooltip=""/>
                 <column type="integer" field="filtered_psms" label="#PSMs - Passing Quality Filters" width="4" tooltip=""/>
                 <column type="integer" field="total_psms" label="#PSMs - All" width="4" tooltip=""/>

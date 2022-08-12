@@ -339,6 +339,7 @@ def main():
             psm['synthetic_filename'] = synthetic_filename
             psm['synthetic_scan'] = synthetic_scan
             psm['synthetic_usi'] = make_usi(synthetic_filename, synthetic_scan, synthetic_peptide, psm['charge'])
+            psm['synthetic_sequence'] = synthetic_peptide
             psm['cosine'] = cosine
             ei, num_matched_peaks = explained_intensity_per_spectrum.get((psm['filename'],psm['scan']),(0,0))
             psm['explained_intensity'] = ei

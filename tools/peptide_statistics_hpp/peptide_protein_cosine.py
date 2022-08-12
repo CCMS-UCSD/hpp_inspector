@@ -33,6 +33,7 @@ def arguments():
     parser.add_argument('--output_task_proteins_all', type = Path, help='Output Task Proteins (All)')
     parser.add_argument('--protein_coverage', type = Path, help='Added Protein Coverage')
     parser.add_argument('--protein_coverage_external', type = Path, help='Added Protein Coverage (External)')
+    parser.add_argument('--protein_coverage_external_compare', type = Path, help='Added Protein Coverage (External) - Comparison')
     parser.add_argument('--cosine_cutoff', type = float, help='Cosine Cutoff')
     parser.add_argument('--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
     parser.add_argument('--annotated_ions_cutoff', type = float, help='Annotated Ion Cutoff')
@@ -206,6 +207,13 @@ def main():
     comparison_picked_fdr = {}
     comparison_hpp_fdr = {}
 
+    precursors_per_protein_all = defaultdict(lambda: defaultdict(list))
+    precursors_per_protein_hpp = defaultdict(lambda: defaultdict(list))
+    precursors_per_protein_non_unique = defaultdict(lambda: defaultdict(list))
+    
+    all_sequences = {}
+    unique_sequences = {}
+
     frequency = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
     with open(args.msv_to_pxd_mapping) as json_file:
@@ -215,32 +223,6 @@ def main():
             pxd = msv_map.get('px_accession')
             if pxd:
                 pxd_mapping[pxd] = msv
-
-
-    with open(args.comparison_pep) as f:
-        r = csv.DictReader(f, delimiter='\t')
-        for l in r:
-            il_peptide = l['demodified'].replace('I','L')
-            has_synthetic = False
-            has_synthetic_cosine = False
-            if l['protein'] in proteome.proteins:
-                
-                if proteome.proteins[l['protein']].db == 'sp' and not proteome.proteins[l['protein']].iso:
-                    #peptides that are not uniquely matching will have both FDRs as 1
-                    comparison_picked_fdr[l['protein']] = min(float(l['all_protein_fdr']),comparison_picked_fdr.get(l['protein'],1))
-                    comparison_hpp_fdr[l['protein']] = min(float(l['hpp_protein_fdr']),comparison_hpp_fdr.get(l['protein'],1))
-
-                protein_mapping[l['protein']][il_peptide].add((int(l['aa_start']),int(l['aa_end']),None,None,None,None))
-                comparison = sequences_found[il_peptide].comparison
-                if comparison != SeqOccurances(True,True,True):
-                    if float(l.get('synthetic_cosine',-1)) >= 0:
-                        has_synthetic = True
-                        if float(l['synthetic_cosine']) > args.cosine_cutoff:
-                            has_synthetic_cosine = True
-                    comparison = SeqOccurances(True, comparison.synthetic_match or has_synthetic, comparison.synthetic_match_cosine or has_synthetic_cosine)
-                    sequences_found[il_peptide] = sequences_found[il_peptide]._replace(comparison = comparison)
-                if l['is_hpp'] == 'True':
-                    sequences_found[il_peptide] = sequences_found[il_peptide]._replace(hpp = True)
 
     peptide_to_protein = defaultdict(list)
     peptide_to_exon_map = defaultdict(list)
@@ -480,7 +462,23 @@ def main():
                 outdict['hpp_match'] = 'No - failed quality thresholds'
         return outdict, output_proteins
 
-    row_pass_filters = lambda best_psm: (float(best_psm['explained_intensity']) >= args.explained_intensity_cutoff or float(best_psm['cosine']) >= args.cosine_cutoff) and int(best_psm['matched_ions']) >= args.annotated_ions_cutoff
+    row_pass_filters_input = lambda best_psm, explained_intensity_cutoff, cosine_cutoff, annotated_ions_cutoff: (
+            float(best_psm['explained_intensity']) >= explained_intensity_cutoff or 
+            float(best_psm['cosine']) >= cosine_cutoff
+        ) and int(best_psm['matched_ions']) >= annotated_ions_cutoff
+
+    row_pass_filters = lambda best_psm: row_pass_filters_input(
+        best_psm,
+        args.explained_intensity_cutoff,
+        args.cosine_cutoff,
+        args.annotated_ions_cutoff
+    )
+    row_pass_filters_compare = lambda best_psm: row_pass_filters_input(
+        best_psm,
+        float(best_psm['explained_intensity_cutoff']),
+        float(best_psm['cosine_cutoff']),
+        int(float(best_psm['annotated_ions_cutoff']))
+    )
 
     if args.output_psms:
         all_psms_with_score = []
@@ -546,12 +544,7 @@ def main():
     if len(all_hpp_precursors) > 0:
         precursor_fdr = fdr.calculate_fdr(all_hpp_precursors)
 
-    precursors_per_protein_all = defaultdict(lambda: defaultdict(list))
-    precursors_per_protein_hpp = defaultdict(lambda: defaultdict(list))
-    precursors_per_protein_non_unique = defaultdict(lambda: defaultdict(list))
-
-
-    def output_protein_level_results(best_psm):
+    def output_protein_level_results(best_psm,row_pass_filters,update_mappings = True):
 
         sequence = best_psm['sequence_unmodified']
         sequence_il = best_psm['sequence_unmodified_il']
@@ -565,52 +558,44 @@ def main():
                 precursors_per_protein_all[proteins[0]][pos].append((float(best_psm['score']),seq_theoretical_mass(best_psm['sequence']),best_psm['charge']))
             for protein in proteins:
                 precursors_per_protein_non_unique[protein][sequence_il].append((float(best_psm['score']),seq_theoretical_mass(best_psm['sequence']),best_psm['charge']))
+        
+        if update_mappings:
+            proteins = peptide_to_protein.get(sequence_il,[])
+            cannonical_proteins = [protein for protein in proteins if (proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso) or proteome.proteins[protein].db == 'con']
+            output_genes = set([proteome.proteins[protein].gene if proteome.proteins[protein].gene else 'N/A' for protein in proteins])
 
-        proteins = peptide_to_protein.get(sequence_il,[])
-        cannonical_proteins = [protein for protein in proteins if (proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso) or proteome.proteins[protein].db == 'con']
-        output_genes = set([proteome.proteins[protein].gene if proteome.proteins[protein].gene else 'N/A' for protein in proteins])
-
-        if len(cannonical_proteins) <= 1:
-            if row_pass_filters(best_psm):
-                for dataset in best_psm['datasets']:
-                    all_datasets.add(dataset)
-                    datasets_per_sequence[sequence_il].add(dataset)
-                for task in best_psm['tasks']:
-                    all_tasks.add(task)
-                    tasks_per_sequence[sequence_il].add(task)
-
-        if len(cannonical_proteins) <= 1 :
-            is_hpp = pep_mapping_info[sequence]['hpp'] and best_psm.get('hpp_match','') == 'Yes'
-            match = False
-            has_synthetic = False
-            has_synthetic_cosine = False
-            is_isoform_unique = False
-            if len(cannonical_proteins) == 1:
-                if row_pass_filters(best_psm):
-                    if float(best_psm['cosine']) >= 0:
-                        has_synthetic = True
-                        if float(best_psm['cosine']) >= args.cosine_cutoff:
-                            has_synthetic_cosine = True
-                    match = True
-                    # for dataset in best_psm['datasets']:
-                    #     all_datasets.add(dataset)
-                    #     datasets_per_sequence[sequence_il].add(dataset)
-                    # for task in best_psm['tasks']:
-                    #     all_tasks.add(task)
-                    #     tasks_per_sequence[sequence_il].add(task)
-            if len(proteins) == 1:
-                if row_pass_filters(best_psm):
-                    is_isoform_unique = True
-            added = sequences_found[sequence_il].added
-            sequences_found[sequence_il] = sequences_found[sequence_il]._replace(
-                hpp=is_hpp,
-                isoform_unique=is_isoform_unique,
-                added = SeqOccurances(
-                    added.match or match,
-                    added.synthetic_match or has_synthetic,
-                    added.synthetic_match_cosine or has_synthetic_cosine
+            if len(cannonical_proteins) <= 1 :
+                is_hpp = pep_mapping_info[sequence]['hpp']
+                match = False
+                has_synthetic = False
+                has_synthetic_cosine = False
+                is_isoform_unique = False
+                if len(cannonical_proteins) == 1:
+                    if row_pass_filters(best_psm):
+                        if float(best_psm['cosine']) >= 0:
+                            has_synthetic = True
+                            if float(best_psm['cosine']) >= args.cosine_cutoff:
+                                has_synthetic_cosine = True
+                        match = True
+                    for dataset in best_psm['datasets']:
+                        all_datasets.add(dataset)
+                        datasets_per_sequence[sequence_il].add(dataset)
+                    for task in best_psm['tasks']:
+                        all_tasks.add(task)
+                        tasks_per_sequence[sequence_il].add(task)
+                if len(proteins) == 1:
+                    if row_pass_filters(best_psm):
+                        is_isoform_unique = True
+                added = sequences_found[sequence_il].added
+                sequences_found[sequence_il] = sequences_found[sequence_il]._replace(
+                    hpp=is_hpp,
+                    isoform_unique=is_isoform_unique,
+                    added = SeqOccurances(
+                        added.match or match,
+                        added.synthetic_match or has_synthetic,
+                        added.synthetic_match_cosine or has_synthetic_cosine
+                        )
                     )
-                )
     print("About to output sequences")
 
     all_precursors = []
@@ -626,7 +611,7 @@ def main():
             best_psm['precursor_fdr'] = min(precursor_fdr.get((sequence, charge),1),1)
             best_psm['psm_fdr'] = -1
             best_psm['synthetic_sequence'] = sequence.replace('+229.163','').replace('+229.162932','')
-            output_protein_level_results(best_psm)
+            output_protein_level_results(best_psm,row_pass_filters=row_pass_filters,update_mappings=True)
             best_psm['datasets'] = ';'.join(best_psm['datasets'])
             best_psm['tasks'] = ';'.join(best_psm['tasks'])
             all_precursors.append(best_psm)
@@ -635,7 +620,45 @@ def main():
         with open(args.input_peptides) as f:
             r = csv.DictReader(f, delimiter='\t')
             for best_psm in r:
-                output_protein_level_results(best_psm)
+                output_protein_level_results(best_psm,row_pass_filters=row_pass_filters,update_mappings=True)
+
+    for protein, seqs in precursors_per_protein_all.items():
+        unique_sequences[protein] = len(seqs)
+
+    for protein, seqs in precursors_per_protein_non_unique.items():
+        all_sequences[protein] = len(seqs)
+
+    for comparison_peptide_file in args.protein_coverage_external_compare.glob('*'):
+        with open(comparison_peptide_file) as f:
+            r = csv.DictReader(f, delimiter='\t')
+            for l in r:
+                output_protein_level_results(l, row_pass_filters=row_pass_filters_compare, update_mappings=False)
+
+    with open(args.comparison_pep) as f:
+        r = csv.DictReader(f, delimiter='\t')
+        for l in r:
+            il_peptide = l['demodified'].replace('I','L')
+            has_synthetic = False
+            has_synthetic_cosine = False
+            if l['protein'] in proteome.proteins:
+                
+                if proteome.proteins[l['protein']].db == 'sp' and not proteome.proteins[l['protein']].iso:
+                    #peptides that are not uniquely matching will have both FDRs as 1
+                    comparison_picked_fdr[l['protein']] = min(float(l['all_protein_fdr']),comparison_picked_fdr.get(l['protein'],1))
+                    comparison_hpp_fdr[l['protein']] = min(float(l['hpp_protein_fdr']),comparison_hpp_fdr.get(l['protein'],1))
+
+                protein_mapping[l['protein']][il_peptide].add((int(l['aa_start']),int(l['aa_end']),None,None,None,None))
+                comparison = sequences_found[il_peptide].comparison
+                if comparison != SeqOccurances(True,True,True):
+                    if float(l.get('synthetic_cosine',-1)) >= 0:
+                        has_synthetic = True
+                        if float(l['synthetic_cosine']) > args.cosine_cutoff:
+                            has_synthetic_cosine = True
+                    comparison = SeqOccurances(True, comparison.synthetic_match or has_synthetic, comparison.synthetic_match_cosine or has_synthetic_cosine)
+                    sequences_found[il_peptide] = sequences_found[il_peptide]._replace(comparison = comparison)
+                if l['is_hpp'] == 'True':
+                    sequences_found[il_peptide] = sequences_found[il_peptide]._replace(hpp = True)
+
 
     hpp_protein_w_scores = []
     hpp_score_dict = {}
@@ -845,8 +868,8 @@ def main():
                 'common_fdr':min(1,common_fdr_dict.get(protein,1)),
                 'leftover_score':leftover_score_dict.get(protein,0),
                 'leftover_fdr':min(1,leftover_fdr_dict.get(protein,1)),
-                'num_sequences':len(precursors_per_protein_all.get(protein,[])),
-                'num_sequences_incl_shared':len(precursors_per_protein_non_unique.get(protein,[])),
+                'num_sequences':unique_sequences.get(protein,0),
+                'num_sequences_incl_shared':all_sequences.get(protein,0),
             }
 
             pass_comparison_picked_fdr,pass_comparison_hpp_fdr = comparison_picked_fdr.get(protein,1) <= args.picked_protein_fdr_comparison, comparison_hpp_fdr.get(protein,1) <= args.hpp_protein_fdr_comparison 

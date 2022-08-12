@@ -146,6 +146,7 @@
       <require name="peptide_coverage"                type="folder"/>
       <require name="novel_psms_w_cosine_external"     type="folder"/>
       <require name="peptide_coverage_merged_external" type="folder"/>
+      <require name="peptide_coverage_merged_external_compare" type="folder"/>
       <require name="external_provenance"             type="file"/>
       <produce name="merged_novel_psms_w_cosine"      type="file" naming="explicit"  extension="tsv"/>
       <produce name="novel_peptides_w_cosine"         type="file" naming="explicit"  extension="tsv"/>
@@ -167,6 +168,7 @@
           <arg option="-input_psms_external"           valueRef="novel_psms_w_cosine_external"/>
           <arg option="-protein_coverage"     valueRef="peptide_coverage"/>
           <arg option="-protein_coverage_external"     valueRef="peptide_coverage_merged_external"/>
+          <arg option="-protein_coverage_external_compare"     valueRef="peptide_coverage_merged_external_compare"/>
           <arg option="-output_psms_flag"          valueRef="@export_psms"/>
           <arg option="-output_psms"          valueRef="merged_novel_psms_w_cosine"/>
           <arg option="-output_peptides"      valueRef="novel_peptides_w_cosine"/>

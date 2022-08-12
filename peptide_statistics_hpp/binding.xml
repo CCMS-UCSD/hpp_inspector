@@ -92,6 +92,7 @@
 
     <bind action="peptide_protein_cosine" tool="peptide_protein_cosine">
         <inputAsRequirement port="kb_pep"                         requirement="kb_pep"/>
+        <inputAsRequirement port="peptide_coverage_merged_external_compare"                         requirement="peptide_coverage_merged_external_compare"/>
         <inputAsRequirement port="fastadb"                  requirement="fastadb"/>
         <inputAsRequirement port="con_fastadb"                  requirement="con_fastadb"/>
         <inputAsRequirement port="novel_psms_w_cosine"       requirement="novel_psms_w_cosine"/>

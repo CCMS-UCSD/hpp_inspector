@@ -117,6 +117,7 @@
 
 		<action name="peptide_protein_cosine">
 			<input   port="kb_pep"       			    object="kb_pep"/>
+			<input   port="peptide_coverage_merged_external_compare"  collection="peptide_coverage_comparisons"/>
 			<input   port="novel_psms_w_cosine"          collection="novel_psms_w_cosine"/>
 			<input  port="fastadb"             			collection="fastadb"/>
 			<input  port="con_fastadb"             	    collection="con_fastadb"/>

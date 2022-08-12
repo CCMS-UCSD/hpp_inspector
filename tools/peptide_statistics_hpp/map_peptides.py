@@ -9,6 +9,7 @@ from bisect import bisect_left
 def arguments():
     parser = argparse.ArgumentParser(description='Map Peptides')
     parser.add_argument('-f','--proteome_fasta', type = Path, help='Input FASTA Protein Database')
+    parser.add_argument('-c','--contaminants_fasta', type = Path, help='Input FASTA Protein Contaminants Database')
     parser.add_argument('-e','--exon_fasta', type = Path, help='Input FASTA Exon Mapping Database')
     parser.add_argument('-p','--peptide_list', type = Path, help='Peptide List')
     parser.add_argument('-o','--output_folder', type = Path, help='Output Folder')
@@ -28,7 +29,7 @@ def load_peptide_list(input_peptide_filename):
 def main():
     args = arguments()
 
-    proteome = mapping.read_uniprot(args.proteome_fasta)
+    proteome = mapping.merge_proteomes([mapping.read_uniprot(args.proteome_fasta),mapping.read_fasta(args.contaminants_fasta)])
     proteome_with_decoys = mapping.add_decoys(proteome)
     peptide_list = load_peptide_list(args.peptide_list)
 

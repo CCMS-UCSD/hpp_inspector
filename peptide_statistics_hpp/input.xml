@@ -13,6 +13,10 @@
 		<parameter name="fastadb" label="Proteome DB">
 			<fileGenerator type="upload" purpose="fasta" target="fastadb"/>
 		</parameter>
+        <!-- Search file parameters -->
+		<parameter name="con_fastadb" label="Proteome DB - Contaminants">
+			<fileGenerator type="upload" purpose="con_fasta" target="con_fastadb"/>
+		</parameter>
 
 		<parameter name="mztab" label="Search mzTab Files">
 			<fileGenerator type="upload" purpose="mztab" target="mztab"/>
@@ -41,8 +45,8 @@
 			<validator type="float" minimum="0"/>
 		</parameter>
 
-		<parameter name="annotated_ions_threshold" label="Annotated Ions Threshold">
-			<default value="6"/>
+		<parameter name="annotated_ions_threshold" label="Peptide Breaks Threshold">
+			<default value="5"/>
 			<validator type="integer" minimum="0"/>
 		</parameter>
 
@@ -80,22 +84,40 @@
 
 		<parameter name="main_fdr" label="FDR for HPP proteins">
 			<options>
-				<option label="Common HPP" value="common_hpp" />
-				<option label="Picked HPP" value="picked_hpp" />
-				<option label="Traditional" value="traditional" />
+				<option label="Traditional" value="common_hpp" />
+				<option label="Picked" value="picked_hpp" />
 			</options>
 			<default value="common_hpp" />
 			<validator type="set" />
 		</parameter>
 
-		<parameter name="leftover_fdr" label="FDR for leftover proteins (if using non-traditional FDR for HPP stage)">
+		<!--<parameter name="leftover_fdr" label="FDR for leftover proteins">
 			<options>
-				<option label="Common" value="common_leftover" />
+				<option label="Traditional" value="common_leftover" />
 				<option label="Picked" value="picked_leftover" />
 			</options>
 			<default value="picked_leftover" />
 			<validator type="set" />
+		</parameter>-->
+
+		<parameter name="use_variants" label="Variant-level analysis">
+			<options>
+				<option label="Peptidoforms" value="0" />
+				<option label="Variants" value="1" />
+			</options>
+			<default value="0" />
+			<validator type="set" />
 		</parameter>
+
+		<parameter name="hpp_aggregation_function" label="Sequence-level HPP Aggregation">
+			<options>
+				<option label="Sum of variants" value="sum" />
+				<option label="Max of variants" value="max" />
+			</options>
+			<default value="sum" />
+			<validator type="set" />
+		</parameter>
+		
 
 		<parameter name="parallel_cosine.parallel_cosine" label="Parallelism (For Cosine Calculations)">
 			<default value="10"/>
@@ -113,7 +135,7 @@
 		</parameter>
 
 		<parameter name="min_mz" label="Minimum m/z">
-			<default value="232"/>
+			<default value="0"/>
 			<validator type="float" minimum="0"/>
 		</parameter>
 
@@ -226,6 +248,16 @@
             <cell colspan="3">
                 <module id="fastadb" type="fileSelector">
                     <property name="label">Proteome DB</property>
+                </module>
+            </cell>
+			<cell>
+                <label>
+                    <content parameter="con_fastadb"/>
+                </label>
+            </cell>
+            <cell colspan="3">
+                <module id="con_fastadb" type="fileSelector">
+                    <property name="label">Proteome DB - Contaminants</property>
                 </module>
             </cell>
         </row>
@@ -363,14 +395,14 @@
 					<cell colspan="3">
 						<input type="select" parameter="main_fdr"/>
 					</cell>
-					<cell>
+					<!-- <cell>
 						<label>
 							<content parameter="leftover_fdr"/>
 						</label>
 					</cell>
 					<cell colspan="3">
 						<input type="select" parameter="leftover_fdr"/>
-					</cell>
+					</cell> -->
 				</row>
 				<row>
 					<cell>
@@ -380,6 +412,24 @@
 					</cell>
 					<cell colspan="2">
 						<input type="select" parameter="synthetic_filters"/>
+					</cell>
+				</row>
+				<row>
+					<cell>
+						<label>
+							<content parameter="use_variants"/>
+						</label>
+					</cell>
+					<cell colspan="2">
+						<input type="select" parameter="use_variants"/>
+					</cell>
+					<cell>
+						<label>
+							<content parameter="hpp_aggregation_function"/>
+						</label>
+					</cell>
+					<cell colspan="2">
+						<input type="select" parameter="hpp_aggregation_function"/>
 					</cell>
 				</row>
 

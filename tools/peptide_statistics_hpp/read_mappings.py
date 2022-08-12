@@ -36,7 +36,7 @@ def read_protein_coverage(protein_coverage_file,seen_sequences,proteome, filter 
                 mapped_protein_str = l['mapped_proteins'] if 'mapped_proteins' in l else l['all_proteins_w_coords']
                 mapped_exon_str = l['mapped_exons'] if 'mapped_exons' in l else l['all_mapped_exons']
 
-                all_protein_fdr = float(l.get('picked_protein_fdr',-1))
+                all_protein_fdr = float(l.get('leftover_protein_fdr',-1))
                 hpp_protein_fdr = float(l.get('hpp_protein_fdr',-1))
                 cosine = float(l.get('cosine',-1))
 

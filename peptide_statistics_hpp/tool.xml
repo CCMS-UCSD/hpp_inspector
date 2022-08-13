@@ -68,7 +68,8 @@
 
     <tool name="download_latest_kb">
       <require name="params"    type="file"/>
-            <require name="fastadb"            type="folder"/>
+      <require name="fastadb"            type="folder"/>
+      <require name="con_fastadb"            type="folder"/>
       <require name="peptide_coverage_comparisons"    type="folder"/>
       <produce name="kb_pep" type="file" naming="explicit"  extension="out"/>
 
@@ -76,6 +77,7 @@
             <arg pathRef="download_latest_kb.script"/>
             <arg option="-params"  valueRef="params"/>
             <arg option="-proteome_fasta"          valueRef="fastadb"/>
+            <arg option="-contaminants_fasta"          valueRef="con_fastadb"/>
             <arg option="-comparisons"  valueRef="peptide_coverage_comparisons"/>
             <arg option="-backup_kb_pep"  pathRef="predownloaded_pep"/>
             <arg option="-kb_pep"  valueRef="kb_pep"/>
@@ -85,11 +87,13 @@
   <tool name="map_peptides">
       <require name="peptide_list"       type="file"/>
       <require name="fastadb"            type="folder"/>
+      <require name="con_fastadb"            type="folder"/>
       <require name="exon_fasta"            type="file"/>
       <produce name="peptide_coverage"        type="folder"/>
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="map_peptides.script"/>
           <arg option="-proteome_fasta"          valueRef="fastadb"/>
+          <arg option="-contaminants_fasta"          valueRef="con_fastadb"/>
           <arg option="-exon_fasta"          valueRef="exon_fasta"/>
           <arg option="-peptide_list"   valueRef="peptide_list"/>
           <arg option="-output_folder"  valueRef="peptide_coverage"/>
@@ -137,6 +141,7 @@
   <tool name="peptide_protein_cosine">
       <require name="kb_pep"    type="file"/>
       <require name="fastadb"            type="folder"/>
+      <require name="con_fastadb"            type="folder"/>
       <require name="novel_psms_w_cosine"             type="folder"/>
       <require name="peptide_coverage"                type="folder"/>
       <require name="novel_psms_w_cosine_external"     type="folder"/>
@@ -157,7 +162,8 @@
           <arg pathRef="peptide_protein_cosine.script"/>
           <arg option="-comparison_pep"               valueRef="kb_pep"/>
           <arg option="-input_psms"           valueRef="novel_psms_w_cosine"/>
-          <arg option="-fasta"                      valueRef="fastadb"/>
+          <arg option="-proteome_fasta"          valueRef="fastadb"/>
+          <arg option="-contaminants_fasta"          valueRef="con_fastadb"/>
           <arg option="-input_psms_external"           valueRef="novel_psms_w_cosine_external"/>
           <arg option="-protein_coverage"     valueRef="peptide_coverage"/>
           <arg option="-protein_coverage_external"     valueRef="peptide_coverage_merged_external"/>
@@ -181,7 +187,7 @@
           <arg option="-picked_protein_fdr_comparison"        valueRef="@picked_protein_fdr_comparison"/>
           <arg option="-filter_rows_fdr"        valueRef="@filter_rows_fdr"/>
           <arg option="-main_fdr"        valueRef="@main_fdr"/>
-          <arg option="-leftover_fdr"        valueRef="@leftover_fdr"/>
+          <arg option="-leftover_fdr"        valueRef="picked_leftover"/>
           <arg option="-nextprot_releases" pathRef="nextprot_releases"/>
           <arg option="-msv_to_pxd_mapping" pathRef="msv_to_pxd_mapping"/>
           <arg option="-external_provenance"  valueRef="external_provenance"/>
@@ -189,7 +195,8 @@
           <arg option="-library_name"         valueRef="@library_name"/>
           <arg option="-export_explorers"     valueRef="@export_explorers"/>
           <arg option="-explorers_output"     valueRef="explorer_export"/>
-
+          <arg option="-variant_output"     valueRef="@use_variants"/>
+          <arg option="-hpp_protein_score_aggregation" valueRef="@hpp_aggregation_function"/>
       </execution>
   </tool>
   

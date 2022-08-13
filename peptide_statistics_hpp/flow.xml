@@ -13,6 +13,7 @@
 		<object name="kb_pep"/>
 
 	<collection name="fastadb"/>
+	<collection name="con_fastadb"/>
 
 	<collection name="parallel_params"/>
 	<collection name="intermediate_protein_coverage"/>
@@ -41,6 +42,8 @@
         <output port="mztab"       			 collection="mztab"/>
 				<output port="spec_on_server"       collection="spec_on_server"/>
         <output port="fastadb" 		  collection="fastadb"/>
+		<output port="con_fastadb" 		  collection="con_fastadb"/>
+
 				<output port="synthetics" 		  collection="synthetics"/>
         <output port="params" object="workflowParameters"/>
 				<output port="peptide_coverage_merged_external"       			 collection="peptide_coverage_merged_external"/>
@@ -60,7 +63,9 @@
 
 		<action name="download_latest_kb">
 			<input   port="params"       			    object="workflowParameters"/>
-			<input  port="fastadb"             			object="fastadb"/>
+			<input  port="fastadb"             			collection="fastadb"/>
+			<input  port="con_fastadb"             	    collection="con_fastadb"/>
+
 			<input port="peptide_coverage_comparisons" collection="peptide_coverage_comparisons"/>
 			<output  port="kb_pep"             		object="kb_pep"/>
 		</action>
@@ -68,8 +73,9 @@
 	<collection name="intermediate_peptide_coverage"/>
 	<action name="map_peptides" multiplicity="multiple" type="parallel">
         <input  port="peptide_list"             collection="peptide_list"  transformation="unfolding"/>
-        <input  port="fastadb"             			object="fastadb"/>
-				<input  port="exon_fasta"             	object="exon_fasta"/>
+			<input  port="fastadb"             			collection="fastadb"/>
+			<input  port="con_fastadb"             	    collection="con_fastadb"/>
+							<input  port="exon_fasta"             	object="exon_fasta"/>
         <output port="peptide_coverage"       	collection="peptide_coverage"/>
     </action>
 
@@ -112,7 +118,8 @@
 		<action name="peptide_protein_cosine">
 			<input   port="kb_pep"       			    object="kb_pep"/>
 			<input   port="novel_psms_w_cosine"          collection="novel_psms_w_cosine"/>
-			<input  port="fastadb"             			object="fastadb"/>
+			<input  port="fastadb"             			collection="fastadb"/>
+			<input  port="con_fastadb"             	    collection="con_fastadb"/>
 			<input   port="peptide_coverage"   collection="peptide_coverage"/>
 			<input   port="novel_psms_w_cosine_external"       collection="novel_psms_w_cosine_external"/>
 			<input   port="peptide_coverage_merged_external"   collection="peptide_coverage_merged_external"/>

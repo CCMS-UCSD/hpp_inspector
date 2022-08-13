@@ -94,8 +94,11 @@ def extract_annotated_peaks(spectrum, fragment_tolerance, low_mass_filter, min_s
             fragment_tolerance,
             precursor_filter_window=1.5,
             low_mass_filter=low_mass_filter,
-            isobaric_tag_type=None,
-            min_snr=min_snr
+            min_snr=0,
+            window_filter_size = 50,
+            window_filter_top_peaks = 8,
+            num_top_unannotated_envelopes_to_remove=2,
+            isobaric_tag_type='TMT 16-plex' #remove these peaks for all jobs
     )
     ion_vector = spectrum._replace(peaks = ion_vector)
     ion_vector = processing.normalize_spectrum(ion_vector)
@@ -107,16 +110,16 @@ def find_ei_and_intensity(spectrum, psm, synthetic_scans, tol, low_mass_filter, 
     charge = psm['charge']
     tolerance = psm['tolerance'] if psm['tolerance'] else tol
     spectrum = spectrum._replace(precursor_z = int(charge), annotation = processing.Annotation(sequence, None))
-    matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
+    matching_synthetics = synthetic_scans.get((''.join([s for s in sequence if s.isalpha()]),charge),[])
     spectrum_ei, spectrum_ion_vector = extract_annotated_peaks(spectrum, tolerance, low_mass_filter, min_snr)
-    for synthetic_filescan, synthetic_ion_vector in matching_synthetics:
+    for synthetic_filescan, synthetic_ion_vector, synthetic_peptide in matching_synthetics:
         cosine = processing.match_peaks(spectrum_ion_vector, synthetic_ion_vector, tolerance)
         if not best_cosine or cosine > best_cosine[0]:
-            best_cosine = (cosine,synthetic_filescan)
+            best_cosine = (cosine,synthetic_filescan,synthetic_peptide)
     return spectrum_ei, best_cosine
 
 def process_spectrum(psms_to_consider, filename, synthetic_scans, tol, low_mass_filter, min_snr, threshold, peaks_obj, spectrum_select_func):
-    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
+    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A'),'N/A'))
     explained_intensity_per_spectrum = {}
     for scan in psms_to_consider[filename].keys():
         spectrum = spectrum_select_func(peaks_obj,scan)
@@ -128,7 +131,7 @@ def process_spectrum(psms_to_consider, filename, synthetic_scans, tol, low_mass_
 
 def process_spectrum_read_file(psms_to_consider, filename, synthetic_scans, tol, low_mass_filter, min_snr, threshold, reader, spectrum_select_func,read_scan):
     start_time = datetime.now()
-    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
+    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A'),'N/A'))
     explained_intensity_per_spectrum = {}
     all_spectra = []
     for i,s in enumerate(reader):
@@ -172,7 +175,7 @@ def main():
         r = csv.DictReader(f, delimiter='\t')
         psms_header = r.fieldnames
         for l in r:
-            synthetic_keys.add((l['sequence'].replace('+229.163','').replace('+229.162932',''),l['charge']))
+            synthetic_keys.add((''.join([a for a in l['sequence'] if a.isalpha()]),l['charge']))
             all_psms.append(l)
             try:
                 tolerance = float(l['frag_tol'])
@@ -195,9 +198,10 @@ def main():
                 with mgf.read(synthetics_file) as reader:
                     for i,s in enumerate(reader):
                         peptide = s['params'].get('seq')
+                        sequence = ''.join([a for a in peptide if a.isalpha()])
                         charge = int(s['params'].get('charge')[0])
                         # print(peptide, str(charge))
-                        if (peptide, str(charge)) in synthetic_keys:
+                        if (sequence, str(charge)) in synthetic_keys:
                             synthetics_loaded += 1
                             filename = s['params'].get('originalfile_filename',s['params'].get('provenance_filename'))
                             scan = s['params'].get('originalfile_scan',s['params'].get('provenance_scan'))
@@ -214,12 +218,12 @@ def main():
                             )
                             synthetic_low_mass, synthetic_min_snr = (args.low_mass_filter, args.min_snr) if args.filter_synthetics == 'Yes' else (0,0)
                             _, synthetic_ion_vector = extract_annotated_peaks(spectrum, 0.05, synthetic_low_mass, synthetic_min_snr)
-                            synthetic_scans[(peptide, str(charge))].append(((filename,scan),synthetic_ion_vector))
+                            synthetic_scans[(sequence, str(charge))].append(((filename,scan),synthetic_ion_vector,peptide))
         print("{}: Loaded {} synthetics".format(datetime.now().strftime("%H:%M:%S"),synthetics_loaded))
     else:
         print("Not loading synthetics")
 
-    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A')))
+    cosine_to_synthetic = defaultdict(lambda: (-1,('N/A','N/A'),'N/A'))
     explained_intensity_per_spectrum = {}
 
     min_spectra_to_load_file = 20
@@ -313,18 +317,18 @@ def main():
             for scan in psms_to_consider[filename].keys():
                 sequence = psms_to_consider[filename][scan]['sequence']
                 charge = psms_to_consider[filename][scan]['charge']
-                matching_synthetics = synthetic_scans.get((sequence.replace('+229.163','').replace('+229.162932',''),charge),[])
-                for synthetic_filescan, _ in matching_synthetics:
-                    cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan)
+                matching_synthetics = synthetic_scans.get((''.join([s for s in sequence if s.isalpha()]),charge),[])
+                for synthetic_filescan, _ , synthetic_peptide in matching_synthetics:
+                    cosine_to_synthetic[(filename,scan)] = (0,synthetic_filescan,synthetic_peptide)
 
     print("{}: About to write out PSMs".format(datetime.now().strftime("%H:%M:%S")))
 
     with open(args.output_psms.joinpath(args.jobs.name), 'w') as fw_psm:
-        header = psms_header + ['usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','explained_intensity','matched_ions']
+        header = psms_header + ['usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','explained_intensity','matched_ions']
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
         for psm in all_psms:
-            cosine, best_synthetic = cosine_to_synthetic[(psm['filename'],psm['scan'])]
+            cosine, best_synthetic, synthetic_peptide = cosine_to_synthetic[(psm['filename'],psm['scan'])]
             if best_synthetic[0] != 'N/A':
                 synthetic_filename = 'f.' + best_synthetic[0].replace('/data/massive/','')
                 synthetic_scan = best_synthetic[1]
@@ -334,12 +338,12 @@ def main():
             psm['usi'] = make_usi(psm['filename'], psm['scan'], psm['sequence'], psm['charge'])
             psm['synthetic_filename'] = synthetic_filename
             psm['synthetic_scan'] = synthetic_scan
-            psm['synthetic_usi'] = make_usi(synthetic_filename, synthetic_scan, psm['sequence'].replace('+229.163','').replace('+229.162932',''), psm['charge'])
+            psm['synthetic_usi'] = make_usi(synthetic_filename, synthetic_scan, synthetic_peptide, psm['charge'])
+            psm['synthetic_sequence'] = synthetic_peptide
             psm['cosine'] = cosine
             ei, num_matched_peaks = explained_intensity_per_spectrum.get((psm['filename'],psm['scan']),(0,0))
             psm['explained_intensity'] = ei
             psm['matched_ions'] = num_matched_peaks
-
             psm['frag_tol'] = psm['frag_tol'] if psm['frag_tol'] != 0 else tol
             w_psm.writerow(psm)
     print("{}: Finished writing out PSMs".format(datetime.now().strftime("%H:%M:%S")))

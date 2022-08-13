@@ -181,7 +181,7 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
 def main():
     args = arguments()
 
-    hpp_score_aggregation = lambda xs: sum(xs) if args.hpp_protein_score_aggregation == 'sum' else max(xs)
+    hpp_score_aggregation = lambda xs: max(xs)
 
     representative_per_precursor = {}
     variant_to_best_precursor = {}
@@ -486,7 +486,7 @@ def main():
         all_psms_with_score = []
         all_psm_rows = []
         with open(args.output_psms,'w') as w:
-            header = ['protein','protein_full','psm_fdr','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','variant_number','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
+            header = ['protein','protein_full','psm_fdr','protein_type','gene','all_proteins','decoy','pe','ms_evidence','filename','scan','variant_number','sequence','sequence_unmodified','sequence_unmodified_il','charge','usi','score','modifications','pass','type','parent_mass','frag_tol','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','synthetic_match','explained_intensity','matched_ions','hpp_match','gene_unique','canonical_matches','all_proteins_w_coords','aa_start','aa_end', 'total_unique_exons_covered', 'exons_covered_no_junction', 'exon_junctions_covered', 'all_mapped_exons','datasets','tasks']
             o = csv.DictWriter(w, delimiter='\t',fieldnames = header, restval='N/A', extrasaction='ignore')
             o.writeheader()
             for input_psm in args.input_psms.glob('*'):
@@ -561,10 +561,10 @@ def main():
             if float(best_psm['precursor_fdr']) <= args.precursor_fdr and len(proteins) == 1 and ('Canonical' in best_psm.get('protein_type','') or 'Contaminant' in best_psm.get('protein_type','')):
                 pos = (int(best_psm['aa_start']),int(best_psm['aa_end']))
                 if best_psm.get('hpp_match','') == 'Yes':
-                    precursors_per_protein_hpp[proteins[0]][pos].append((float(best_psm['score']),seq_theoretical_mass(best_psm['sequence']),best_psm['charge']))
-                precursors_per_protein_all[proteins[0]][pos].append((float(best_psm['score']),seq_theoretical_mass(best_psm['sequence']),best_psm['charge']))
+                    precursors_per_protein_hpp[proteins[0]][pos].append((float(best_psm['score']),integer_mod_mass(best_psm['sequence']),best_psm['charge']))
+                precursors_per_protein_all[proteins[0]][pos].append((float(best_psm['score']),integer_mod_mass(best_psm['sequence']),best_psm['charge']))
             for protein in proteins:
-                precursors_per_protein_non_unique[protein][sequence_il].append((float(best_psm['score']),seq_theoretical_mass(best_psm['sequence']),best_psm['charge']))
+                precursors_per_protein_non_unique[protein][sequence_il].append((float(best_psm['score']),integer_mod_mass(best_psm['sequence']),best_psm['charge']))
 
         proteins = peptide_to_protein.get(sequence_il,[])
         cannonical_proteins = [protein for protein in proteins if (proteome.proteins[protein].db == 'sp' and not proteome.proteins[protein].iso) or proteome.proteins[protein].db == 'con']
@@ -603,7 +603,7 @@ def main():
                     is_isoform_unique = True
             added = sequences_found[sequence_il].added
             sequences_found[sequence_il] = sequences_found[sequence_il]._replace(
-                hpp=is_hpp,
+                hpp=sequences_found[sequence_il].hpp or is_hpp,
                 isoform_unique=is_isoform_unique,
                 added = SeqOccurances(
                     added.match or match,
@@ -625,7 +625,6 @@ def main():
             best_psm.pop('len')
             best_psm['precursor_fdr'] = min(precursor_fdr.get((sequence, charge),1),1)
             best_psm['psm_fdr'] = -1
-            best_psm['synthetic_sequence'] = sequence.replace('+229.163','').replace('+229.162932','')
             output_protein_level_results(best_psm)
             best_psm['datasets'] = ';'.join(best_psm['datasets'])
             best_psm['tasks'] = ';'.join(best_psm['tasks'])
@@ -651,19 +650,8 @@ def main():
 
     seen_picked = set()
 
-    def greedy_sequence_precursor_score(precursor_list, distance = 3, score_aggregation_func = lambda xs: sum(xs)):
-        used_precursors = []
-        for precursor in sorted(precursor_list, key = lambda x: x[0], reverse = True):
-            found = False
-            for seen_precursor in used_precursors:
-                if precursor[2]==seen_precursor[2] and abs(precursor[1]-seen_precursor[1]) <= distance:
-                    found = True
-            if not found:
-                used_precursors.append(precursor)
-        return score_aggregation_func([p[0] for p in used_precursors])
-
     for protein, precursors in precursors_per_protein_hpp.items():
-        score, count = mapping.non_nested_score([(*k,greedy_sequence_precursor_score(v,score_aggregation_func=hpp_score_aggregation)) for k,v in precursors.items()])
+        score, count = mapping.non_nested_score([(*k,max([v[0] for v in vs])) for k,vs in precursors.items()])
         if score != 0:
             hpp_protein_w_scores.append(fdr.ScoredElement(protein,'XXX_' in protein, score))
             hpp_score_dict[protein] = score
@@ -678,8 +666,10 @@ def main():
         if fdr_val <= 0.01:
             seen_picked.add(transform_protein(protein))
 
+    variants_to_nodes = lambda variants, tol: [(unit_mass+int(charge)*1000,unit_mass+tol+int(charge)*1000,score) for score,unit_mass,charge in variants]
+
     for protein, precursors in precursors_per_protein_all.items():
-        score = sum([greedy_sequence_precursor_score(v) for k,v in precursors.items()])
+        score = sum([mapping.segment_count(variants_to_nodes(vs,3),mapping.non_overlapping)[0] for k,vs in precursors.items()])
         #remove corresponding found targets/decoys before running the picked FDR
         if hpp_fdr_dict.get(protein,1) > 0.01 and transform_protein(protein) not in seen_picked:
             if score != 0:

@@ -324,7 +324,7 @@ def main():
     print("{}: About to write out PSMs".format(datetime.now().strftime("%H:%M:%S")))
 
     with open(args.output_psms.joinpath(args.jobs.name), 'w') as fw_psm:
-        header = psms_header + ['usi','synthetic_filename','synthetic_scan','synthetic_usi','cosine','explained_intensity','matched_ions']
+        header = psms_header + ['usi','synthetic_filename','synthetic_scan','synthetic_usi','synthetic_sequence','cosine','explained_intensity','matched_ions']
         w_psm = csv.DictWriter(fw_psm, delimiter = '\t', fieldnames = header)
         w_psm.writeheader()
         for psm in all_psms:
@@ -339,11 +339,11 @@ def main():
             psm['synthetic_filename'] = synthetic_filename
             psm['synthetic_scan'] = synthetic_scan
             psm['synthetic_usi'] = make_usi(synthetic_filename, synthetic_scan, synthetic_peptide, psm['charge'])
+            psm['synthetic_sequence'] = synthetic_peptide
             psm['cosine'] = cosine
             ei, num_matched_peaks = explained_intensity_per_spectrum.get((psm['filename'],psm['scan']),(0,0))
             psm['explained_intensity'] = ei
             psm['matched_ions'] = num_matched_peaks
-
             psm['frag_tol'] = psm['frag_tol'] if psm['frag_tol'] != 0 else tol
             w_psm.writerow(psm)
     print("{}: Finished writing out PSMs".format(datetime.now().strftime("%H:%M:%S")))

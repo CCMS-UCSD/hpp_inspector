@@ -180,6 +180,7 @@
           <arg option="-cosine_cutoff"        valueRef="@cosine_threshold"/>
           <arg option="-explained_intensity_cutoff"        valueRef="@explained_intensity_threshold"/>
           <arg option="-annotated_ions_cutoff"        valueRef="@annotated_ions_threshold"/>
+          <arg option="-psm_fdr"        valueRef="@psm_fdr"/>
           <arg option="-precursor_fdr"        valueRef="@precursor_fdr"/>
           <arg option="-hpp_protein_fdr"        valueRef="@hpp_protein_fdr"/>
           <arg option="-picked_protein_fdr"        valueRef="@picked_protein_fdr"/>

@@ -45,9 +45,7 @@
           <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical Traditional)" width="4" tooltip=""/>
 
           <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/> -->
-        <column type="float" precision="3"  field="coverage_incl_shared" label="Total Coverage" width="4" tooltip=""/>
-          
+          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/> -->          
         <column type="text" field="protein_type" label="Protein Type" width="4"/>
 
             <column label="View Peptides" type="genericurlgenerator" width="5">
@@ -63,7 +61,8 @@
             <column type="text" field="gene" label="Gene" width="4"/>
             <column type="integer" field="pe" label="PE" width="1"/>
             <column type="integer" field="aa_total" label="Protein Length" width="3"/>
-            <column type="integer" field="num_sequences_incl_shared" label="#Sequences" width="1"/>
+            <column type="float" precision="3"  field="coverage_incl_shared" label="Total Coverage" width="4" tooltip=""/>
+            <column type="integer" field="num_sequences" label="#Sequences" width="1"/>
             <column type="integer" field="combined_hpp_just_current" label="#HPP Peptides (Canonical-unique)" width="5"/>
             <column type="integer" field="combined_hpp_just_current_iso_unique" label="#HPP Peptides (Isoform-unique)" width="5"/>
             <!-- <column type="integer" field="comparison_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
@@ -162,7 +161,7 @@
             <!-- <column type="text" field="synthetic_filename" label="Synthetic Filename" width="20"/>
             <column type="integer" field="synthetic_scan" label="Synthetic Scan" width="4"/> -->
             <column type="float" precision="4"  field="cosine" label="Cosine to Synthetic" width="4" tooltip=""/>
-            <column type="integer" field="canonical_matches" label="#SAAP protein matches" width="1"/>
+            <column type="integer" field="canonical_matches" label="#SAAV protein matches" width="1"/>
             <column type="text" field="gene_unique" label="Gene Unique" width="2"/>
             <column type="integer" field="exon_junctions_covered" label="Exon Junctions Covered" width="1"/>
             <column type="integer" field="exons_covered_no_junction" label="Complete Exons Covered" width="1"/>
@@ -253,7 +252,7 @@
                 <column type="integer" field="total_psms" label="#PSMs - All" width="4" tooltip=""/>
                 <column type="integer" field="num_peptidoforms" label="#Peptidoforms" width="4" tooltip=""/>
                 <column type="integer" field="variant_number" label="Variant Number" width="4" tooltip=""/>
-                <column type="integer" field="canonical_matches" label="#SAAP protein matches" width="1" tooltip = "Number of proteins the peptide matches to with a single amino acid variant."/>
+                <column type="integer" field="canonical_matches" label="#SAAV protein matches" width="1" tooltip = "Number of proteins the peptide matches to with a single amino acid variant."/>
                 <column type="text" field="gene_unique" label="Gene Unique" width="2" tooltip = "Peptide matches uniquely to a single gene with a single amino acid variant (True/False)."/>
                 <column type="text" field="decoy" label="Decoy" width="2" tooltip = ""/>
                 <column type="integer" field="exon_junctions_covered" label="Exon Junctions Covered" width="1"/>

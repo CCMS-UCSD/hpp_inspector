@@ -36,6 +36,7 @@ def arguments():
     parser.add_argument('--cosine_cutoff', type = float, help='Cosine Cutoff')
     parser.add_argument('--explained_intensity_cutoff', type = float, help='Explained Intensity Cutoff')
     parser.add_argument('--annotated_ions_cutoff', type = float, help='Annotated Ion Cutoff')
+    parser.add_argument('--psm_fdr', type = float, help='PSM FDR')
     parser.add_argument('--precursor_fdr', type = float, help='Precursor FDR')
     parser.add_argument('--picked_protein_fdr', type = float, help='Canonical Protein FDR')
     parser.add_argument('--hpp_protein_fdr', type = float, help='HPP Protein FDR')
@@ -59,8 +60,8 @@ def arguments():
         sys.exit(1)
     return parser.parse_args()
 
-aa_weights =    [71,  156, 114, 115, 103, 129, 128, 57,  137, 113, 113, 128, 131, 147, 97,  87,  101, 186, 163, 99]
-aa_characters = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V']
+aa_weights =    [71,  156, 114, 115, 103, 129, 128, 57,  137, 113, 113, 128, 131, 147, 97,  87,  101, 186, 163, 99, 151]
+aa_characters = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V', 'U']
 
 aa_dict = dict(zip(aa_characters,aa_weights))
 
@@ -256,7 +257,7 @@ def main():
     latest_nextprot_release = sorted(list(nextprot_releases_pe.keys()))[-1]
     nextprot_pe = nextprot_releases_pe[latest_nextprot_release]
 
-    def update_precursor_representative(l,from_psm = True, variant_level = False, psm_fdr = 0):
+    def update_precursor_representative(l,from_psm = True, variant_level = False, pass_psm_fdr = True):
         datasets = set([d for d in l.get('datasets','').split(';') if d != ''])
         tasks = set([t for t in l.get('tasks','').split(';') if t != ''])
         sequence, charge = l['sequence'],l['charge']
@@ -270,7 +271,7 @@ def main():
             variant = (sequence, charge)
         update_peptidoform = False
 
-        score = float(l['score']) if psm_fdr <= 0.01 else 0
+        score = float(l['score']) if pass_psm_fdr else 0
 
         variant_to_all_precursors[variant].add((sequence, charge))
 
@@ -528,7 +529,7 @@ def main():
 
             for l in all_psm_rows:
                 l['psm_fdr'] = psm_fdr.get(l['usi'],1)
-                l['variant_number'] = update_precursor_representative(l, psm_fdr = l['psm_fdr'], variant_level=args.variant_output==1)
+                l['variant_number'] = update_precursor_representative(l, pass_psm_fdr = l['psm_fdr'] <= args.psm_fdr, variant_level=args.variant_output==1)
                 if args.output_psms_flag == "1" or (args.output_psms_flag == "0.5" and row_pass_filters(l)):
                     o.writerow(l)
 

@@ -49,27 +49,30 @@
 			<default value="5"/>
 			<validator type="integer" minimum="0"/>
 		</parameter>
-
+		<parameter name="psm_fdr" label="Input Element (PSM or Sequence) FDR">
+			<default value="0.01"/>
+			<validator type="float" minimum="0" maximum="1"/>
+		</parameter>
 		<parameter name="precursor_fdr" label="Precursor FDR">
 			<default value="0.01"/>
-			<validator type="float" minimum="0"/>
+			<validator type="float" minimum="0" maximum="1"/>
 		</parameter>
 		<parameter name="picked_protein_fdr" label="Picked Protein FDR">
 			<default value="0.01"/>
-			<validator type="float" minimum="0"/>
+			<validator type="float" minimum="0" maximum="1"/>
 		</parameter>
 		<parameter name="hpp_protein_fdr" label="HPP Protein FDR">
 			<default value="0.01"/>
-			<validator type="float" minimum="0"/>
+			<validator type="float" minimum="0" maximum="1"/>
 		</parameter>
 
-		<parameter name="picked_protein_fdr_comparison" label="Picked Protein Comparison FDR">
+		<parameter name="picked_protein_fdr_comparison" label="Reference Picked Protein FDR Threshold">
 			<default value="0.01"/>
-			<validator type="float" minimum="0"/>
+			<validator type="float" minimum="0" maximum="1"/>
 		</parameter>
-		<parameter name="hpp_protein_fdr_comparison" label="HPP Protein Comparison FDR">
+		<parameter name="hpp_protein_fdr_comparison" label="Reference HPP Protein FDR Threshold">
 			<default value="0.01"/>
-			<validator type="float" minimum="0"/>
+			<validator type="float" minimum="0" maximum="1"/>
 		</parameter>
 
 
@@ -350,13 +353,21 @@
 												<input type="text" parameter="annotated_ions_threshold"/>
 										</cell>
 		        </row>
-						<row>
+						<row>										
+									<cell>
+												<label>
+														<content parameter="psm_fdr"/>
+												</label>
+										</cell>
+										<cell colspan="2">
+												<input type="text" parameter="psm_fdr"/>
+										</cell>
 										<cell>
 												<label>
 														<content parameter="precursor_fdr"/>
 												</label>
 										</cell>
-										<cell colspan="3">
+										<cell colspan="2">
 												<input type="text" parameter="precursor_fdr"/>
 										</cell>
 										<cell>
@@ -364,7 +375,7 @@
 														<content parameter="hpp_protein_fdr"/>
 												</label>
 										</cell>
-										<cell colspan="3">
+										<cell colspan="2">
 												<input type="text" parameter="hpp_protein_fdr"/>
 										</cell>			
 										<cell>
@@ -372,7 +383,7 @@
 														<content parameter="picked_protein_fdr"/>
 												</label>
 										</cell>
-										<cell colspan="3">
+										<cell colspan="2">
 												<input type="text" parameter="picked_protein_fdr"/>
 										</cell>
 							
@@ -434,7 +445,7 @@
 				</row>
 
 	</block>
-	<block label="Comparison">
+	<block label="Reference for Comparison">
 		<row>
 						<cell>
 								<label>

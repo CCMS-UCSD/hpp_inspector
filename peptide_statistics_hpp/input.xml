@@ -425,24 +425,6 @@
 						<input type="select" parameter="synthetic_filters"/>
 					</cell>
 				</row>
-				<row>
-					<cell>
-						<label>
-							<content parameter="use_variants"/>
-						</label>
-					</cell>
-					<cell colspan="2">
-						<input type="select" parameter="use_variants"/>
-					</cell>
-					<cell>
-						<label>
-							<content parameter="hpp_aggregation_function"/>
-						</label>
-					</cell>
-					<cell colspan="2">
-						<input type="select" parameter="hpp_aggregation_function"/>
-					</cell>
-				</row>
 
 	</block>
 	<block label="Reference for Comparison">
@@ -626,6 +608,24 @@
 										<property name="label">external_provenance</property>
 								</module>
 						</cell>
+				</row>
+								<row>
+					<cell>
+						<label>
+							<content parameter="use_variants"/>
+						</label>
+					</cell>
+					<cell colspan="2">
+						<input type="select" parameter="use_variants"/>
+					</cell>
+					<cell>
+						<label>
+							<content parameter="hpp_aggregation_function"/>
+						</label>
+					</cell>
+					<cell colspan="2">
+						<input type="select" parameter="hpp_aggregation_function"/>
+					</cell>
 				</row>
 	</block>
 </interface>

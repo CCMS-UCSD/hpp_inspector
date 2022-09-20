@@ -65,9 +65,10 @@
     <bind action="map_peptides" tool="map_peptides">
         <inputAsRequirement port="peptide_list"             requirement="peptide_list"/>
         <inputAsRequirement port="fastadb"                  requirement="fastadb"/>
-        <inputAsRequirement port="con_fastadb"                  requirement="con_fastadb"/>
+        <inputAsRequirement port="con_fastadb"              requirement="con_fastadb"/>
         <inputAsRequirement port="exon_fasta"               requirement="exon_fasta"/>
-		    <productionToOutput port="peptide_coverage"         production="peptide_coverage"/>
+		<productionToOutput port="peptide_coverage"         production="peptide_coverage"/>
+        <productionToOutput port="peptide_coverage_exact"   production="peptide_coverage_exact"/>
     </bind>
 
     <bind action="demangle_spec_on_server" tool="demangle_spec_on_server">
@@ -137,6 +138,9 @@
         <compression type="zip"/>
         <upload port="unique_peptides_list" type="file">
             <query name="resource" value="unique_peptides_list"/>
+        </upload>
+        <upload port="peptide_coverage_exact" type="folder">
+            <query name="resource" value="peptide_coverage_exact"/>
         </upload>
         <upload port="protein_coverage" type="file">
             <query name="resource" value="protein_coverage"/>

@@ -90,6 +90,7 @@
       <require name="con_fastadb"            type="folder"/>
       <require name="exon_fasta"            type="file"/>
       <produce name="peptide_coverage"        type="folder"/>
+      <produce name="peptide_coverage_exact"        type="folder"/>
       <execution env="binary" argConvention="adhoc">
           <arg pathRef="map_peptides.script"/>
           <arg option="-proteome_fasta"          valueRef="fastadb"/>
@@ -97,6 +98,7 @@
           <arg option="-exon_fasta"          valueRef="exon_fasta"/>
           <arg option="-peptide_list"   valueRef="peptide_list"/>
           <arg option="-output_folder"  valueRef="peptide_coverage"/>
+          <arg option="-output_folder_exact"  valueRef="peptide_coverage_exact"/>
         </execution>
   </tool>
 

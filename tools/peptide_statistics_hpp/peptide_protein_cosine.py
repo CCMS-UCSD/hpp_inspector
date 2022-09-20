@@ -72,6 +72,8 @@ theoretical_mass = lambda xs: sum([aa_dict[x] for x in xs]) + 18.010564686
 
 no_mod_il = lambda pep: ''.join([p.replace('I','L') for p in pep if p.isalpha()])
 
+handle_x_aa = lambda seq, mass: 'N/A' if re.search('[BXZ]',seq) else mass()
+
 def seq_theoretical_mass(sequence):
     aa = ''.join([a for a in sequence if a.isalpha()])
     mods = ''.join([m for m in sequence if not m.isalpha()])
@@ -79,7 +81,7 @@ def seq_theoretical_mass(sequence):
         mods = eval(mods)
     else:
         mods = 0
-    return (theoretical_mass(aa) + mods + 1.007276035)
+    return handle_x_aa(aa,lambda: theoretical_mass(aa) + mods + 1.007276035)
 
 
 def theoretical_mz(sequence,charge):
@@ -89,7 +91,7 @@ def theoretical_mz(sequence,charge):
         mods = eval(mods)
     else:
         mods = 0
-    return (theoretical_mass(aa) + mods + (int(charge)*1.007276035))/int(charge)
+    return handle_x_aa(aa,lambda: (theoretical_mass(aa) + mods + (int(charge)*1.007276035))/int(charge))
 
 def integer_mod_mass(sequence):
     mods = ''.join([m for m in sequence if not m.isalpha()])

@@ -25,6 +25,8 @@
 	<collection name="peptide_coverage_comparisons"/>
 
     <object name="protein_coverage"/>
+	<collection name="peptide_coverage_exact"/>
+
 		<object name="novel_psms"/>
 		<object name="novel_peptides"/>
     <object name="unique_peptides_list"/>
@@ -77,6 +79,8 @@
 			<input  port="con_fastadb"             	    collection="con_fastadb"/>
 							<input  port="exon_fasta"             	object="exon_fasta"/>
         <output port="peptide_coverage"       	collection="peptide_coverage"/>
+		        <output port="peptide_coverage_exact"       	collection="peptide_coverage_exact"/>
+
     </action>
 
     <collection name="spec_on_server_demangled"/>
@@ -165,6 +169,7 @@
 
     <action name="end">
         <input port="unique_peptides_list"       object="unique_peptides_list"/>
+		<input port="peptide_coverage_exact"       	collection="peptide_coverage_exact"/>
         <input port="protein_coverage" object="protein_coverage"/>
 		<input port="library_coverage_summary_statistics" object="library_coverage_summary_statistics"/>
 		<input port="debug_protein_coverage" collection="debug_protein_coverage"/>

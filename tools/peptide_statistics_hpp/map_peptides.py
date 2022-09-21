@@ -77,13 +77,12 @@ def main():
             for mapped_protein in mapped_proteins:
                 if not mapped_protein.mismatches:
                     protein = proteome_with_decoys.proteins[mapped_protein.protein_accession]
-                    if not protein.decoy:
-                        output_dict = {}
+                    output_dict = {}
 
-                        output_dict["peptide"] = peptide
-                        output_dict["protein"] = mapping.protein_to_full_uniprot_string(protein)
+                    output_dict["peptide"] = peptide
+                    output_dict["protein"] = mapping.protein_to_full_uniprot_string(protein)
 
-                        w.writerow(output_dict)
+                    w.writerow(output_dict)
 
 if __name__ == "__main__":
     main()

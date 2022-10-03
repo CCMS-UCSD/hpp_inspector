@@ -8,7 +8,7 @@ from pathlib import Path
 from itertools import chain
 import explorer_export
 import read_mappings
-from python_ms_utilities import mapping, resources, fdr, proteosafe
+from python_ms_utilities import processing, mapping, resources, fdr, proteosafe
 import pandas as pd
 from datetime import datetime
 import requests
@@ -126,7 +126,7 @@ def correct_usi(usi_input, msv_mapping):
         else:
             split_usi = usi_input.split(':')
             split_usi[1] = msv_to_pxd(split_usi[1], msv_mapping)
-            split_usi[5] = '/'.join([add_brackets(split_usi[5].split('/')[0]),split_usi[5].split('/')[1]])
+            split_usi[5] = '/'.join([processing.inspect_to_proforma(split_usi[5].split('/')[0]),split_usi[5].split('/')[1]])
             return ':'.join(split_usi)
     except:
         return ''

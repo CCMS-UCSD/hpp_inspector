@@ -62,7 +62,8 @@
             <column type="integer" field="pe" label="PE" width="1"/>
             <column type="integer" field="aa_total" label="Protein Length" width="3"/>
             <column type="float" precision="3"  field="coverage_incl_shared" label="Total Coverage" width="4" tooltip=""/>
-            <column type="integer" field="num_sequences" label="#Sequences" width="1"/>
+            <column type="integer" field="num_sequences_incl_shared" label="#Sequences (Including shared)" width="1"/>
+            <column type="integer" field="num_sequences" label="#Sequences (Uniquely mapped)" width="1"/>
             <column type="integer" field="combined_hpp_just_current" label="#HPP Peptides (Canonical-unique)" width="5"/>
             <column type="integer" field="combined_hpp_just_current_iso_unique" label="#HPP Peptides (Isoform-unique)" width="5"/>
             <!-- <column type="integer" field="comparison_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>

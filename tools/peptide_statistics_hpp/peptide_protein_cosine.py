@@ -96,21 +96,6 @@ def integer_mod_mass(sequence):
     mods = [int(round(float(m))) if i == 0 else -int(round(float(m))) for ms in mods.split('+') for i,m in enumerate(ms.split('-')) if m != '' ]
     return sum(mods)
 
-def add_brackets(pep):
-    aa_breakpoints = []
-    pep = pep.replace('+','[+').replace('-','[-')
-    for i,aa in enumerate(pep[1:]):
-        if not pep[i-1].isalpha() and pep[i].isalpha():
-            aa_breakpoints.append(i)
-        elif not pep[i].isalpha() and i == (len(pep)-2):
-            aa_breakpoints.append(i+2)
-    for i,breakpoint in enumerate(reversed(aa_breakpoints)):
-        end_bracket = ']'
-        if i == len(aa_breakpoints)-1 and pep[0] == '[':
-            end_bracket = ']-'
-        pep = pep[:breakpoint] + end_bracket + pep[breakpoint:]
-    return pep
-
 protein_type = lambda protein, proteome: 'Contaminant' if proteome.proteins[protein].db == 'con' else ('TrEMBL' if proteome.proteins[protein].db == 'tr' else ('Canonical' if proteome.proteins[protein].iso == None else 'Isoform'))
 
 def msv_to_pxd(msv, msv_mapping):

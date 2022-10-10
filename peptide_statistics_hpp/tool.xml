@@ -200,6 +200,7 @@
           <arg option="-explorers_output"     valueRef="explorer_export"/>
           <arg option="-variant_output"     valueRef="@use_variants"/>
           <arg option="-hpp_protein_score_aggregation" valueRef="@hpp_aggregation_function"/>
+          <arg option="-skip"               valueRef="@only_mapping"/>
       </execution>
   </tool>
   

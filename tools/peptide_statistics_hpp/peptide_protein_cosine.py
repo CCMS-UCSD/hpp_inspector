@@ -1000,6 +1000,18 @@ def main():
         hupo_mapping = {}
         unique_mapping = {}
         for protein, peptides in protein_mapping.items():
+
+            is_canonical = proteome.proteins.get(protein).db == 'sp' and not proteome.proteins.get(protein).iso
+
+            compare_mappings = defaultdict(dict)
+
+            for sequence, mappings in peptides.items():
+                found = sequences_found.get(sequence)
+                if found:
+                    if found.hpp:
+                        if found.added.match:
+                            compare_mappings['added_match'].update({sequence:mappings})
+
             if 'XXX_' not in protein:
                 protein_dict = {
                     'protein': protein,
@@ -1011,7 +1023,8 @@ def main():
                     'picked_fdr':min(1,picked_fdr_dict.get(protein,1))
                 }
                 pass_picked_fdr, pass_hpp_fdr = protein_dict['picked_fdr'] <= args.picked_protein_fdr, protein_dict['hpp_fdr'] <= args.hpp_protein_fdr 
-                hupo_mapping[protein] = find_overlap({},peptides,int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, pass_picked_fdr, pass_hpp_fdr,0,0)[0]['new_hpp']
+                if is_canonical:
+                    hupo_mapping[protein] = find_overlap({},compare_mappings['added_match'],int(protein_dict['aa_total']),int(protein_dict['pe']),'', 10, pass_picked_fdr, pass_hpp_fdr,0,0)[0]['new_hpp']
         for protein, peptides in protein_mapping.items():
             if 'XXX_' not in protein:
                 unique_mapping[protein] = len(set([peptide for peptide, mappings in peptides.items()]))

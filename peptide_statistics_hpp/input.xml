@@ -191,6 +191,15 @@
 			<validator type="set" />
 		</parameter>
 
+		<parameter name="only_mapping" label="Only output mapping">
+			<options>
+				<option label="Yes" value="1" />
+				<option label="No" value="0" />
+			</options>
+			<default value="0" />
+			<validator type="set" />
+		</parameter>
+
 		<parameter name="library_name" label="Library Name">
 			<options>
 				<option label="MassIVE-KB (combined)" value="1" />
@@ -627,5 +636,17 @@
 						<input type="select" parameter="hpp_aggregation_function"/>
 					</cell>
 				</row>
+	</block>
+	<block label="Advanced Mapping Outputs">
+		<row>
+			<cell>
+				<label>
+					<content parameter="only_mapping"/>
+				</label>
+			</cell>
+			<cell colspan="2">
+				<input type="select" parameter="only_mapping"/>
+			</cell>
+		</row>
 	</block>
 </interface>

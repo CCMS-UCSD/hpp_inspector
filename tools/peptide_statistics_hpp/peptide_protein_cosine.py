@@ -54,6 +54,7 @@ def arguments():
     parser.add_argument('--explorers_output', type = Path, help='Tables for Explorers')
     parser.add_argument('--variant_output', type = int, help='Variant level outputs',default=0)
     parser.add_argument('--hpp_protein_score_aggregation', type = str, help='HPP Protein Aggregation (max or sum')
+    parser.add_argument('--skip', type = int, help='Skip this node')
 
     if len(sys.argv) < 4:
         parser.print_help()
@@ -72,6 +73,8 @@ theoretical_mass = lambda xs: sum([aa_dict[x] for x in xs]) + 18.010564686
 
 no_mod_il = lambda pep: ''.join([p.replace('I','L') for p in pep if p.isalpha()])
 
+handle_x_aa = lambda seq, mass: 'N/A' if re.search('[BXZ]',seq) else mass()
+
 def seq_theoretical_mass(sequence):
     aa = ''.join([a for a in sequence if a.isalpha()])
     mods = ''.join([m for m in sequence if not m.isalpha()])
@@ -79,7 +82,7 @@ def seq_theoretical_mass(sequence):
         mods = eval(mods)
     else:
         mods = 0
-    return (theoretical_mass(aa) + mods + 1.007276035)
+    return handle_x_aa(aa,lambda: theoretical_mass(aa) + mods + 1.007276035)
 
 
 def theoretical_mz(sequence,charge):
@@ -89,7 +92,7 @@ def theoretical_mz(sequence,charge):
         mods = eval(mods)
     else:
         mods = 0
-    return (theoretical_mass(aa) + mods + (int(charge)*1.007276035))/int(charge)
+    return handle_x_aa(aa,lambda: (theoretical_mass(aa) + mods + (int(charge)*1.007276035))/int(charge))
 
 def integer_mod_mass(sequence):
     mods = ''.join([m for m in sequence if not m.isalpha()])
@@ -181,7 +184,20 @@ def find_overlap(existing_peptides, new_peptides, protein_length, protein_pe, na
 
 def main():
     args = arguments()
+    if not args.skip:
+        cond_main(args)
+    else:
+        args.output_psms.touch()
+        args.output_peptides.touch()
+        args.output_proteins.touch()
+        args.output_exons.touch()
+        args.output_mappings.touch()
+        args.output_dataset_proteins_hpp.touch()
+        args.output_dataset_proteins_all.touch()
+        args.output_task_proteins_hpp.touch()
+        args.output_task_proteins_all.touch()
 
+def cond_main(args):
     hpp_score_aggregation = lambda xs: max(xs)
 
     representative_per_precursor = {}

@@ -111,6 +111,13 @@ def prepare_pandas_table(input_file):
 
 def main():
     args = arguments()
+    if args.input_file.stat().st_size != 0:
+        cond_main(args)
+    else:
+        args.output_file.touch()
+
+def cond_main(args):
+    args = arguments()
 
     headers = {}
 

@@ -13,6 +13,7 @@ def arguments():
     parser.add_argument('-e','--exon_fasta', type = Path, help='Input FASTA Exon Mapping Database')
     parser.add_argument('-p','--peptide_list', type = Path, help='Peptide List')
     parser.add_argument('-o','--output_folder', type = Path, help='Output Folder')
+    parser.add_argument('-x','--output_folder_exact', type = Path, help='Output Folder For Exact Matches')
 
     if len(sys.argv) < 3:
         parser.print_help()
@@ -63,6 +64,25 @@ def main():
             output_dict["mapped_exons"] = mapping.exon_mappings_to_string(mapped_exons)
 
             w.writerow(output_dict)
+
+    with open(args.output_folder_exact.joinpath(args.peptide_list.name), 'w') as f:
+        w = DictWriter(f, delimiter = '\t', fieldnames = ['peptide','protein'])
+        w.writeheader()
+
+        for peptide in peptide_list:
+
+            output_dict = {}
+
+            mapped_proteins = mapping.map_peptide_to_proteome(peptide,proteome_with_decoys,kmer_proteome_hashes)
+            for mapped_protein in mapped_proteins:
+                if not mapped_protein.mismatches:
+                    protein = proteome_with_decoys.proteins[mapped_protein.protein_accession]
+                    output_dict = {}
+
+                    output_dict["peptide"] = peptide
+                    output_dict["protein"] = mapping.protein_to_full_uniprot_string(protein)
+
+                    w.writerow(output_dict)
 
 if __name__ == "__main__":
     main()

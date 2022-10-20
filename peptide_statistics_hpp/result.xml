@@ -35,18 +35,17 @@
 
           <column type="float" precision="4"  field="hpp_score" label="Score (HPP 2+)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="hpp_fdr" label="FDR (HPP 2+)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="leftover_score" label="Score (Leftover)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="leftover_fdr" label="FDR (Leftover)" width="4" tooltip=""/>
           <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical old)" width="4" tooltip=""/> -->
-          <column type="float" precision="4"  field="picked_score" label="Score (Picked)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="picked_fdr" label="FDR (Picked)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="common_score" label="Score (Canonical)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
-         <column type="float" precision="4"  field="leftover_score" label="Score (Leftover)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="leftover_fdr" label="FDR (Leftover)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="picked_score" label="Score (Canonical Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="picked_fdr" label="FDR (Canonical Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_score" label="Score (Canonical Traditional)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical Traditional)" width="4" tooltip=""/>
+
           <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/> -->
-        <column type="float" precision="3"  field="coverage_incl_shared" label="Total Coverage" width="4" tooltip=""/>
-          
+          <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical)" width="4" tooltip=""/> -->          
         <column type="text" field="protein_type" label="Protein Type" width="4"/>
 
             <column label="View Peptides" type="genericurlgenerator" width="5">
@@ -54,7 +53,7 @@
                 <parameter name="USETASK" value="True"/>
                 <parameter name="REQUESTPARAMETER=view" value="view_added_peptides"/>
                 <parameter name="HASHPARAMTER=protein_input" value="[protein]"/>
-                <parameter name="HASHPARAMTER=hpp_match_input" value="True"/>
+                <parameter name="HASHPARAMTER=hpp_match_input" value="Yes"/>
                 <parameter name="HASHPARAMTER=explained_intensity_lowerinput" value="[explained_intensity_cutoff]"/>
                 <parameter name="LABEL" value="View HPP Compliant Peptides"/>
                 <parameter name="PASS_URL" value="True"/>
@@ -62,7 +61,9 @@
             <column type="text" field="gene" label="Gene" width="4"/>
             <column type="integer" field="pe" label="PE" width="1"/>
             <column type="integer" field="aa_total" label="Protein Length" width="3"/>
-            <column type="integer" field="num_sequences_incl_shared" label="#Sequences" width="1"/>
+            <column type="float" precision="3"  field="coverage_incl_shared" label="Total Coverage" width="4" tooltip=""/>
+            <column type="integer" field="num_sequences_incl_shared" label="#Sequences (Including shared)" width="1"/>
+            <column type="integer" field="num_sequences" label="#Sequences (Uniquely mapped)" width="1"/>
             <column type="integer" field="combined_hpp_just_current" label="#HPP Peptides (Canonical-unique)" width="5"/>
             <column type="integer" field="combined_hpp_just_current_iso_unique" label="#HPP Peptides (Isoform-unique)" width="5"/>
             <!-- <column type="integer" field="comparison_hpp_w_synthetic_cosine" label="#HPP Peptides (KB Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
@@ -73,7 +74,7 @@
             <column type="expandable" field="novel_peptides" label="Novel Peptides" width="20"/>
             <column type="integer" field="combined_hpp" label="#HPP Peptides (Combined)" width="5"/>
             <column type="integer" field="combined_fdr_hpp" label="#HPP Peptides (Combined, Pass FDR)" width="5"/>
-            <column type="integer" field="comparison_hpp_allfdr" label="#HPP Peptides (Reference Common FDR)" width="2"/>
+            <column type="integer" field="comparison_hpp_allfdr" label="#HPP Peptides (Reference Leftover FDR)" width="2"/>
             <column type="integer" field="comparison_hpp_hppfdr" label="#HPP Peptides (Reference HPP FDR)" width="2"/>
 
             <column type="integer" field="new_hpp" label="#HPP Peptides (Added Only)" width="2"/>
@@ -83,7 +84,7 @@
             <column type="expandable" field="supporting_peptides_w_synthetic" label="Previously-known Peptides (Synthetic)" width="20"/>
             <column type="expandable" field="novel_peptides_w_synthetic" label="Novel Peptides (Synthetic)" width="20"/>
             <column type="integer" field="combined_hpp_w_synthetic" label="#HPP Peptides (Combined) (Synthetic)" width="5"/>
-            <column type="integer" field="comparison_hpp_allfdr_w_synthetic" label="#HPP Peptides (Reference Common FDR) (Synthetic)" width="2"/>
+            <column type="integer" field="comparison_hpp_allfdr_w_synthetic" label="#HPP Peptides (Reference Leftover FDR) (Synthetic)" width="2"/>
             <column type="integer" field="comparison_hpp_hppfdr_w_synthetic" label="#HPP Peptides (Reference HPP FDR)(Synthetic)" width="2"/>
 
             <column type="integer" field="new_hpp_w_synthetic" label="#HPP Peptides (Added Only) (Synthetic)" width="2"/>
@@ -94,7 +95,7 @@
             <column type="expandable" field="supporting_peptides_w_synthetic_cosine" label="Previously-known Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
             <column type="expandable" field="novel_peptides_w_synthetic_cosine" label="Novel Peptides (Synthetic + Pass Cosine Threshold)" width="20"/>
                         <column type="integer" field="combined_hpp_w_synthetic_cosine" label="#HPP Peptides (Combined) (Synthetic + Pass Cosine Threshold)" width="5"/>
-            <column type="integer" field="comparison_hpp_allfdr_w_synthetic_cosine" label="#HPP Peptides (Reference Common FDR) (Synthetic + Pass Cosine Threshold)" width="2"/>
+            <column type="integer" field="comparison_hpp_allfdr_w_synthetic_cosine" label="#HPP Peptides (Reference Leftover FDR) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="integer" field="comparison_hpp_hppfdr_w_synthetic_cosine" label="#HPP Peptides (Reference HPP FDR) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="integer" field="new_hpp_w_synthetic_cosine" label="#HPP Peptides (Added Only) (Synthetic + Pass Cosine Threshold)" width="2"/>
             <column type="float" field="total_coverage_w_synthetic_cosine" label="Coverage (Total) (Synthetic + Pass Cosine Threshold)" width="2"/>
@@ -147,7 +148,7 @@
             <column type="text" field="protein_type" label="Protein Type" width="4"/>
             <column type="integer" field="aa_start" label="AA Start" width="1"/>
             <column type="integer" field="aa_end" label="AA End" width="1"/>
-            <column type="integer" field="pe" label="PE" width="5"/>
+            <column type="integer" field="pe" label="PE" width="5" nonNumericCheckbox="true"/>
             <column type="text" field="hpp_match" label="HPP Compliant" width="2"/>
             <column type="text" field="usi" label="USI" width="20"/>
             <!-- <column type="text" field="filename" label="Filename" width="20"/>
@@ -160,7 +161,8 @@
             <column autoHideSentinel="true" type="text" field="synthetic_usi" label="Synthetic Match" width="20"/>
             <!-- <column type="text" field="synthetic_filename" label="Synthetic Filename" width="20"/>
             <column type="integer" field="synthetic_scan" label="Synthetic Scan" width="4"/> -->
-            <column type="integer" field="canonical_matches" label="#SAAP protein matches" width="1"/>
+            <column type="float" precision="4"  field="cosine" label="Cosine to Synthetic" width="4" tooltip=""/>
+            <column type="integer" field="canonical_matches" label="#SAAV protein matches" width="1"/>
             <column type="text" field="gene_unique" label="Gene Unique" width="2"/>
             <column type="integer" field="exon_junctions_covered" label="Exon Junctions Covered" width="1"/>
             <column type="integer" field="exons_covered_no_junction" label="Complete Exons Covered" width="1"/>
@@ -216,13 +218,13 @@
                            <column type="slideExpandableHidden" characterhidelimit="18" field="protein" label="Protein Accession" width="4"/>
 
                 <column type="float" precision="4" field="precursor_fdr" label="Precursor FDR" width="4" tooltip=""/>
-                <column type="float" precision="4" field="picked_protein_fdr" label="Protein FDR (Canonical)" width="4" tooltip=""/>
+                <column type="float" precision="4" field="picked_protein_fdr" label="Protein FDR (Leftover)" width="4" tooltip=""/>
                 <column type="float" precision="4"  field="hpp_protein_fdr" label="Protein FDR (HPP 2+)" width="4" tooltip=""/>
                 <column type="expandable" field="gene" label="Gene" width="4" tooltip="Gene for the protein"/>
                 <column type="text" field="protein_type" label="Protein Type" width="4"/>
                 <column type="integer" field="aa_start" label="AA Start" width="1" tooltip="Start location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
                 <column type="integer" field="aa_end" label="AA End" width="1" tooltip="End location of peptide.  If the peptide maps multiple times, to either multiple proteins or the same protein, this will be N/A."/>
-                <column type="integer" field="pe" label="Protein Existence (PE) Level" width="5" tooltip="Protein Existence (PE) Level from neXtProt 2020 release."/>
+                <column type="integer" field="pe" label="Protein Existence (PE) Level" width="5" tooltip="Protein Existence (PE) Level from latest neXtProt release." nonNumericCheckbox="true" />
                 <column type="text" field="sequence" label="Sequence" width="20"/>
                 <column type="text" field="sequence_unmodified" label="Demodified Sequence" width="20"/>
                 <column type="text" field="sequence_unmodified_il" label="IL Demodified Sequence" width="20"/>
@@ -245,9 +247,15 @@
                 <column type="float" precision="3"  field="explained_intensity" label="Explained Intensity" width="6"/>
                 <column type="integer" field="matched_ions" label="Matched Ions" width="6"/>
                 <!-- <column type="text" field="pass" label="Above Library Threshold" width="6"/> -->
-                <column type="float" precision="3"  field="cosine" label="Best Annotated Cosine to Synthetic Spectrum Match" width="6" tooltip="Spectrum cosine using only annotated peaks from the input spectrum and closest matching synthetic."/>
-                <column type="integer" field="canonical_matches" label="#SAAP protein matches" width="1" tooltip = "Number of proteins the peptide matches to with a single amino acid variant."/>
+                <column type="float" precision="4"  field="cosine" label="Cosine to Synthetic" width="4" tooltip=""/>
+                <column type="float" precision="4"  field="best_overall_psm_score" label="Best PSM Score" width="4" tooltip=""/>
+                <column type="integer" field="filtered_psms" label="#PSMs - Passing Quality Filters" width="4" tooltip=""/>
+                <column type="integer" field="total_psms" label="#PSMs - All" width="4" tooltip=""/>
+                <column type="integer" field="num_peptidoforms" label="#Peptidoforms" width="4" tooltip=""/>
+                <column type="integer" field="variant_number" label="Variant Number" width="4" tooltip=""/>
+                <column type="integer" field="canonical_matches" label="#SAAV protein matches" width="1" tooltip = "Number of proteins the peptide matches to with a single amino acid variant."/>
                 <column type="text" field="gene_unique" label="Gene Unique" width="2" tooltip = "Peptide matches uniquely to a single gene with a single amino acid variant (True/False)."/>
+                <column type="text" field="decoy" label="Decoy" width="2" tooltip = ""/>
                 <column type="integer" field="exon_junctions_covered" label="Exon Junctions Covered" width="1"/>
                 <column type="integer" field="exons_covered_no_junction" label="Complete Exons Covered" width="1"/>
                 <column type="integer" field="total_unique_exons_covered" label="Total Exons Covered" width="1"/>
@@ -408,8 +416,8 @@
           
           <!-- <column type="float" precision="4"  field="all_score" label="Score (Canonical old)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="all_fdr" label="FDR (Canonical old)" width="4" tooltip=""/> -->
-          <column type="float" precision="4"  field="picked_score" label="Score (Picked)" width="4" tooltip=""/>
-          <column type="float" precision="4"  field="picked_fdr" label="FDR (Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="picked_score" label="Score (Canonical Picked)" width="4" tooltip=""/>
+          <column type="float" precision="4"  field="picked_fdr" label="FDR (Canonical Picked)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="common_score" label="Score (Canonical)" width="4" tooltip=""/>
           <column type="float" precision="4"  field="common_fdr" label="FDR (Canonical)" width="4" tooltip=""/>
                    <column type="float" precision="4"  field="leftover_score" label="Score (Leftover)" width="4" tooltip=""/>

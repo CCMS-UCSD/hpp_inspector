@@ -29,6 +29,9 @@
         <download port="fastadb" type="folder">
             <query name="resource" value="fastadb"/>
         </download>
+        <download port="con_fastadb" type="folder">
+            <query name="resource" value="con_fastadb"/>
+        </download>
         <download port="dna" type="folder">
                 <query name="resource" value="dna"/>
             </download>
@@ -54,6 +57,7 @@
     <bind action="download_latest_kb" tool="download_latest_kb">
         <inputAsRequirement port="params"    requirement="params"/>
         <inputAsRequirement port="fastadb"                  requirement="fastadb"/>
+        <inputAsRequirement port="con_fastadb"                  requirement="con_fastadb"/>
         <inputAsRequirement port="peptide_coverage_comparisons" requirement="peptide_coverage_comparisons"/>
         <productionToOutput port="kb_pep"    production="kb_pep"/>
     </bind>
@@ -61,8 +65,10 @@
     <bind action="map_peptides" tool="map_peptides">
         <inputAsRequirement port="peptide_list"             requirement="peptide_list"/>
         <inputAsRequirement port="fastadb"                  requirement="fastadb"/>
+        <inputAsRequirement port="con_fastadb"              requirement="con_fastadb"/>
         <inputAsRequirement port="exon_fasta"               requirement="exon_fasta"/>
-		    <productionToOutput port="peptide_coverage"         production="peptide_coverage"/>
+		<productionToOutput port="peptide_coverage"         production="peptide_coverage"/>
+        <productionToOutput port="peptide_coverage_exact"   production="peptide_coverage_exact"/>
     </bind>
 
     <bind action="demangle_spec_on_server" tool="demangle_spec_on_server">
@@ -88,6 +94,7 @@
     <bind action="peptide_protein_cosine" tool="peptide_protein_cosine">
         <inputAsRequirement port="kb_pep"                         requirement="kb_pep"/>
         <inputAsRequirement port="fastadb"                  requirement="fastadb"/>
+        <inputAsRequirement port="con_fastadb"                  requirement="con_fastadb"/>
         <inputAsRequirement port="novel_psms_w_cosine"       requirement="novel_psms_w_cosine"/>
         <inputAsRequirement port="peptide_coverage"        requirement="peptide_coverage"/>
         <inputAsRequirement port="novel_psms_w_cosine_external"       requirement="novel_psms_w_cosine_external"/>
@@ -131,6 +138,9 @@
         <compression type="zip"/>
         <upload port="unique_peptides_list" type="file">
             <query name="resource" value="unique_peptides_list"/>
+        </upload>
+        <upload port="peptide_coverage_exact" type="folder">
+            <query name="resource" value="peptide_coverage_exact"/>
         </upload>
         <upload port="protein_coverage" type="file">
             <query name="resource" value="protein_coverage"/>

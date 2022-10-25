@@ -278,7 +278,7 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
                 #    get_sequence(l)
                 #]]) + '\n')
                 w_provenance_representatives.write(','.join(["\"{}\"".format(r) for r in [
-                    "#library_dataset_id:{}.{}".format(library_id,library_version),
+                    library_id,
                     "#variant_id:{}.{}".format(get_sequence(l),get_charge(l)),
                     '#psm_id:f.{}.scan={}.{}'.format(get_filename(l),get_scan(l),get_proteosafe_task(l))
                 ]]) + '\n')

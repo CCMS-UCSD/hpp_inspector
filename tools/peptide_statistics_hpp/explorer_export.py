@@ -2,6 +2,8 @@ from pathlib import Path
 from csv import DictReader, DictWriter
 from collections import defaultdict
 
+correct_kb_paths = lambda x: x.replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW").replace('ccms/ccms_output/ccms/PXD026440/IPX0003098000/IPX0003098001','MSV000088554/ccms_peak').replace('ccms/ccms_output/ccms/bioplex_3.0/BioPlex_293T_3.0_RAW_Files/archive','MSV000088555/ccms_peak')
+
 def headers(key):
     return {
         'proteins':
@@ -113,12 +115,13 @@ def table_output(index,table,output_folder,output_rows, postprocess = ''):
         for (i,row) in enumerate(output_rows):
             w.write("{}\n".format(",".join(["\"{}\"".format(r) for r in row])))
 
-def table_from_dataset_proteins(dataset_protein_dict):
+def table_from_dataset_proteins(dataset_protein_dict, library_id, library_version):
     dataset_protein_rows = []
     for ((dataset,protein),d) in dataset_protein_dict.items():
         dataset_protein_rows.append([
+            library_id,
             dataset,
-            protein,
+            "#protein_id:" + protein,
             str(len(d['unique_peptides'])),
             str(len(d['exon_unique'].intersection(d['unique_peptides']))),
             str(len(d['splice_junction'].intersection(d['unique_peptides']))),
@@ -132,17 +135,12 @@ def table_from_proteins(protein_dict, hupo_mapping, unique_mapping, library_id, 
     protein_rows = []
     for (protein,d) in protein_dict.items():
         protein_rows.append([
-            protein,
             library_id,
-            library_version,
+            "#protein_id:" + protein,
             str(unique_mapping.get(protein,0)),
             str(len(d['exon_unique'].intersection(d['unique_peptides']))),
             str(len(d['splice_junction'].intersection(d['unique_peptides']))),
             str(len(d['exon_mapped'])),
-            str(len(d['peptides'])),
-            str(len(d['variants'])),
-            str(len(d['modifications'])),
-            str(len(d['datasets'])),
             str(d['psms_shared']),
             str(d['psms_unique']),
             str(hupo_mapping.get(protein,0))
@@ -162,48 +160,34 @@ def mapping_to_peptides_and_mapping(input_mapping, library_id):
             len(peptide)
         ])
         for protein,(start_aa,end_aa),il_ambiguous in mapping_obj['mapped_proteins']:
-            if not il_ambiguous:
-                mappings.append([
-                    peptide,
-                    "#peptide_id:" + peptide,
-                    protein,
-                    start_aa,
-                    end_aa,
-                    library_id
-                ])
             mappings.append([
                 peptide,
                 "#peptide_id:" + peptide,
-                protein,
+                "#protein_id:" + protein,
                 start_aa,
-                end_aa,
-                0
+                end_aa
             ])
     return peptides, mappings
 
-def representatives_to_representatives_and_variants(representatives_table, library_id, library_version):
+def representatives_to_representatives_and_variants(representatives_table, library_id, library_version, task_for_filescan):
     representatives, variants = [], []
     for (sequence, charge), representative in representatives_table.items():
-        just_sequence = "".join([p for p in sequence if p.isalpha()])
+        spectrum_file_descriptor = "f.{}".format(correct_kb_paths(representative["database_filename"]))
+        nativeid = "scan={}".format(representative["database_scan"])
         representatives.append([
             library_id,
-            representative['charge'],
-            '#provenance_id:{}.scan={}'.format(representative['database_filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW").replace('ccms/ccms_output/ccms/PXD026440/IPX0003098000/IPX0003098001','MSV000088554/ccms_peak').replace('ccms/ccms_output/ccms/bioplex_3.0/BioPlex_293T_3.0_RAW_Files/archive','MSV000088555/ccms_peak'),representative['database_scan']),
-            "#variant_id:" + sequence,
-            "#peptide_id:" + just_sequence,
-            library_version,
+            "#variant_id:{}.{}".format(sequence,charge),
+            "#psm_id:{}.{}.{}".format(spectrum_file_descriptor,nativeid,task_for_filescan[(spectrum_file_descriptor,nativeid)]),
             representative['score']
         ])
         variants.append([
             representative['sequence'],
-            just_sequence,
-            "#peptide_id:" + just_sequence,
-            float(representative['parent_mass']),
-            representative['modifications']
+            representative['charge'],
+            float(representative['parent_mass'])
         ])
     return representatives, variants
 
-def update_provenance(input_provenance, input_representatives, input_mappings, library_id, output_provenance, output_provenance_representatives):
+def update_provenance(input_provenance, input_representatives, input_mappings, library_id, library_version, output_provenance, output_provenance_representatives):
     proteins_stats = defaultdict(
         lambda : {
             'exon_unique':set(),
@@ -220,6 +204,7 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
         }
     )
     dataset_proteins = defaultdict(lambda : {'exon_unique':set(),'splice_junction':set(),'exon_mapped':set(), 'unique_peptides':set(), 'psms_unique':0, 'psms_shared':0})
+    task_for_filescan = {}
 
     provenance_file = None
     provenance_generator = None
@@ -231,7 +216,7 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
         get_sequence = lambda l: l['annotation']
         get_charge = lambda l: l['charge']
         # replace is because a symlink was used in construction of KB 2.0.1
-        get_filename = lambda l: l['filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW").replace('ccms/ccms_output/ccms/PXD026440/IPX0003098000/IPX0003098001','MSV000088554/ccms_peak').replace('ccms/ccms_output/ccms/bioplex_3.0/BioPlex_293T_3.0_RAW_Files/archive','MSV000088555/ccms_peak')
+        get_filename = lambda l: correct_kb_paths(l['filename'])
         get_scan = lambda l: l['scan']
         get_proteosafe_task = lambda l: l['proteosafe_task']
         get_workflow = lambda l, a: l.get('workflow',a)
@@ -240,13 +225,13 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
         provenance_lines = input_provenance.values()
         get_sequence = lambda l: l['sequence']
         get_charge = lambda l: l['charge']
-        get_filename = lambda l: l['filename'].replace("jswertz/MSV000086369_hct116_symlinks", "MSV000086369/ccms_peak/RAW").replace('ccms/ccms_output/ccms/PXD026440/IPX0003098000/IPX0003098001','MSV000088554/ccms_peak').replace('ccms/ccms_output/ccms/bioplex_3.0/BioPlex_293T_3.0_RAW_Files/archive','MSV000088555/ccms_peak')
+        get_filename = lambda l: correct_kb_paths(l['filename'])
         get_scan = lambda l: l['scan']
         get_proteosafe_task = lambda l: l['proteosafe_task']
         get_workflow = lambda l, a: l.get('workflow',a)
         get_search_url = lambda l: l.get('search_url','https://proteomics2.ucsd.edu/ProteoSAFe/status.jsp?task={}'.format(get_proteosafe_task(l)))
 
-    with open(output_provenance, 'w') as w_provenance,  open(output_provenance_representatives, 'w') as w_provenance_representatives:
+    with open(output_provenance_representatives, 'w') as w_provenance_representatives:
         for l in provenance_lines:
             if (get_sequence(l),get_charge(l)) in input_representatives:
                 precursor_il = "".join([p.replace('I','L') for p in get_sequence(l)])
@@ -280,42 +265,48 @@ def update_provenance(input_provenance, input_representatives, input_mappings, l
                         if int(exon_unique) > 0:
                             dataset_proteins[(dataset,protein)]['exon_unique'].add(sequence_il)
                             proteins_stats[protein]['exon_unique'].add(sequence_il)
-                w_provenance.write(','.join(["\"{}\"".format(r) for r in [
-                    get_filename(l),
-                    'scan={}'.format(get_scan(l)),
-                    dataset,
-                    get_charge(l),
-                    get_proteosafe_task(l),
-                    get_workflow(l,'MSGF_PLUS').upper(),
-                    get_search_url(l),
-                    get_sequence(l)
-                ]]) + '\n')
+                # Jeremy 3/17/22: Commenting out the below file writes since we no longer need to
+                # load this file into the merged ProteinExplorer/MassIVE search database schema
+                #w_provenance.write(','.join(["\"{}\"".format(r) for r in [
+                #    get_filename(l),
+                #    'scan={}'.format(get_scan(l)),
+                #    dataset,
+                #    get_charge(l),
+                #    get_proteosafe_task(l),
+                #    get_workflow(l,'MSGF_PLUS').upper(),
+                #    get_search_url(l),
+                #    get_sequence(l)
+                #]]) + '\n')
                 w_provenance_representatives.write(','.join(["\"{}\"".format(r) for r in [
-                    '#provenance_id:{}.scan={}'.format(get_filename(l),get_scan(l)),
-                    '#representative_id:{}.{}.{}'.format(get_sequence(l),get_charge(l),library_id)
+                    library_id,
+                    "#variant_id:{}.{}".format(get_sequence(l),get_charge(l)),
+                    '#psm_id:f.{}.scan={}.{}'.format(get_filename(l),get_scan(l),get_proteosafe_task(l))
                 ]]) + '\n')
+                representative = input_representatives[(get_sequence(l),get_charge(l))]
+                if get_filename(l) == correct_kb_paths(representative["database_filename"]) and get_scan(l) == representative["database_scan"]:
+                    task_for_filescan[("f.{}".format(get_filename(l)),"scan={}".format(get_scan(l)))] = get_proteosafe_task(l)
     if Path(input_provenance).is_file():
         provenance_file.close()
-    return dataset_proteins, proteins_stats
+    return dataset_proteins, proteins_stats, task_for_filescan
 
 
 def output_for_explorer(output_folder, input_mappings, input_representatives, input_provenance, hupo_mapping, unique_mapping, library_id, library_version):
-    peptides, mappings = mapping_to_peptides_and_mapping(input_mappings, library_id)
-    representatives, variants = representatives_to_representatives_and_variants(input_representatives, library_id, library_version)
     # need to stream provenance
-    output_provenance = output_folder.joinpath("{}_{}.tsv".format(5,'psm_provenance'))
-    output_provenance_representatives = output_folder.joinpath("{}_{}.tsv".format(7,'provenance_representative'))
+    output_provenance = output_folder.joinpath("{}_{}.tsv".format(8,'psm_provenance'))
+    output_provenance_representatives = output_folder.joinpath("{}_{}.tsv".format(5,'library_variant_psms'))
+    dataset_protein_dict, proteins_stats_dict, task_for_filescan_dict = update_provenance(input_provenance, input_representatives, input_mappings, library_id, library_version, output_provenance, output_provenance_representatives)
 
-    dataset_protein_dict, proteins_stats_dict = update_provenance(input_provenance, input_representatives, input_mappings, library_id, output_provenance, output_provenance_representatives)
+    peptides, mappings = mapping_to_peptides_and_mapping(input_mappings, library_id)
+    representatives, variants = representatives_to_representatives_and_variants(input_representatives, library_id, library_version, task_for_filescan_dict)
 
-    dataset_proteins = table_from_dataset_proteins(dataset_protein_dict)
+    dataset_proteins = table_from_dataset_proteins(dataset_protein_dict, library_id, library_version)
     protein_stats = table_from_proteins(proteins_stats_dict, hupo_mapping, unique_mapping, library_id, library_version)
 
-    table_output(2, 'peptides', output_folder, peptides)
-    table_output(3, 'variants', output_folder, variants)
-    table_output(4, 'peptide_mapping', output_folder, mappings)
-    # table_output(5, 'psm_provenance', args.output_folder, provenance)
-    table_output(6, 'representatives', output_folder, representatives, 'a')
-    # table_output(7, 'provenance_representative', output_folder, provenance_representatives, 'b')
-    table_output(8, 'protein_datasets', output_folder, dataset_proteins)
-    table_output(9, 'protein_statistics', output_folder, protein_stats)
+    table_output(1, 'peptides', output_folder, peptides)
+    table_output(2, 'variants', output_folder, variants)
+    table_output(3, 'peptide_proteins', output_folder, mappings)
+    table_output(4, 'library_variants', output_folder, representatives, 'a')
+    # table_output(5, 'library_variant_psms', output_folder, provenance_representatives, 'b')
+    table_output(6, 'library_proteins', output_folder, protein_stats)
+    table_output(7, 'library_dataset_proteins', output_folder, dataset_proteins)
+    # table_output(8, 'psm_provenance', args.output_folder, provenance)
